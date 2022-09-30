@@ -90,6 +90,7 @@ fn all_of(name: String, bindings: Vec<Binding>) -> Binding {
                 ..Default::default()
             }
         })
+        .flat_map(unfold_property)
         .collect();
     Binding::Struct(codegen::Struct {
         name,
@@ -117,6 +118,34 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
         variants,
         ..Default::default()
     })
+}
+
+pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
+    if !property.name.is_empty() {
+        return vec![property];
+    }
+
+    match property._type {
+        codegen::Type::Struct(fields) =>  {
+            fields.into_iter()
+                .map(|(name, _type)| codegen::Property {
+                    name: name.to_ascii_lowercase(),
+                    _type,
+                    ..Default::default()
+                })
+                .collect()
+        }
+        codegen::Type::Enum(variants) => {
+            variants.into_iter()
+                .map(|(name, _type)| codegen::Property {
+                    name: name.to_ascii_lowercase(),
+                    _type,
+                    ..Default::default()
+                })
+                .collect()
+        }
+        _ => vec![property]
+    }
 }
 
 pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc::OpenRpc, cache: &mut HashMap<String, Binding>) -> Binding {
@@ -175,7 +204,8 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
                 eprintln!("name={} prop_name={} prop_type={:?} schema={:#?}", name, prop_name, prop_type, prop_schema);
                 codegen::Property::of(prop_name.to_string(), prop_type)
             })
-            .collect::<Vec<_>>();
+            .flat_map(unfold_property)
+            .collect();
         return Binding::Struct(codegen::Struct::of(name, properties));
     }
     if let Some(all) = schema.allOf.as_ref() {
@@ -196,15 +226,15 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
     unreachable!()
 }
 
-// TODO "EMITTED_EVENT": allOf[ref + object[ref, ref, ref]] - de-anonimize object (part of allOf)
-// TODO "DECLARE_TXN": allOf[ref + object[ref, ref]] - de-anonimize object (part of allOf)
-// TODO "INVOKE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
-// TODO "L1_HANDLER_TXN": allOf[object[ref, ref, ref, ref] + ref] - de-anonimize object (part of allOf)
-// TODO "BROADCASTED_INVOKE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
-// TODO "PENDING_BLOCK_WITH_TX_HASHES": allOf[ref + object[ref, ref]] - de-anonimize object (part of allOf)
-// TODO "PENDING_BLOCK_WITH_TXS": allOf[ref + object[ref, ref, ref]] - de-anonimize object (part of allOf)
-// TODO "BROADCASTED_DECLARE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
-// TODO "DEPLOY_TXN": allOf[object[ref, ref] + ref] - de-anonimize object (part of allOf)
+// "EMITTED_EVENT": allOf[ref + object[ref, ref, ref]] - de-anonimize object (part of allOf)
+// "DECLARE_TXN": allOf[ref + object[ref, ref]] - de-anonimize object (part of allOf)
+// "INVOKE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
+// "L1_HANDLER_TXN": allOf[object[ref, ref, ref, ref] + ref] - de-anonimize object (part of allOf)
+// "BROADCASTED_INVOKE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
+// "PENDING_BLOCK_WITH_TX_HASHES": allOf[ref + object[ref, ref]] - de-anonimize object (part of allOf)
+// "PENDING_BLOCK_WITH_TXS": allOf[ref + object[ref, ref, ref]] - de-anonimize object (part of allOf)
+// "BROADCASTED_DECLARE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
+// "DEPLOY_TXN": allOf[object[ref, ref] + ref] - de-anonimize object (part of allOf)
 
 #[cfg(test)]
 mod tests {
