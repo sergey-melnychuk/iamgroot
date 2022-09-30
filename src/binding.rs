@@ -127,7 +127,7 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
             return cache.get(id).cloned().expect("Cache hit");
         }
         let schema = spec.get_schema(id).expect("Schema lookup");
-        let binding = get_schema_binding(name, schema, spec, cache);
+        let binding = get_schema_binding(id.to_string(), schema, spec, cache);
         cache.insert(id.to_string(), binding.clone());
         return binding;
     }

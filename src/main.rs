@@ -33,7 +33,8 @@ fn main() {
             .iter()
             .for_each(|(name, schema)| {
                 let binding = binding::get_schema_binding(name.to_string(), schema, &spec, &mut cache);
-                println!("\n===\nname={}\nschema={:#?}\n---\nbinding={:#?}", name, schema, binding);
+                //println!("\n===\nname={}\nschema={:#?}\n---\nbinding={:#?}", name, schema, binding);
+                println!("{:#?}", binding);
             });
     } else {
         eprintln!("Unknown mode: {}. Supported are JSON and AST.", mode);
