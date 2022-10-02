@@ -9,7 +9,7 @@ const REF_ID_PREFIX: &str = "#/components/schemas/";
 pub enum Binding {
     Basic(codegen::Basic),
     Struct(codegen::Struct),
-    Tuple(codegen::Tuple),
+    // Tuple(codegen::Tuple),
     Enum(codegen::Enum),
     Named(String, codegen::Type),
     //Empty,
@@ -20,7 +20,7 @@ impl Binding {
         match self {
             Binding::Basic(basic) => basic.to_string(),
             Binding::Struct(s) => s.name.clone(),
-            Binding::Tuple(t) => t.name.clone(),
+            // Binding::Tuple(t) => t.name.clone(),
             Binding::Enum(e) => e.name.clone(),
             Binding::Named(name, _) => name.clone(),
             //Binding::Empty => "<empty>".to_string(),
@@ -32,7 +32,7 @@ impl Binding {
             match self {
                 Binding::Basic(basic) => codegen::Type::Basic(basic.clone()),
                 Binding::Struct(s) => codegen::Type::Named(s.name.clone()),
-                Binding::Tuple(t) => codegen::Type::Named(t.name.clone()),
+                //Binding::Tuple(t) => codegen::Type::Named(t.name.clone()),
                 Binding::Enum(e) => codegen::Type::Named(e.name.clone()),
                 Binding::Named(_, t) => t.clone(),
                 //Binding::Empty => codegen::Type::Unit,
@@ -55,7 +55,7 @@ impl Binding {
                         .collect();
                     codegen::Type::Enum(vars)
                 },
-                Binding::Tuple(t) => codegen::Type::Tuple(t.types.clone()),
+                //Binding::Tuple(t) => codegen::Type::Tuple(t.types.clone()),
                 Binding::Named(_, t) => t.clone(),
                 //Binding::Empty => codegen::Type::Unit,
             }
@@ -105,9 +105,16 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
         .map(|b| {
             //eprintln!("one_of: name={} var_name={} var_type={:?}", name, b.get_name(), b.get_type());
             let name = deanonimize(&b).to_ascii_uppercase();
+            let _type = match b.get_type() {
+                codegen::Type::Struct(fields) 
+                    if fields.len() == 1 && fields[0].0.to_ascii_uppercase() == name => 
+                        // avoid creating unnecessary wrappers (single-property tuples)
+                        fields[0].1.clone(),
+                unchanged => unchanged
+            };
             codegen::Variant {
                 name,
-                _type: b.get_type(),
+                _type,
                 ..Default::default()
             }
         })
@@ -122,7 +129,19 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
 
 pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
     if !property.name.is_empty() {
-        return vec![property];
+        return match property._type {
+            codegen::Type::Struct(fields) if fields.len() == 1 => {
+                fields.into_iter()
+                    .take(1)
+                    .map(|(name, _type)| codegen::Property {
+                        name: name.to_ascii_lowercase(),
+                        _type,
+                        ..Default::default()
+                    })
+                    .collect()
+            }
+            _ => vec![property]
+        }    
     }
 
     match property._type {
@@ -171,29 +190,19 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
                 .collect();
             return Binding::Enum(codegen::Enum::of(name, variants));
         }
-        if name.is_empty() {
-            return Binding::Basic(codegen::Basic::String);
-        }
-        return Binding::Tuple(codegen::Tuple::of(name, vec![codegen::Type::Basic(codegen::Basic::String)]));
+        return Binding::Basic(codegen::Basic::String);
     }
     if schema.has_type("integer") {
-        if name.is_empty() {
-            return Binding::Basic(codegen::Basic::Integer);
-        }
-        return Binding::Tuple(codegen::Tuple::of(name, vec![codegen::Type::Basic(codegen::Basic::Integer)]));
+        return Binding::Basic(codegen::Basic::Integer);
     }
     if schema.has_type("boolean") {
-        if name.is_empty() {
-            return Binding::Basic(codegen::Basic::Boolean);
-        }
-        return Binding::Tuple(codegen::Tuple::of(name, vec![codegen::Type::Basic(codegen::Basic::Boolean)]));
+        return Binding::Basic(codegen::Basic::Boolean);
     }
     if schema.has_type("array") {
         let schema = schema.items.as_ref().expect("Item schema");
         let binding = get_schema_binding(name.clone(), schema, spec, cache);
-        let item_name = binding.get_name();
         let item_type = Box::new(binding.get_type());
-        return Binding::Named(item_name, codegen::Type::Array(item_type));
+        return Binding::Named(name, codegen::Type::Array(item_type));
     }
     if schema.properties.is_some() /* assuming schema.type="object" */ {
         let properties = schema.properties.as_ref().expect("Object properties");
@@ -226,15 +235,11 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
     unreachable!()
 }
 
-// "EMITTED_EVENT": allOf[ref + object[ref, ref, ref]] - de-anonimize object (part of allOf)
-// "DECLARE_TXN": allOf[ref + object[ref, ref]] - de-anonimize object (part of allOf)
-// "INVOKE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
-// "L1_HANDLER_TXN": allOf[object[ref, ref, ref, ref] + ref] - de-anonimize object (part of allOf)
-// "BROADCASTED_INVOKE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
-// "PENDING_BLOCK_WITH_TX_HASHES": allOf[ref + object[ref, ref]] - de-anonimize object (part of allOf)
-// "PENDING_BLOCK_WITH_TXS": allOf[ref + object[ref, ref, ref]] - de-anonimize object (part of allOf)
-// "BROADCASTED_DECLARE_TXN": allOf[ref + oneOf[ref, ref]] - de-anonimize enum (build for oneOf)
-// "DEPLOY_TXN": allOf[object[ref, ref] + ref] - de-anonimize object (part of allOf)
+// TODO Extract anonymous structs ('\s+Struct\(' in ast.txt):
+// - CONTRACT_CLASS.entry_points_by_type
+// - STATE_UPDATE.state_diff
+// - STATE_UPDATE."state_diff".nonces
+// - CONTRACT_STORAGE_DIFF_ITEM.storage_entries
 
 #[cfg(test)]
 mod tests {

@@ -18,7 +18,7 @@ pub enum Type {
     Struct(Vec<(String, Type)>),
     Enum(Vec<(String, Type)>),
     //Maybe(Box<Type>),
-    Tuple(Vec<Type>),
+    //Tuple(Vec<Type>),
     Named(String),
     #[default]
     Unit,
@@ -94,23 +94,23 @@ pub struct Variant {
     pub _type: Type,
 }
 
-#[derive(Debug, Default, Clone)]
-pub struct Tuple {
-    pub name: String,
-    pub types: Vec<Type>,
-    pub decorators: Vec<String>,
-    pub visibility: Visibility,
-}
+// #[derive(Debug, Default, Clone)]
+// pub struct Tuple {
+//     pub name: String,
+//     pub types: Vec<Type>,
+//     pub decorators: Vec<String>,
+//     pub visibility: Visibility,
+// }
 
-impl Tuple {
-    pub fn of(name: String, types: Vec<Type>) -> Self {
-        Self {
-            name, 
-            types,
-            ..Default::default()
-        }
-    }
-}
+// impl Tuple {
+//     pub fn of(name: String, types: Vec<Type>) -> Self {
+//         Self {
+//             name, 
+//             types,
+//             ..Default::default()
+//         }
+//     }
+// }
 
 #[derive(Debug, Clone)]
 pub struct Alias {
