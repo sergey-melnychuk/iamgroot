@@ -18,6 +18,9 @@ mod renders;
 // Total lines of code:
 // find . -type f -name "*.rs" | xargs grep . | wc -l
 
+// Changes necessary to make existing spec a valid OpenRPC spec:
+// https://github.com/starkware-libs/starknet-specs/pull/56
+
 fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<binding::Contract>) {
     let mut cache = HashMap::new();
     let bindings = spec
