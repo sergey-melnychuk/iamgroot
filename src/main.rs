@@ -8,10 +8,10 @@ mod renders;
 // cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
 // diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
 
-// cargo run -- ./api/input.openrpc TREE > ast.txt 2> dbg.txt
+// cargo run --release -- ./api/input.openrpc TREE > ast.txt 2> dbg.txt
 
 // rm -rf examples && mkdir examples
-// cargo run -- ./api/input.openrpc CODE > examples/gen.rs
+// cargo run --release -- ./api/input.openrpc CODE > examples/gen.rs
 // echo '\nfn main() { println!("OK"); }' >> examples/gen.rs
 // cargo run --example gen
 
