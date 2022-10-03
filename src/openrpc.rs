@@ -127,7 +127,10 @@ pub struct Schema {
 
 impl Schema {
     pub fn has_type(&self, expected: &str) -> bool {
-        self._type.as_ref().map(|s| s.as_str() == expected).unwrap_or_default()
+        self._type
+            .as_ref()
+            .map(|s| s.as_str() == expected)
+            .unwrap_or_default()
     }
 }
 

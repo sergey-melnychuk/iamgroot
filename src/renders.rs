@@ -6,7 +6,7 @@ use crate::codegen;
 
 #[derive(Clone, Debug)]
 pub enum Error {
-    Message(String)
+    Message(String),
 }
 
 impl From<String> for Error {
@@ -24,13 +24,14 @@ impl From<&str> for Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Message(message) => write!(f, "Code renderer error: {}.", message)
+            Self::Message(message) => write!(f, "Code renderer error: {}.", message),
         }
     }
 }
 
 type Result<T> = std::result::Result<T, Error>;
 
+#[allow(dead_code)]
 pub fn normalize_prop_name(name: &str) -> Result<String> {
     // TODO Add field name normalization (snake_case) and respective #[serde] annotations
     Ok(name.to_string())
@@ -56,7 +57,7 @@ pub fn render_type(ty: &codegen::Type) -> Result<String> {
         codegen::Type::Basic(basic) => Ok(render_basic(basic)),
         codegen::Type::Array(boxed) => Ok(format!("Vec<{}>", render_type(boxed)?)),
         codegen::Type::Unit => Ok(String::default()),
-        unexpected => Err(format!("Unexpected enum variant type: {:?}", unexpected).into())
+        unexpected => Err(format!("Unexpected enum variant type: {:?}", unexpected).into()),
     }
 }
 
@@ -69,14 +70,14 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             if ty != name {
                 lines.push(format!("pub type {} = {};", name, ty));
             }
-        },
+        }
         binding::Binding::Named(name, ty) => {
             let ty = render_type(ty)?;
             let name = normalize_type_name(name)?;
             if ty != name {
                 lines.push(format!("pub type {} = {};", name, ty));
             }
-        },
+        }
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
             lines.push(format!("pub enum {} {{", normalize_type_name(name)?));
@@ -94,8 +95,8 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 };
                 lines.push(format!("  {}{},", name, suffix));
             }
-            lines.push(format!("}}"));
-        },
+            lines.push("}".to_string());
+        }
         binding::Binding::Struct(the_struct) => {
             let mut seen = HashSet::new();
             lines.push(format!("pub struct {} {{", normalize_type_name(name)?));
@@ -105,25 +106,33 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                     continue;
                 }
                 seen.insert(name.clone());
-                lines.push(format!("  pub {}: {},", name, render_type(&property._type)?));
+                lines.push(format!(
+                    "  pub {}: {},",
+                    name,
+                    render_type(&property._type)?
+                ));
             }
-            lines.push(format!("}}"));
+            lines.push("}".to_string());
         }
     }
     Ok(lines.join("\n"))
 }
 
-pub fn render_method(name: &str, contract: &binding::Contract, cache: &HashMap<String, binding::Binding>) -> String {
+#[allow(dead_code)]
+pub fn render_method(
+    name: &str,
+    _contract: &binding::Contract,
+    _cache: &HashMap<String, binding::Binding>,
+) -> String {
     // TODO impl
     // TODO Add random filled DTO generation (for further testing)?
     format!("// TODO: Method '{}' definition", name)
 }
 
-// TODO 
+// TODO
 // Add stop-words substitution for field names ("type", "struct", "enum" etc)
 // Consider raw identifiers: https://doc.rust-lang.org/rust-by-example/compatibility/raw_identifiers.html
 
-// TODO 
+// TODO
 // Add #[serde] annotations on enum variants
 // #[serde(untagged)]: https://serde.rs/enum-representations.html
-

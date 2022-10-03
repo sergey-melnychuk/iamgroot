@@ -41,7 +41,7 @@ pub struct Property {
 impl Property {
     pub fn of(name: String, _type: Type) -> Self {
         Self {
-            name, 
+            name,
             _type,
             visibility: Default::default(),
             decorators: Default::default(),
@@ -60,7 +60,7 @@ pub struct Struct {
 impl Struct {
     pub fn of(name: String, properties: Vec<Property>) -> Self {
         Self {
-            name, 
+            name,
             properties,
             visibility: Default::default(),
             decorators: Default::default(),
@@ -79,7 +79,7 @@ pub struct Enum {
 impl Enum {
     pub fn of(name: String, variants: Vec<Variant>) -> Self {
         Self {
-            name, 
+            name,
             variants,
             ..Default::default()
         }

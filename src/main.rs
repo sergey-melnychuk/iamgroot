@@ -1,8 +1,8 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
+mod binding;
 mod codegen;
 mod openrpc;
-mod binding;
 mod renders;
 
 // cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
@@ -20,7 +20,8 @@ mod renders;
 
 fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<binding::Contract>) {
     let mut cache = HashMap::new();
-    let bindings = spec.components
+    let bindings = spec
+        .components
         .as_ref()
         .expect("Components section")
         .schemas
@@ -37,11 +38,12 @@ fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<bindin
         cache.insert(b.get_name(), b);
     }
 
-    let contracts = spec.methods
+    let contracts = spec
+        .methods
         .iter()
         .filter_map(|method| {
             let name = method.name.clone();
-            binding::get_method_contract(name.clone(), &spec, &mut cache)
+            binding::get_method_contract(name, &spec, &mut cache)
         })
         .collect::<Vec<_>>();
 
@@ -57,19 +59,20 @@ fn main() {
     };
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
     let spec: openrpc::OpenRpc = serde_json::from_str(&json).expect("JSON is valid");
-    
+
     if mode.as_str() == "JSON" {
         let text = serde_json::to_string(&spec).expect("JSON serialized.");
-        println!("{}", text);    
+        println!("{}", text);
     } else if mode.as_str() == "TREE" {
         let (cache, contracts) = run(spec);
 
-        cache.iter()
+        cache
+            .iter()
             .for_each(|(name, binding)| println!("---\n{}: {:#?}", name, binding));
 
-        contracts.iter()
+        contracts
+            .iter()
             .for_each(|contract| println!("---\n{:#?}", contract));
-
     } else if mode.as_str() == "CODE" {
         let (cache, _contracts) = run(spec);
 
@@ -81,7 +84,6 @@ fn main() {
         }
 
         // TODO Dump generated trait
-
     } else {
         eprintln!("Unknown mode: {}. Supported are: JSON, TREE, CODE.", mode);
     }
