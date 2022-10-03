@@ -14,16 +14,6 @@ pub enum Binding {
     Named(String, codegen::Type),
 }
 
-#[derive(Debug, Clone)]
-pub struct Contract {
-    name: String,
-    params: Vec<(String, Binding)>,
-    result: Binding,
-    errors: Vec<Binding>,
-    summary: String,
-    description: String,
-}
-
 impl Binding {
     pub fn get_name(&self) -> String {
         match self {
@@ -338,6 +328,56 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
         return get_schema_binding(name, schema, spec, cache);
     }
     unreachable!()
+}
+
+#[derive(Debug, Clone)]
+pub struct Contract {
+    pub name: String,
+    pub params: Vec<(String, codegen::Type)>,
+    pub result: Option<Binding>,
+    pub errors: Vec<openrpc::Error>,
+    pub summary: String,
+    pub description: String,
+}
+
+pub fn get_content_binding(content: &openrpc::Content, spec: &openrpc::OpenRpc, cache: &mut HashMap<String, Binding>) -> Binding {
+    let schema = content.schema.as_ref().unwrap();
+    let name = content.name.clone().unwrap_or_default();
+    get_schema_binding(name, &schema, spec, cache)
+}
+
+pub fn get_method_contract(name: String, spec: &openrpc::OpenRpc, cache: &mut HashMap<String, Binding>) -> Option<Contract> {
+    let method = spec.methods.iter().find(|m| m.name == name)?;
+    let params = method.params
+        .iter()
+        .map(|param| {
+            let binding = get_content_binding(param, spec, cache);
+            (param.name.clone().unwrap_or_default(), binding.get_type())
+        })
+        .collect();
+    let result = method.result.as_ref()
+        .map(|result| get_content_binding(result, spec, cache));
+    let errors = method.errors
+        .clone()
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|reference| {
+            let key = reference._ref?.strip_prefix(ERROR_REF_PREFIX)?.to_string();
+            spec.components
+                .as_ref()
+                .map(|components| &components.errors)
+                .and_then(|errors| errors.get(&key))
+        })
+        .cloned()
+        .collect();
+    Some(Contract {
+        name,
+        params,
+        result,
+        errors,
+        summary: method.summary.clone().unwrap_or_default(),
+        description: method.description.clone().unwrap_or_default(),
+    })
 }
 
 #[cfg(test)]
