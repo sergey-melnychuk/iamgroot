@@ -3,7 +3,8 @@ use std::collections::HashMap;
 use crate::codegen;
 use crate::openrpc;
 
-const REF_ID_PREFIX: &str = "#/components/schemas/";
+const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
+const ERROR_REF_PREFIX: &str = "#/components/errors/";
 
 #[derive(Debug, Clone)]
 pub enum Binding {
@@ -13,6 +14,16 @@ pub enum Binding {
     Enum(codegen::Enum),
     Named(String, codegen::Type),
     //Empty,
+}
+
+#[derive(Debug, Clone)]
+pub struct Contract {
+    name: String,
+    params: Vec<(String, Binding)>,
+    result: Binding,
+    errors: Vec<Binding>,
+    summary: String,
+    description: String,
 }
 
 impl Binding {
@@ -167,10 +178,112 @@ pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
     }
 }
 
+pub fn extract_property(properties: Vec<codegen::Property>) -> (Vec<codegen::Property>, Vec<Binding>) {
+    let mut props = Vec::new();
+    let mut binds = Vec::new();
+    for property in properties {
+        let name = &property.name;
+        match &property._type {
+            codegen::Type::Struct(struct_fields) => {
+                let prop = codegen::Property {
+                    name: name.clone(),
+                    _type: codegen::Type::Named(name.clone().to_ascii_uppercase()),
+                    ..Default::default()
+                };
+                props.push(prop);
+
+                let bind = Binding::Struct(codegen::Struct {
+                    name: name.clone().to_ascii_uppercase(),
+                    properties: struct_fields.into_iter()
+                        .cloned()
+                        .map(|(name, _type)| codegen::Property {
+                            name, 
+                            _type,
+                            ..Default::default()
+                        })
+                        .collect(),
+                    ..Default::default()
+                });
+                binds.push(bind);
+            },
+            codegen::Type::Array(boxed) => {
+                match &**boxed {
+                    codegen::Type::Struct(struct_fields) => {
+                        let prop = codegen::Property {
+                            name: name.clone(),
+                            _type: codegen::Type::Array(Box::new(codegen::Type::Named(name.clone().to_ascii_uppercase() + "_ITEM"))),
+                            ..Default::default()
+                        };
+                        props.push(prop);
+
+                        let bind = Binding::Struct(codegen::Struct {
+                            name: name.clone().to_ascii_uppercase() + "_ITEM",
+                            properties: struct_fields.into_iter()
+                                .cloned()
+                                .map(|(name, _type)| codegen::Property {
+                                    name, 
+                                    _type,
+                                    ..Default::default()
+                                })
+                                .collect(),
+                            ..Default::default()
+                        });
+                        binds.push(bind);
+                    },
+                    _ => {
+                        props.push(property);
+                    }
+                }
+            },
+            codegen::Type::Enum(enum_variants) => {
+                let prop = codegen::Property {
+                    name: name.clone(),
+                    _type: codegen::Type::Array(Box::new(codegen::Type::Named(name.clone().to_ascii_uppercase() + "_ENUM"))),
+                    ..Default::default()
+                };
+                props.push(prop);
+
+                let bind = Binding::Enum(codegen::Enum {
+                    name: name.clone().to_ascii_uppercase() + "_ENUM",
+                    variants: enum_variants.into_iter()
+                        .cloned()
+                        .map(|(name, _type)| codegen::Variant {
+                            name, 
+                            _type,
+                            ..Default::default()
+                        })
+                        .collect(),
+                    ..Default::default()
+                });
+                binds.push(bind);
+            },
+            _ => {
+                props.push(property);
+            }
+        }
+    }
+    (props, binds)
+}
+
+pub fn unfold_binding(binding: Binding) -> Vec<Binding> {
+    match binding {
+        Binding::Struct(the_struct) => {
+            let (props, mut binds) = extract_property(the_struct.properties);
+            let binding = Binding::Struct(codegen::Struct {
+                properties: props,
+                ..the_struct
+            });
+            binds.push(binding);
+            binds
+        },
+        other => vec![other]
+    }
+}
+
 pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc::OpenRpc, cache: &mut HashMap<String, Binding>) -> Binding {
     eprintln!("\nname={}\nschema={:#?}", name, schema);
     if let Some(id) = &schema._ref {
-        let id = id.strip_prefix(REF_ID_PREFIX).expect("ID prefix");
+        let id = id.strip_prefix(SCHEMA_REF_PREFIX).expect("ID prefix");
         if cache.contains_key(id) {
             return cache.get(id).cloned().expect("Cache hit");
         }
@@ -234,12 +347,6 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
     }
     unreachable!()
 }
-
-// TODO Extract anonymous structs ('\s+Struct\(' in ast.txt):
-// - CONTRACT_CLASS.entry_points_by_type
-// - STATE_UPDATE.state_diff
-// - STATE_UPDATE."state_diff".nonces
-// - CONTRACT_STORAGE_DIFF_ITEM.storage_entries
 
 #[cfg(test)]
 mod tests {

@@ -4,12 +4,17 @@ mod binding;
 
 use std::collections::HashMap;
 
+use binding::unfold_binding;
+
 use crate::openrpc::OpenRpc;
 
 // cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
 // diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
 
 // cargo run -- ./api/input.openrpc AST > ast.txt 2> dbg.txt
+
+// Total lines of code:
+// find . -type f -name "*.rs" | xargs grep . | wc -l
 
 fn main() {
     let (path, mode) = {
@@ -26,15 +31,26 @@ fn main() {
         println!("{}", text);    
     } else if mode.as_str() == "AST" {
         let mut cache = HashMap::new();
-        spec.components
+        let bindings = spec.components
             .as_ref()
             .expect("Components section")
             .schemas
             .iter()
-            .for_each(|(name, schema)| {
-                let binding = binding::get_schema_binding(name.to_string(), schema, &spec, &mut cache);
-                //println!("\n===\nname={}\nschema={:#?}\n---\nbinding={:#?}", name, schema, binding);
-                println!("{:#?}", binding);
+            .map(|(name, schema)| {
+                binding::get_schema_binding(name.to_string(), schema, &spec, &mut cache)
+            })
+            .flat_map(unfold_binding)
+            // Make a second pass (extra unfolding might be necessary)
+            .flat_map(unfold_binding)
+            .collect::<Vec<_>>();
+
+        for b in bindings {
+            cache.insert(b.get_name(), b);
+        }
+
+        cache.iter()
+            .for_each(|(name, binding)| {
+                println!("{}: {:#?}", name, binding);
             });
     } else {
         eprintln!("Unknown mode: {}. Supported are JSON and AST.", mode);
