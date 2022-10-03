@@ -10,10 +10,8 @@ const ERROR_REF_PREFIX: &str = "#/components/errors/";
 pub enum Binding {
     Basic(codegen::Basic),
     Struct(codegen::Struct),
-    // Tuple(codegen::Tuple),
     Enum(codegen::Enum),
     Named(String, codegen::Type),
-    //Empty,
 }
 
 #[derive(Debug, Clone)]
@@ -31,10 +29,8 @@ impl Binding {
         match self {
             Binding::Basic(basic) => basic.to_string(),
             Binding::Struct(s) => s.name.clone(),
-            // Binding::Tuple(t) => t.name.clone(),
             Binding::Enum(e) => e.name.clone(),
             Binding::Named(name, _) => name.clone(),
-            //Binding::Empty => "<empty>".to_string(),
         }
     }
 
@@ -43,10 +39,8 @@ impl Binding {
             match self {
                 Binding::Basic(basic) => codegen::Type::Basic(basic.clone()),
                 Binding::Struct(s) => codegen::Type::Named(s.name.clone()),
-                //Binding::Tuple(t) => codegen::Type::Named(t.name.clone()),
                 Binding::Enum(e) => codegen::Type::Named(e.name.clone()),
                 Binding::Named(_, t) => t.clone(),
-                //Binding::Empty => codegen::Type::Unit,
             }
         } else {
             // anonymous types (not named, thus full structure must be represented)
@@ -66,9 +60,7 @@ impl Binding {
                         .collect();
                     codegen::Type::Enum(vars)
                 },
-                //Binding::Tuple(t) => codegen::Type::Tuple(t.types.clone()),
                 Binding::Named(_, t) => t.clone(),
-                //Binding::Empty => codegen::Type::Unit,
             }
         }
     }
@@ -130,7 +122,7 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
             }
         })
         .collect();
-    eprintln!("one_of={} bindings={:#?}\nvariants={:#?}", name, bindings, variants);
+    //eprintln!("one_of={} bindings={:#?}\nvariants={:#?}", name, bindings, variants);
     Binding::Enum(codegen::Enum {
         name,
         variants,
@@ -281,7 +273,7 @@ pub fn unfold_binding(binding: Binding) -> Vec<Binding> {
 }
 
 pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc::OpenRpc, cache: &mut HashMap<String, Binding>) -> Binding {
-    eprintln!("\nname={}\nschema={:#?}", name, schema);
+    //eprintln!("\nname={}\nschema={:#?}", name, schema);
     if let Some(id) = &schema._ref {
         let id = id.strip_prefix(SCHEMA_REF_PREFIX).expect("ID prefix");
         if cache.contains_key(id) {
@@ -323,7 +315,7 @@ pub fn get_schema_binding(name: String, schema: &openrpc::Schema, spec: &openrpc
             .map(|(prop_name, prop_schema)| {
                 let binding = get_schema_binding(String::default(), prop_schema, spec, cache);
                 let prop_type = binding.get_type();
-                eprintln!("name={} prop_name={} prop_type={:?} schema={:#?}", name, prop_name, prop_type, prop_schema);
+                //eprintln!("name={} prop_name={} prop_type={:?} schema={:#?}", name, prop_name, prop_type, prop_schema);
                 codegen::Property::of(prop_name.to_string(), prop_type)
             })
             .flat_map(unfold_property)
