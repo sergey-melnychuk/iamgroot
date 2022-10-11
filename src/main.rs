@@ -8,12 +8,12 @@ mod renders;
 // cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
 // diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
 
-// cargo run --release -- ./api/input.openrpc TREE > ast.txt 2> dbg.txt
+// cargo run --release -- ./api/input.openrpc TREE > tree.txt 2> debug.txt
 
 // rm -rf examples && mkdir examples
 // cargo run --release -- ./api/input.openrpc CODE > examples/gen.rs
 // echo '\nfn main() { println!("OK"); }' >> examples/gen.rs
-// cargo run --example gen
+// cargo run --example gen 2> debug.txt
 
 // Total lines of code:
 // find . -type f -name "*.rs" | xargs grep . | wc -l
@@ -77,16 +77,19 @@ fn main() {
             .iter()
             .for_each(|contract| println!("---\n{:#?}", contract));
     } else if mode.as_str() == "CODE" {
-        let (cache, _contracts) = run(spec);
+        let (cache, contracts) = run(spec);
 
         println!("/// === GENERATED CODE ===");
-        for (name, binding) in cache {
-            let code = renders::render_object(&name, &binding)
+        for (name, binding) in &cache {
+            let code = renders::render_object(name, binding)
                 .unwrap_or_else(|e| format!("//! Rendering object '{}' failed: {}", name, e));
             println!("\n// object: '{}'\n{}", name, code);
         }
 
-        // TODO Dump generated trait
+        for contract in contracts {
+            let code = renders::render_method(&contract.name, &contract, &cache);
+            println!("\n{}", code);
+        }
     } else {
         eprintln!("Unknown mode: {}. Supported are: JSON, TREE, CODE.", mode);
     }

@@ -72,6 +72,7 @@ fn deanonimize(binding: &Binding) -> String {
 }
 
 fn all_of(name: String, bindings: Vec<Binding>) -> Binding {
+    //eprintln!("all_of: name={} bindings={:#?}", name, bindings);
     let properties = bindings
         .into_iter()
         .map(|b| {
@@ -355,7 +356,11 @@ pub fn get_content_binding(
 ) -> Binding {
     let schema = content.schema.as_ref().unwrap();
     let name = content.name.clone().unwrap_or_default();
-    get_schema_binding(name, schema, spec, cache)
+    let binding = get_schema_binding(name.clone(), schema, spec, cache);
+    if !cache.contains_key(&name) && !cache.contains_key(&name.to_ascii_uppercase()) {
+        cache.insert(name, binding.clone());
+    }
+    binding
 }
 
 pub fn get_method_contract(

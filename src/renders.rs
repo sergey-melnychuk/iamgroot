@@ -121,12 +121,49 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
 #[allow(dead_code)]
 pub fn render_method(
     name: &str,
-    _contract: &binding::Contract,
-    _cache: &HashMap<String, binding::Binding>,
+    contract: &binding::Contract,
+    cache: &HashMap<String, binding::Binding>,
 ) -> String {
-    // TODO impl
-    // TODO Add random filled DTO generation (for further testing)?
-    format!("// TODO: Method '{}' definition", name)
+    let mut lines = vec![
+        format!("/// {}", &contract.summary),
+        format!("/// {}", &contract.description),
+        format!("pub fn {} (", name),
+    ];
+
+    for (name, ty) in &contract.params {
+        lines.push(format!(
+            "    {}: {},",
+            name,
+            render_type(ty).expect("render type")
+        ));
+    }
+
+    let mut extra_objects = Vec::new();
+
+    let ret = if let Some(binding) = &contract.result {
+        match binding {
+            binding::Binding::Struct(st) if !cache.contains_key(&st.name) => {
+                let object =
+                    render_object(&binding.get_name(), binding).expect("render result object");
+                extra_objects.push(object);
+                st.name.clone() // TODO normalize type name
+            }
+            binding::Binding::Enum(en) if !cache.contains_key(&en.name) => {
+                let object =
+                    render_object(&binding.get_name(), binding).expect("render result object");
+                extra_objects.push(object);
+                en.name.clone() // TODO normalize type name
+            }
+            other => render_type(&other.get_type()).expect("render type"),
+        }
+    } else {
+        "()".to_string()
+    };
+    lines.push(format!(") -> {} {{", ret));
+    lines.push("    todo!()".to_string());
+    lines.push("}".to_string());
+
+    vec![extra_objects.join("\n"), lines.join("\n")].join("")
 }
 
 // TODO
@@ -136,3 +173,12 @@ pub fn render_method(
 // TODO
 // Add #[serde] annotations on enum variants
 // #[serde(untagged)]: https://serde.rs/enum-representations.html
+
+// TODO
+// Wrap parameters into <method_name>Input struct
+// Generate error subset enums per-method
+// Generate return types as Result<Output, ErrorSubset>
+
+// TODO
+// Add #[serde] annotations where necessary
+// Normalize structs property names and type names
