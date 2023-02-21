@@ -41,7 +41,7 @@ pub fn normalize_prop_name(name: &str) -> Result<String> {
 pub fn normalize_type_name(name: &str) -> Result<String> {
     let chunks = name
         .split(|c| c == '_')
-        .flat_map(|chunk| capitalize(chunk))
+        .flat_map(capitalize)
         .collect::<Vec<_>>();
 
     Ok(chunks.join(""))
@@ -146,10 +146,14 @@ pub fn render_method(
     contract: &binding::Contract,
     cache: &HashMap<String, binding::Binding>,
 ) -> String {
+    let short_name = name.strip_prefix("starknet_").unwrap_or(name);
+
     let mut lines = vec![
-        format!("/// {}", &contract.summary),
-        format!("/// {}", &contract.description),
-        format!("pub fn {name} ("),
+        format!("/// Method: '{name}'"),
+        format!("/// Summary: {}", &contract.summary),
+        format!("/// Description: {}", &contract.description),
+        format!("///"),
+        format!("pub fn {short_name} ("),
     ];
 
     for (name, ty) in &contract.params {
@@ -188,7 +192,7 @@ pub fn render_method(
     vec![extra_objects.join("\n"), lines.join("\n")].join("")
 }
 
-// TODO: serde for DTOs 
+// TODO: serde for DTOs
 // Add #[serde] annotations on enum variants
 // #[serde(untagged)]: https://serde.rs/enum-representations.html
 

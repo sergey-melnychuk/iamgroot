@@ -83,7 +83,10 @@ fn main() {
         for (name, binding) in &cache {
             let code = renders::render_object(name, binding)
                 .unwrap_or_else(|e| format!("//! Rendering object '{name}' failed: {e}"));
-            println!("\n// object: '{name}'\n{code}");
+
+            if !code.is_empty() {
+                println!("\n// object: '{name}'\n{code}");
+            }
         }
 
         for contract in contracts {
