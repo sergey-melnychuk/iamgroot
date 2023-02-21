@@ -65,32 +65,32 @@ fn main() {
 
     if mode.as_str() == "JSON" {
         let text = serde_json::to_string(&spec).expect("JSON serialized.");
-        println!("{}", text);
+        println!("{text}");
     } else if mode.as_str() == "TREE" {
         let (cache, contracts) = run(spec);
 
         cache
             .iter()
-            .for_each(|(name, binding)| println!("---\n{}: {:#?}", name, binding));
+            .for_each(|(name, binding)| println!("---\n{name}: {binding:#?}"));
 
         contracts
             .iter()
-            .for_each(|contract| println!("---\n{:#?}", contract));
+            .for_each(|contract| println!("---\n{contract:#?}"));
     } else if mode.as_str() == "CODE" {
         let (cache, contracts) = run(spec);
 
         println!("/// === GENERATED CODE ===");
         for (name, binding) in &cache {
             let code = renders::render_object(name, binding)
-                .unwrap_or_else(|e| format!("//! Rendering object '{}' failed: {}", name, e));
-            println!("\n// object: '{}'\n{}", name, code);
+                .unwrap_or_else(|e| format!("//! Rendering object '{name}' failed: {e}"));
+            println!("\n// object: '{name}'\n{code}");
         }
 
         for contract in contracts {
             let code = renders::render_method(&contract.name, &contract, &cache);
-            println!("\n{}", code);
+            println!("\n{code}");
         }
     } else {
-        eprintln!("Unknown mode: {}. Supported are: JSON, TREE, CODE.", mode);
+        eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
     }
 }

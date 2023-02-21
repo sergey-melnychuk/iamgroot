@@ -24,7 +24,7 @@ impl From<&str> for Error {
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Message(message) => write!(f, "Code renderer error: {}.", message),
+            Self::Message(message) => write!(f, "Code renderer error: {message}."),
         }
     }
 }
@@ -57,7 +57,7 @@ pub fn render_type(ty: &codegen::Type) -> Result<String> {
         codegen::Type::Basic(basic) => Ok(render_basic(basic)),
         codegen::Type::Array(boxed) => Ok(format!("Vec<{}>", render_type(boxed)?)),
         codegen::Type::Unit => Ok(String::default()),
-        unexpected => Err(format!("Unexpected enum variant type: {:?}", unexpected).into()),
+        unexpected => Err(format!("Unexpected enum variant type: {unexpected:?}").into()),
     }
 }
 
@@ -68,14 +68,14 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let ty = render_basic(basic);
             let name = normalize_type_name(name)?;
             if ty != name {
-                lines.push(format!("pub type {} = {};", name, ty));
+                lines.push(format!("pub type {name} = {ty};"));
             }
         }
         binding::Binding::Named(name, ty) => {
             let ty = render_type(ty)?;
             let name = normalize_type_name(name)?;
             if ty != name {
-                lines.push(format!("pub type {} = {};", name, ty));
+                lines.push(format!("pub type {name} = {ty};"));
             }
         }
         binding::Binding::Enum(the_enum) => {
@@ -91,9 +91,9 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 let suffix = if ty.is_empty() {
                     "".to_string()
                 } else {
-                    format!("({})", ty)
+                    format!("({ty})")
                 };
-                lines.push(format!("  {}{},", name, suffix));
+                lines.push(format!("  {name}{suffix},"));
             }
             lines.push("}".to_string());
         }
@@ -118,7 +118,6 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
     Ok(lines.join("\n"))
 }
 
-#[allow(dead_code)]
 pub fn render_method(
     name: &str,
     contract: &binding::Contract,
@@ -127,7 +126,7 @@ pub fn render_method(
     let mut lines = vec![
         format!("/// {}", &contract.summary),
         format!("/// {}", &contract.description),
-        format!("pub fn {} (", name),
+        format!("pub fn {name} ("),
     ];
 
     for (name, ty) in &contract.params {
@@ -159,7 +158,7 @@ pub fn render_method(
     } else {
         "()".to_string()
     };
-    lines.push(format!(") -> {} {{", ret));
+    lines.push(format!(") -> {ret} {{"));
     lines.push("    todo!()".to_string());
     lines.push("}".to_string());
 
