@@ -216,9 +216,7 @@ pub fn extract_property(
             codegen::Type::Enum(enum_variants) => {
                 let prop = codegen::Property {
                     name: name.clone(),
-                    r#type: codegen::Type::Array(Box::new(codegen::Type::Named(
-                        name.clone().to_ascii_uppercase() + "_ENUM",
-                    ))),
+                    r#type: codegen::Type::Named(name.clone().to_ascii_uppercase() + "_ENUM"),
                     ..Default::default()
                 };
                 props.push(prop);
