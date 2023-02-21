@@ -5,6 +5,8 @@ openrpc-stub-gen
 
 [OpenRPC spec](https://spec.open-rpc.org/)
 
+[JSON-RPC spec](https://www.jsonrpc.org/specification)
+
 [StarkNet OpenRPC spec](https://github.com/starkware-libs/starknet-specs)
 
 JSON-roundtrip and JSON-aware comparison with the input file:
