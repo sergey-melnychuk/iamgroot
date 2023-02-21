@@ -4,6 +4,7 @@ mod binding;
 mod codegen;
 mod openrpc;
 mod renders;
+mod jsonrpc;
 
 // cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
 // diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
