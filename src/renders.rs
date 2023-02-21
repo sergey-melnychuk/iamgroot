@@ -49,20 +49,16 @@ pub fn normalize_type_name(name: &str) -> Result<String> {
 
 pub fn capitalize(s: &str) -> Result<String> {
     if s.is_empty() {
-        return error("cannot capitalize empty string");
+        return Err("cannot capitalize empty string".into());
     }
     if !s.is_ascii() {
-        return error("cannot capitalize non-ASCII string");
+        return Err("cannot capitalize non-ASCII string".into());
     }
     let mut chars: Vec<char> = s.to_ascii_lowercase().chars().collect();
     let head = chars[0].to_ascii_uppercase();
     *chars.get_mut(0).unwrap() = head;
 
     Ok(chars.into_iter().collect())
-}
-
-fn error<T>(message: &str) -> Result<T> {
-    Err(Error::Message(message.to_string()))
 }
 
 pub fn render_basic(basic: &codegen::Basic) -> String {
