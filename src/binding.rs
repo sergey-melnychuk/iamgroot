@@ -40,7 +40,7 @@ impl Binding {
                     let props = s
                         .properties
                         .iter()
-                        .map(|p| (p.name.clone(), p._type.clone()))
+                        .map(|p| (p.name.clone(), p.r#type.clone()))
                         .collect();
                     codegen::Type::Struct(props)
                 }
@@ -48,7 +48,7 @@ impl Binding {
                     let vars = e
                         .variants
                         .iter()
-                        .map(|p| (p.name.clone().to_ascii_uppercase(), p._type.clone()))
+                        .map(|p| (p.name.clone().to_ascii_uppercase(), p.r#type.clone()))
                         .collect();
                     codegen::Type::Enum(vars)
                 }
@@ -72,14 +72,13 @@ fn deanonimize(binding: &Binding) -> String {
 }
 
 fn all_of(name: String, bindings: Vec<Binding>) -> Binding {
-    //eprintln!("all_of: name={} bindings={:#?}", name, bindings);
     let properties = bindings
         .into_iter()
         .map(|b| {
             let name = deanonimize(&b).to_ascii_lowercase();
             codegen::Property {
                 name,
-                _type: b.get_type(),
+                r#type: b.get_type(),
                 ..Default::default()
             }
         })
@@ -96,21 +95,19 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
     let variants = bindings
         .into_iter()
         .map(|b| {
-            //eprintln!("one_of: name={} var_name={} var_type={:?}", name, b.get_name(), b.get_type());
             let name = deanonimize(&b).to_ascii_uppercase();
-            let _type = match b.get_type() {
+            let r#type = match b.get_type() {
                 codegen::Type::Struct(fields)
                     if fields.len() == 1 && fields[0].0.to_ascii_uppercase() == name =>
-                // avoid creating unnecessary wrappers (single-property tuples)
                 {
+                    // avoid creating unnecessary wrappers (single-property tuples)
                     fields[0].1.clone()
                 }
                 unchanged => unchanged,
             };
-            codegen::Variant { name, _type }
+            codegen::Variant { name, r#type }
         })
         .collect();
-    //eprintln!("one_of={} bindings={:#?}\nvariants={:#?}", name, bindings, variants);
     Binding::Enum(codegen::Enum {
         name,
         variants,
@@ -120,13 +117,13 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
 
 pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
     if !property.name.is_empty() {
-        return match property._type {
+        return match property.r#type {
             codegen::Type::Struct(fields) if fields.len() == 1 => fields
                 .into_iter()
                 .take(1)
-                .map(|(name, _type)| codegen::Property {
+                .map(|(name, r#type)| codegen::Property {
                     name: name.to_ascii_lowercase(),
-                    _type,
+                    r#type,
                     ..Default::default()
                 })
                 .collect(),
@@ -134,20 +131,20 @@ pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
         };
     }
 
-    match property._type {
+    match property.r#type {
         codegen::Type::Struct(fields) => fields
             .into_iter()
-            .map(|(name, _type)| codegen::Property {
+            .map(|(name, r#type)| codegen::Property {
                 name: name.to_ascii_lowercase(),
-                _type,
+                r#type,
                 ..Default::default()
             })
             .collect(),
         codegen::Type::Enum(variants) => variants
             .into_iter()
-            .map(|(name, _type)| codegen::Property {
+            .map(|(name, r#type)| codegen::Property {
                 name: name.to_ascii_lowercase(),
-                _type,
+                r#type,
                 ..Default::default()
             })
             .collect(),
@@ -162,11 +159,11 @@ pub fn extract_property(
     let mut binds = Vec::new();
     for property in properties {
         let name = &property.name;
-        match &property._type {
+        match &property.r#type {
             codegen::Type::Struct(struct_fields) => {
                 let prop = codegen::Property {
                     name: name.clone(),
-                    _type: codegen::Type::Named(name.clone().to_ascii_uppercase()),
+                    r#type: codegen::Type::Named(name.clone().to_ascii_uppercase()),
                     ..Default::default()
                 };
                 props.push(prop);
@@ -176,9 +173,9 @@ pub fn extract_property(
                     properties: struct_fields
                         .iter()
                         .cloned()
-                        .map(|(name, _type)| codegen::Property {
+                        .map(|(name, r#type)| codegen::Property {
                             name,
-                            _type,
+                            r#type,
                             ..Default::default()
                         })
                         .collect(),
@@ -190,7 +187,7 @@ pub fn extract_property(
                 codegen::Type::Struct(struct_fields) => {
                     let prop = codegen::Property {
                         name: name.clone(),
-                        _type: codegen::Type::Array(Box::new(codegen::Type::Named(
+                        r#type: codegen::Type::Array(Box::new(codegen::Type::Named(
                             name.clone().to_ascii_uppercase() + "_ITEM",
                         ))),
                         ..Default::default()
@@ -202,9 +199,9 @@ pub fn extract_property(
                         properties: struct_fields
                             .iter()
                             .cloned()
-                            .map(|(name, _type)| codegen::Property {
+                            .map(|(name, r#type)| codegen::Property {
                                 name,
-                                _type,
+                                r#type,
                                 ..Default::default()
                             })
                             .collect(),
@@ -219,7 +216,7 @@ pub fn extract_property(
             codegen::Type::Enum(enum_variants) => {
                 let prop = codegen::Property {
                     name: name.clone(),
-                    _type: codegen::Type::Array(Box::new(codegen::Type::Named(
+                    r#type: codegen::Type::Array(Box::new(codegen::Type::Named(
                         name.clone().to_ascii_uppercase() + "_ENUM",
                     ))),
                     ..Default::default()
@@ -231,7 +228,7 @@ pub fn extract_property(
                     variants: enum_variants
                         .iter()
                         .cloned()
-                        .map(|(name, _type)| codegen::Variant { name, _type })
+                        .map(|(name, r#type)| codegen::Variant { name, r#type })
                         .collect(),
                     ..Default::default()
                 });
@@ -266,8 +263,7 @@ pub fn get_schema_binding(
     spec: &openrpc::OpenRpc,
     cache: &mut HashMap<String, Binding>,
 ) -> Binding {
-    //eprintln!("\nname={}\nschema={:#?}", name, schema);
-    if let Some(id) = &schema._ref {
+    if let Some(id) = &schema.r#ref {
         let id = id.strip_prefix(SCHEMA_REF_PREFIX).expect("ID prefix");
         if cache.contains_key(id) {
             return cache.get(id).cloned().expect("Cache hit");
@@ -278,13 +274,13 @@ pub fn get_schema_binding(
         return binding;
     }
     if schema.has_type("string") {
-        if let Some(values) = schema._enum.as_ref() {
+        if let Some(values) = schema.r#enum.as_ref() {
             let variants = values
                 .iter()
                 .cloned()
                 .map(|name| codegen::Variant {
                     name,
-                    _type: codegen::Type::Unit,
+                    r#type: codegen::Type::Unit,
                 })
                 .collect();
             return Binding::Enum(codegen::Enum::of(name, variants));
@@ -312,7 +308,6 @@ pub fn get_schema_binding(
             .map(|(prop_name, prop_schema)| {
                 let binding = get_schema_binding(String::default(), prop_schema, spec, cache);
                 let prop_type = binding.get_type();
-                //eprintln!("name={} prop_name={} prop_type={:?} schema={:#?}", name, prop_name, prop_type, prop_schema);
                 codegen::Property::of(prop_name.to_string(), prop_type)
             })
             .flat_map(unfold_property)

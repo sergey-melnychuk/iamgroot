@@ -26,23 +26,21 @@ pub enum Type {
 pub enum Visibility {
     #[default]
     Public,
-    //Package,
-    //Private,
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct Property {
     pub name: String,
-    pub _type: Type,
+    pub r#type: Type,
     pub visibility: Visibility,
     pub decorators: Vec<String>,
 }
 
 impl Property {
-    pub fn of(name: String, _type: Type) -> Self {
+    pub fn of(name: String, r#type: Type) -> Self {
         Self {
             name,
-            _type,
+            r#type,
             visibility: Default::default(),
             decorators: Default::default(),
         }
@@ -89,13 +87,13 @@ impl Enum {
 #[derive(Debug, Default, Clone)]
 pub struct Variant {
     pub name: String,
-    pub _type: Type,
+    pub r#type: Type,
 }
 
 #[derive(Debug, Clone)]
 pub struct Alias {
     pub name: String,
-    pub _type: Type,
+    pub r#type: Type,
 }
 
 #[derive(Debug, Clone)]

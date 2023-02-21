@@ -91,13 +91,12 @@ pub struct Content {
 pub struct Schema {
     #[serde(rename = "$ref")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub _ref: Option<String>,
-    #[serde(rename = "type")]
+    pub r#ref: Option<String>,
+    // Supported types: string, boolean, integer, array, object
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub _type: Option<String>, // string, boolean, integer, array, object
-    #[serde(rename = "enum")]
+    pub r#type: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub _enum: Option<Vec<String>>,
+    pub r#enum: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -127,7 +126,7 @@ pub struct Schema {
 
 impl Schema {
     pub fn has_type(&self, expected: &str) -> bool {
-        self._type
+        self.r#type
             .as_ref()
             .map(|s| s.as_str() == expected)
             .unwrap_or_default()

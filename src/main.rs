@@ -90,6 +90,9 @@ fn main() {
             let code = renders::render_method(&contract.name, &contract, &cache);
             println!("\n{code}");
         }
+
+        // Temporary workaround: make example runnable
+        println!("\nfn main() {{ println!(\"OK\"); }}");
     } else {
         eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
     }
