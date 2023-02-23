@@ -76,8 +76,11 @@ fn main() {
     } else if mode.as_str() == "CODE" {
         let (cache, contracts) = run(spec);
 
-        println!("/// === GENERATED CODE ===");
-        println!("use openrpc_stub_gen::jsonrpc;");
+        println!("// vvv GENERATED CODE BELOW vvv");
+        println!("use serde::{{Deserialize, Serialize}};");
+        println!("use serde_json::Value;");
+        println!("\nuse openrpc_stub_gen::jsonrpc;");
+
         for (name, binding) in &cache {
             let code = renders::render_object(name, binding)
                 .unwrap_or_else(|e| format!("//! Rendering object '{name}' failed: {e}"));
@@ -88,14 +91,21 @@ fn main() {
         }
 
         println!("trait Rpc {{");
-        for contract in contracts {
-            let code = renders::render_method(&contract.name, &contract, &cache);
+        for contract in &contracts {
+            let code = renders::render_method(&contract.name, contract, &cache);
             println!("\n{code}");
         }
         println!("}}");
 
-        // Temporary workaround: make example runnable
-        println!("\nfn main() {{ println!(\"OK\"); }}");
+        for contract in &contracts {
+            let code = renders::render_method_handler(&contract.name, contract);
+            println!("{code}");
+        }
+
+        let handler = renders::render_handle_function(&contracts);
+        println!("{handler}");
+        println!("// ^^^ GENERATED CODE ABOVE ^^^");
+
     } else {
         eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
     }

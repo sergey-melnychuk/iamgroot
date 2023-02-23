@@ -11,6 +11,24 @@ pub struct Request {
     pub id: Option<Id>,
 }
 
+impl Request {
+    pub fn new(method: String, params: Value) -> Self {
+        Self {
+            jsonrpc: "2.0".to_string(),
+            method,
+            params: Some(params),
+            id: None,
+        }
+    }
+
+    pub fn with_id(self, id: Id) -> Self {
+        Self {
+            id: Some(id),
+            ..self
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Response {
     pub jsonrpc: String,
@@ -56,6 +74,12 @@ impl Response {
 pub struct Error {
     pub code: i64,
     pub message: String,
+}
+
+impl Error {
+    pub fn new(code: i64, message: String) -> Self {
+        Self { code, message }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
