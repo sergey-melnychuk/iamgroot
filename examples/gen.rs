@@ -1,7 +1,5 @@
 use std::cell::RefCell;
 
-use openrpc_stub_gen::jsonrpc;
-
 struct State(RefCell<u64>);
 
 fn main() {
@@ -22,11 +20,11 @@ fn main() {
     });
     println!(">>> {}", json.to_string());
 
-    let req: jsonrpc::Request = serde_json::from_value(json).unwrap();
-    let ret = handle(&state, req.with_id(jsonrpc::Id::Number(42)));
+    let req: openrpc_stub_gen::jsonrpc::Request = serde_json::from_value(json).unwrap();
+    let ret = handle(&state, req.with_id(openrpc_stub_gen::jsonrpc::Id::Number(42)));
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 
-    let req = jsonrpc::Request::new(
+    let req = openrpc_stub_gen::jsonrpc::Request::new(
         "starknet_call".to_string(),
         serde_json::json!([
             {
@@ -60,4 +58,3 @@ fn main() {
 
 // TODO Uncomment line below and update 'call' method as above
 // impl Rpc for State {}
-
