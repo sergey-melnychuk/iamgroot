@@ -58,3 +58,5 @@ fn main() {
 
 // TODO Uncomment line below and update 'call' method as above
 // impl Rpc for State {}
+
+// NOTE: Generated code will be added below this line
