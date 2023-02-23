@@ -287,7 +287,7 @@ pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String
 }
 
 const HANDLE_FUNCTION: &str = r###"
-fn handle<RPC: Rpc>(rpc: &RPC, req: jsonrpc::Request) -> jsonrpc::Response {
+pub fn handle<RPC: Rpc>(rpc: &RPC, req: jsonrpc::Request) -> jsonrpc::Response {
     let params = if let Some(params) = req.params {
         params
     } else {

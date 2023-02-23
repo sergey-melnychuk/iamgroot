@@ -77,6 +77,10 @@ fn main() {
         let (cache, contracts) = run(spec);
 
         println!("// vvv GENERATED CODE BELOW vvv");
+        println!("#[allow(dead_code)]");
+        println!("#[allow(non_snake_case)]");
+        println!("#[allow(unused_variables)]");
+        println!("mod gen {{");
         println!("use serde::{{Deserialize, Serialize}};");
         println!("use serde_json::Value;");
         println!("\nuse openrpc_stub_gen::jsonrpc;");
@@ -90,7 +94,7 @@ fn main() {
             }
         }
 
-        println!("trait Rpc {{");
+        println!("pub trait Rpc {{");
         for contract in &contracts {
             let code = renders::render_method(&contract.name, contract, &cache);
             println!("\n{code}");
@@ -104,6 +108,7 @@ fn main() {
 
         let handler = renders::render_handle_function(&contracts);
         println!("{handler}");
+        println!("}}");
         println!("// ^^^ GENERATED CODE ABOVE ^^^");
     } else {
         eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
