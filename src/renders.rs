@@ -99,6 +99,8 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         }
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
+            lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+            lines.push("#[serde(untagged)]".to_string());
             lines.push(format!("pub enum {} {{", normalize_type_name(name)?));
             for variant in &the_enum.variants {
                 let name = normalize_type_name(&variant.name)?;
@@ -118,6 +120,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         }
         binding::Binding::Struct(the_struct) => {
             let mut seen = HashSet::new();
+            lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
             lines.push(format!("pub struct {} {{", normalize_type_name(name)?));
             for property in &the_struct.properties {
                 let name = normalize_prop_name(&property.name)?;
@@ -183,20 +186,138 @@ pub fn render_method(
     } else {
         "()".to_string()
     };
-    lines.push(format!(
-        ") -> std::result::Result<{ret}, jsonrpc::Error> {{"
-    ));
-    lines.push("    todo!()".to_string());
-    lines.push("}".to_string());
+    lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
 
     vec![extra_objects.join("\n"), lines.join("\n")].join("")
 }
 
-// TODO: serde for DTOs
-// Add #[serde] annotations on enum variants
-// #[serde(untagged)]: https://serde.rs/enum-representations.html
+const METHOD_HANDLER_FULL: &str = r###"
+fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    #[derive(Deserialize, Serialize)]
+    struct ArgByPos(
+`arg_types`
+    );
 
-// TODO: errors
-// Wrap parameters into <method_name>Input struct
-// Generate error subset enums per-method
-// Generate return types as Result<Output, ErrorSubset>
+    #[derive(Deserialize, Serialize)]
+    struct ArgByName {
+`arg_names_and_types`
+    }
+
+    let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+        serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
+            let ArgByPos(
+`arg_names`
+            ) = args_by_pos;
+            ArgByName { 
+`arg_names` 
+            }
+        })
+    });
+
+    let args: ArgByName = match args {
+        Ok(args) => args,
+        Err(e) => return jsonrpc::Response::error(1002, &format!("{e:?}")),
+    };
+
+    let ArgByName { 
+`arg_names` 
+    } = args;
+
+    match rpc.`method_short_name`(
+`arg_names`
+    ) {
+        Ok(ret) => match serde_json::to_value(ret) {
+            Ok(ret) => jsonrpc::Response::result(ret),
+            Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+        },
+        Err(e) => jsonrpc::Response::error(e.code, &e.message),
+    }
+}
+"###;
+
+const METHOD_HANDLER_NO_ARGUMENTS: &str = r###"
+fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    match rpc.`method_short_name`() {
+        Ok(ret) => match serde_json::to_value(ret) {
+            Ok(ret) => jsonrpc::Response::result(ret),
+            Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+        },
+        Err(e) => jsonrpc::Response::error(e.code, &e.message),
+    }
+}
+"###;
+
+pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String {
+    // TODO FIXME: starknet-specific processing (strip the common prefix)
+    let short_name = name.strip_prefix("starknet_").unwrap_or(name);
+
+    if contract.params.is_empty() {
+        return METHOD_HANDLER_NO_ARGUMENTS
+            .replace("`method_name`", name)
+            .replace("`method_short_name`", short_name);
+    }
+
+    let params_names_only = contract
+        .params
+        .iter()
+        .map(|(name, _)| format!("{},", name))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let params_types_only = contract
+        .params
+        .iter()
+        .map(|(_, ty)| format!("{},", render_type(ty).expect("render type")))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let params_names_with_types = contract
+        .params
+        .iter()
+        .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("render type")))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    METHOD_HANDLER_FULL
+        .replace("`arg_names`", &params_names_only)
+        .replace("`arg_types`", &params_types_only)
+        .replace("`arg_names_and_types`", &params_names_with_types)
+        .replace("`method_name`", name)
+        .replace("`method_short_name`", short_name)
+}
+
+const HANDLE_FUNCTION: &str = r###"
+fn handle<RPC: Rpc>(rpc: &RPC, req: jsonrpc::Request) -> jsonrpc::Response {
+    let params = if let Some(params) = req.params {
+        params
+    } else {
+        return jsonrpc::Response::error(1001, "Required field is missing: 'params'");
+    };
+
+    let response = match req.method.as_str() {
+`handlers`
+        _ => jsonrpc::Response::error(1004, &format!("No such method: '{}'.", req.method)),
+    };
+
+    return if let Some(id) = req.id {
+        response.with_id(id)
+    } else {
+        response
+    };
+}
+"###;
+
+pub fn render_handle_function(contracts: &[binding::Contract]) -> String {
+    let lines = contracts
+        .iter()
+        .map(|contract| {
+            format!(
+                "        \"{}\" => handle_{}(rpc, &params),",
+                contract.name, contract.name
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    HANDLE_FUNCTION.replace("`handlers`", &lines)
+}
