@@ -25,7 +25,7 @@ cargo run --release -- ./api/input.openrpc TREE > tree.txt 2> debug.txt
 Generate the code and then run it:
 
 ```
-# rm -rf examples && mkdir examples
-cargo run --release -- ./api/input.openrpc CODE > examples/gen.rs
-cargo run --example gen 2> debug.txt
+git restore examples/gen.rs
+cargo run --release -- ./api/input.openrpc CODE >> examples/gen.rs
+cargo run --example gen
 ```
