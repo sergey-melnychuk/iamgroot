@@ -142,6 +142,7 @@ pub fn render_method(
     contract: &binding::Contract,
     cache: &HashMap<String, binding::Binding>,
 ) -> String {
+    // TODO FIXME: starknet-specific processing (strip the common prefix)
     let short_name = name.strip_prefix("starknet_").unwrap_or(name);
 
     let mut lines = vec![
@@ -149,7 +150,8 @@ pub fn render_method(
         format!("/// Summary: {}", &contract.summary),
         format!("/// Description: {}", &contract.description),
         format!("///"),
-        format!("pub fn {short_name} ("),
+        format!("fn {short_name} ("),
+        format!("    &self,"),
     ];
 
     for (name, ty) in &contract.params {
@@ -176,12 +178,14 @@ pub fn render_method(
                 extra_objects.push(object);
                 en.name.clone()
             }
-            other => render_type(&other.get_type()).expect("render type"),
+            other => render_type(&other.get_type()).expect("render result type"),
         }
     } else {
         "()".to_string()
     };
-    lines.push(format!(") -> {ret} {{"));
+    lines.push(format!(
+        ") -> std::result::Result<{ret}, jsonrpc::Error> {{"
+    ));
     lines.push("    todo!()".to_string());
     lines.push("}".to_string());
 
