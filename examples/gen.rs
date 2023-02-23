@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 
+use openrpc_stub_gen::jsonrpc;
+
 struct State(RefCell<u64>);
 
 fn main() {
@@ -20,14 +22,11 @@ fn main() {
     });
     println!(">>> {}", json.to_string());
 
-    let req: openrpc_stub_gen::jsonrpc::Request = serde_json::from_value(json).unwrap();
-    let ret = handle(
-        &state,
-        req.with_id(openrpc_stub_gen::jsonrpc::Id::Number(42)),
-    );
+    let req: jsonrpc::Request = serde_json::from_value(json).unwrap();
+    let ret = gen::handle(&state, req.with_id(jsonrpc::Id::Number(42)));
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 
-    let req = openrpc_stub_gen::jsonrpc::Request::new(
+    let req = jsonrpc::Request::new(
         "starknet_call".to_string(),
         serde_json::json!([
             {
@@ -39,13 +38,14 @@ fn main() {
         ]),
     );
     println!("\n>>> {}", serde_json::to_string(&req).unwrap());
-    let ret = handle(&state, req);
+    let ret = gen::handle(&state, req);
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 }
 
-// (git restore examples/gen.rs)
-// cargo run --release -- ./api/input.openrpc CODE >> examples/gen.rs
-// cargo run --example gen
+// 0. (git restore examples/gen.rs)
+// 1. cargo run --release -- ./api/input.openrpc CODE >> examples/gen.rs
+// 2. implement gen::Rpc for State and 'starknet_call' method (see below)
+// 2. cargo run --example gen
 
 // starknet_call:
 /*
@@ -59,7 +59,9 @@ fn main() {
         }
 */
 
-// TODO Uncomment line below and update 'call' method as above
-// impl Rpc for State {}
+#[allow(unused_variables)]
+impl gen::Rpc for State {
+    // TODO
+}
 
 // NOTE: Generated code will be added below this line
