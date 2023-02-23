@@ -45,7 +45,8 @@ fn main() {
 // 0. (git restore examples/gen.rs)
 // 1. cargo run --release -- ./api/input.openrpc CODE >> examples/gen.rs
 // 2. implement gen::Rpc for State and 'starknet_call' method (see below)
-// 2. cargo run --example gen
+//    - consider running 'cargo fmt' along the way
+// 3. cargo run --example gen
 
 // starknet_call:
 /*
@@ -60,8 +61,6 @@ fn main() {
 */
 
 #[allow(unused_variables)]
-impl gen::Rpc for State {
-    // TODO
-}
+impl gen::Rpc for State {}
 
 // NOTE: Generated code will be added below this line
