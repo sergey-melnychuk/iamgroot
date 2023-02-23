@@ -2,22 +2,6 @@ use std::collections::HashMap;
 
 use openrpc_stub_gen::{binding, openrpc, renders};
 
-// cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
-// diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
-
-// cargo run --release -- ./api/input.openrpc TREE > tree.txt 2> debug.txt
-
-// rm -rf examples && mkdir examples
-// cargo run --release -- ./api/input.openrpc CODE > examples/gen.rs
-// echo '\nfn main() { println!("OK"); }' >> examples/gen.rs
-// cargo run --example gen 2> debug.txt
-
-// Total lines of code:
-// find . -type f -name "*.rs" | xargs grep . | wc -l
-
-// Changes necessary to make existing spec a valid OpenRPC spec:
-// https://github.com/starkware-libs/starknet-specs/pull/56
-
 fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<binding::Contract>) {
     let mut cache = HashMap::new();
     let bindings = spec

@@ -9,6 +9,8 @@ openrpc-stub-gen
 
 [StarkNet OpenRPC spec](https://github.com/starkware-libs/starknet-specs)
 
+NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is necessary to make existing spec a valid OpenRPC spec.
+
 JSON-roundtrip and JSON-aware comparison with the input file:
 
 ```
@@ -29,3 +31,22 @@ git restore examples/gen.rs
 cargo run --release -- ./api/input.openrpc CODE >> examples/gen.rs
 cargo run --example gen
 ```
+
+The `gen` example output:
+
+```
+>>> {"id":42,"jsonrpc":"2.0","method":"starknet_call","params":{"block_id":"0xFF","request":{"calldata":["2"],"contract_address":"1","entry_point_selector":"3"}}}
+<<< {"jsonrpc":"2.0","error":{"code":-42,"message":"Not implemented"},"id":42}
+
+>>> {"jsonrpc":"2.0","method":"starknet_call","params":[{"calldata":["2"],"contract_address":"1","entry_point_selector":"3"},"0xFF"]}
+<<< {"jsonrpc":"2.0","result":["x=2"]}
+```
+
+Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xargs grep . | wc -l`
+
+### Plans:
+
+1. [ ] Error enum/constants
+1. [ ] HTTP-based server generation
+1. [ ] HTTP-based client generation
+1. [ ] Seamless inclusion into a build process
