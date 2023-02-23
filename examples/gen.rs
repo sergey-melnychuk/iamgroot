@@ -21,7 +21,10 @@ fn main() {
     println!(">>> {}", json.to_string());
 
     let req: openrpc_stub_gen::jsonrpc::Request = serde_json::from_value(json).unwrap();
-    let ret = handle(&state, req.with_id(openrpc_stub_gen::jsonrpc::Id::Number(42)));
+    let ret = handle(
+        &state,
+        req.with_id(openrpc_stub_gen::jsonrpc::Id::Number(42)),
+    );
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 
     let req = openrpc_stub_gen::jsonrpc::Request::new(
@@ -46,14 +49,14 @@ fn main() {
 
 // starknet_call:
 /*
-    let mut x = self.0.borrow_mut();
-    *x += 1;
+        let mut x = self.0.borrow_mut();
+        *x += 1;
 
-    if *x % 2 == 0 {
-        Ok(vec![format!("x={x}")])
-    } else {
-        Err(jsonrpc::Error::new(-42, "Not implemented".to_string()))
-    }
+        if *x % 2 == 0 {
+            Ok(vec![format!("x={x}")])
+        } else {
+            Err(jsonrpc::Error::new(-42, "Not implemented".to_string()))
+        }
 */
 
 // TODO Uncomment line below and update 'call' method as above

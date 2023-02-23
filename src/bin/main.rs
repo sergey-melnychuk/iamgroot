@@ -105,7 +105,6 @@ fn main() {
         let handler = renders::render_handle_function(&contracts);
         println!("{handler}");
         println!("// ^^^ GENERATED CODE ABOVE ^^^");
-
     } else {
         eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
     }
