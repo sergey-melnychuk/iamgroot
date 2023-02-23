@@ -50,3 +50,5 @@ Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xar
 1. [ ] HTTP-based server generation
 1. [ ] HTTP-based client generation
 1. [ ] Seamless inclusion into a build process
+1. [ ] `async` version of trait & handlers
+   - would require `async_trait` on stable rust: [async_fn_in_trait](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
