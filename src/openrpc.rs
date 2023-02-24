@@ -45,7 +45,7 @@ pub struct Server {
 pub struct Reference {
     #[serde(rename = "$ref")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub _ref: Option<String>,
+    pub r#ref: Option<String>,
 }
 
 #[allow(non_snake_case)]

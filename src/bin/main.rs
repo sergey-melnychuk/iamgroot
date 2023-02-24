@@ -2,16 +2,17 @@ use std::collections::HashMap;
 
 use openrpc_stub_gen::{binding, openrpc, renders};
 
-fn run(spec: openrpc::OpenRpc, cache: &mut HashMap<String, binding::Binding>) -> Vec<binding::Contract> {
+fn run(
+    spec: openrpc::OpenRpc,
+    cache: &mut HashMap<String, binding::Binding>,
+) -> Vec<binding::Contract> {
     let bindings = spec
         .components
         .as_ref()
         .expect("Components section")
         .schemas
         .iter()
-        .map(|(name, schema)| {
-            binding::get_schema_binding(name.to_string(), schema, &spec, cache)
-        })
+        .map(|(name, schema)| binding::get_schema_binding(name.to_string(), schema, &spec, cache))
         .flat_map(binding::unfold_binding)
         // Make a second pass (extra unfolding might be necessary)
         .flat_map(binding::unfold_binding)
@@ -65,7 +66,8 @@ fn main() {
     } else if mode.as_str() == "TREE" {
         let mut cache = HashMap::new();
 
-        let contracts = paths.into_iter()
+        let contracts = paths
+            .into_iter()
             .map(|path| parse(&path))
             .flat_map(|spec| run(spec, &mut cache))
             .collect::<Vec<_>>();
@@ -80,7 +82,8 @@ fn main() {
     } else if mode.as_str() == "CODE" {
         let mut cache = HashMap::new();
 
-        let contracts = paths.into_iter()
+        let contracts = paths
+            .into_iter()
             .map(|path| parse(&path))
             .flat_map(|spec| run(spec, &mut cache))
             .collect::<Vec<_>>();

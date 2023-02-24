@@ -262,7 +262,8 @@ pub fn get_schema_binding(
     cache: &mut HashMap<String, Binding>,
 ) -> Binding {
     if let Some(id) = &schema.r#ref {
-        let id = id.strip_prefix(SCHEMA_REF_PREFIX).expect("ID prefix");
+        // Allow shared cache lookups for cross-file references
+        let id = id.split(SCHEMA_REF_PREFIX).skip(1).next().unwrap();
         if cache.contains_key(id) {
             return cache.get(id).cloned().expect("Cache hit");
         }
@@ -380,11 +381,13 @@ pub fn get_method_contract(
         .unwrap_or_default()
         .into_iter()
         .filter_map(|reference| {
-            let key = reference._ref?.strip_prefix(ERROR_REF_PREFIX)?.to_string();
+            let key = reference.r#ref?;
+            // Enable shared cache lookup for cross-file references
+            let key = key.split(ERROR_REF_PREFIX).skip(1).next().unwrap();
             spec.components
                 .as_ref()
                 .map(|components| &components.errors)
-                .and_then(|errors| errors.get(&key))
+                .and_then(|errors| errors.get(key))
         })
         .cloned()
         .collect();

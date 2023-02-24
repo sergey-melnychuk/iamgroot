@@ -28,7 +28,7 @@ Generate the code and then run it:
 
 ```
 git restore examples/gen.rs
-cargo run --release -- CODE ./api/test/input.openrpc >> examples/gen.rs
+cargo run --release -- CODE ./api/test/input.openrpc ./api/starknet_write_api.json >> examples/gen.rs
 cargo run --example gen
 ```
 
