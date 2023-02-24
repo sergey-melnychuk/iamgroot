@@ -261,9 +261,6 @@ pub fn get_schema_binding(
     spec: &openrpc::OpenRpc,
     cache: &mut HashMap<String, Binding>,
 ) -> Binding {
-    if let Some(binding) = cache.get(&name) {
-        return binding.clone();
-    }
     if let Some(key) = &schema.r#ref {
         // TODO distinguish anon (empty `name`) named lookups - they have different semantics
 
