@@ -32,21 +32,33 @@ cargo run --release -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write
 cargo run --example gen
 ```
 
-Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xargs grep . | wc -l`
+Total lines of code (1105): `find . -type f -name "*.rs" | xargs grep . | wc -l`
 
-### Plans:
+### TODO
 
-1. [x] resolve naming collisions
-   - e.g. `starknet_getStateUpdate.result` vs `starknet_getBlockWithTxs.result`
-1. [ ] use value-objects instead of type aliases (?)
+1. [ ] wrap non-required properties with `Option<_>`
 1. [ ] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 1. [ ] error enum/constants
-1. [ ] merge multiple spec files into single consistent spec
-   - [ ] cross-file lookup for a schema
-   - [ ] cross-file lookup for an error
-1. [ ] validate JSON to be valid OpenRPC spec
-1. [ ] `async` version of trait & handlers
-   - would require `async_trait` on stable rust: [async_fn_in_trait](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
-1. [ ] HTTP-based server generation
-1. [ ] HTTP-based client generation
+1. [ ] verify each method against pathfinder
+1. [ ] `async` version of trait & handlers (?)
+   - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
+1. [ ] HTTP-based server generation (?)
+1. [ ] HTTP-based client generation (?)
 1. [ ] Seamless inclusion into a build process
+   - publish as a library/binary on crates.io (?)
+
+### DONE
+
+* [x] resolve naming collisions (might required slightly patching the specs)
+  - e.g. `starknet_getStateUpdate.result` vs `starknet_getBlockWithTxs.result`
+* [x] use value-objects instead of type aliases
+  - value-objects without validation do not make much sense (e.g. match against regex)
+  - library (vs. framework) approach is to avoid making decisions for the client code
+  - is client code allowed to send "invalid" data?
+  - is client code allowed to receive "invalid" data?
+  - up to client code - thus no validation (at least out of the box, at least for now)
+* [x] run against most recent Starknet specs
+* [x] support multiple files with specs
+* [x] generate the `Rpc` trait
+* [x] generate `handle` function of method handlers
+* [x] provide OpenRPC and JSON-RPC bindings
