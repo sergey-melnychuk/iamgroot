@@ -87,6 +87,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let ty = render_basic(basic);
             let name = normalize_type_name(name)?;
             if ty != name {
+                lines.push("// binding::Basic".to_string());
                 lines.push(format!("pub type {name} = {ty};"));
                 // TODO wrap into value-object
                 // lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
@@ -96,7 +97,8 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         binding::Binding::Named(name, ty) => {
             let ty = render_type(ty)?;
             let name = normalize_type_name(name)?;
-            if ty != name {
+            if name != ty {
+                lines.push("// binding::Named".to_string());
                 lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
                 lines.push(format!("pub struct {name}({ty});"));
             }

@@ -261,15 +261,21 @@ pub fn get_schema_binding(
     spec: &openrpc::OpenRpc,
     cache: &mut HashMap<String, Binding>,
 ) -> Binding {
-    if let Some(id) = &schema.r#ref {
+    if let Some(binding) = cache.get(&name) {
+        return binding.clone();
+    }
+    if let Some(key) = &schema.r#ref {
+        // TODO distinguish anon (empty `name`) named lookups - they have different semantics
+
         // Allow shared cache lookups for cross-file references
-        let id = id.split(SCHEMA_REF_PREFIX).nth(1).unwrap();
-        if cache.contains_key(id) {
-            return cache.get(id).cloned().expect("Cache hit");
+        let key = key.split(SCHEMA_REF_PREFIX).nth(1).unwrap();
+        if let Some(binding) = cache.get(key) {
+            return binding.clone();
         }
-        let schema = spec.get_schema(id).expect("Schema lookup");
-        let binding = get_schema_binding(id.to_string(), schema, spec, cache);
-        cache.insert(id.to_string(), binding.clone());
+
+        let schema = spec.get_schema(key).expect("schema");
+        let binding = get_schema_binding(key.to_string(), schema, spec, cache);
+        cache.insert(key.to_string(), binding.clone());
         return binding;
     }
     if schema.has_type("string") {
