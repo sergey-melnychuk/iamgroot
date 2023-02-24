@@ -146,7 +146,8 @@
                 "message": "Invalid contract class"
             },
             "CLASS_HASH_NOT_FOUND": {
-                "$ref": "./api/starknet_api_openrpc.json#/components/errors/CLASS_HASH_NOT_FOUND"
+                "code": 28,
+                "message": "Class hash not found"
             }
         }
     }
