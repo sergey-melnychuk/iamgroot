@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Basic {
     String,
     Integer,
@@ -11,7 +11,7 @@ impl std::fmt::Display for Basic {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Type {
     Basic(Basic),
     Array(Box<Type>),
@@ -22,13 +22,13 @@ pub enum Type {
     Unit,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Visibility {
     #[default]
     Public,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Property {
     pub name: String,
     pub r#type: Type,
@@ -47,7 +47,7 @@ impl Property {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Struct {
     pub name: String,
     pub properties: Vec<Property>,
@@ -66,7 +66,7 @@ impl Struct {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Enum {
     pub name: String,
     pub variants: Vec<Variant>,
@@ -84,7 +84,7 @@ impl Enum {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Variant {
     pub name: String,
     pub r#type: Type,

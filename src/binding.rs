@@ -6,7 +6,7 @@ use crate::openrpc;
 const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
 const ERROR_REF_PREFIX: &str = "#/components/errors/";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Binding {
     Basic(codegen::Basic),
     Struct(codegen::Struct),
@@ -356,6 +356,18 @@ pub fn get_content_binding(
     let binding = get_schema_binding(name.clone(), schema, spec, cache);
     if !cache.contains_key(&name) && !cache.contains_key(&name.to_ascii_uppercase()) {
         cache.insert(name, binding.clone());
+    } else {
+        let existing = cache
+            .get(&name)
+            .or_else(|| cache.get(&name.to_ascii_uppercase()))
+            .cloned()
+            .unwrap();
+        if existing != binding {
+            eprintln!(
+                "\ncache collision: key={name}\n\texisting: {existing:?}\n\tbinding: {binding:?}"
+            );
+            panic!("cache collision detected");
+        }
     }
     binding
 }

@@ -21,7 +21,7 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 Dump the AST:
 
 ```
-cargo run --release -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt 2> debug.txt
+cargo run --release -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt
 ```
 
 Generate the code and then run it:
@@ -36,6 +36,8 @@ Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xar
 
 ### Plans:
 
+1. [ ] resolve naming collisions
+   - e.g. `starknet_getStateUpdate.result` vs `starknet_getBlockWithTxs.result`
 1. [ ] use value-objects instead of type aliases (?)
 1. [ ] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 1. [ ] error enum/constants
