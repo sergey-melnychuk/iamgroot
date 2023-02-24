@@ -14,21 +14,21 @@ NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is nec
 JSON-roundtrip and JSON-aware comparison with the input file:
 
 ```
-cargo run --release -- JSON ./api/input.openrpc 2>/dev/null | jq . > debug.json
-diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
+cargo run --release -- JSON ./api/test/input.openrpc 2>/dev/null | jq . > debug.json
+diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 ```
 
 Dump the AST:
 
 ```
-cargo run --release -- TREE ./api/input.openrpc > tree.txt 2> debug.txt
+cargo run --release -- TREE ./api/test/input.openrpc > tree.txt 2> debug.txt
 ```
 
 Generate the code and then run it:
 
 ```
 git restore examples/gen.rs
-cargo run --release -- CODE ./api/input.openrpc >> examples/gen.rs
+cargo run --release -- CODE ./api/test/input.openrpc >> examples/gen.rs
 cargo run --example gen
 ```
 
@@ -47,10 +47,12 @@ Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xar
 ### Plans:
 
 1. [ ] Error enum/constants
+1. [ ] merge multiple spec files into single consistent spec
+   - [ ] cross-file lookup for a schema
+   - [ ] cross-file lookup for an error
+1. [ ] validate JSON to be valid OpenRPC spec
+1. [ ] `async` version of trait & handlers
+   - would require `async_trait` on stable rust: [async_fn_in_trait](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
 1. [ ] HTTP-based server generation
 1. [ ] HTTP-based client generation
 1. [ ] Seamless inclusion into a build process
-1. [ ] `async` version of trait & handlers
-   - would require `async_trait` on stable rust: [async_fn_in_trait](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
-1. [ ] merge multiple spec files into single consistent spec
-1. [ ] validate JSON to be valid OpenRPC spec
