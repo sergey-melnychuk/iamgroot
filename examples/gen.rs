@@ -1,11 +1,9 @@
-use std::cell::RefCell;
-
 use openrpc_stub_gen::jsonrpc;
 
-struct State(RefCell<u64>);
+struct State;
 
 fn main() {
-    let state = State(RefCell::new(0));
+    let state = State;
 
     let json = serde_json::json!({
         "jsonrpc": "2.0",
