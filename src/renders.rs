@@ -94,9 +94,9 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             if ty != name {
                 lines.push("// binding::Basic".to_string());
                 lines.push(format!("pub type {name} = {ty};"));
-                // TODO wrap into value-object
+                // TODO? wrap into value-object (see README)
                 // lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
-                // lines.push(format!("pub struct {name}({ty});"));
+                // lines.push(format!("pub struct {name}(pub {ty});"));
             }
         }
         binding::Binding::Named(name, ty) => {
@@ -105,7 +105,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             if name != ty {
                 lines.push("// binding::Named".to_string());
                 lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
-                lines.push(format!("pub struct {name}({ty});"));
+                lines.push(format!("pub struct {name}(pub {ty});"));
             }
         }
         binding::Binding::Enum(the_enum) => {
