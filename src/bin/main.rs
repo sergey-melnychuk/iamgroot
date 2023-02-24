@@ -106,7 +106,7 @@ fn main() {
             }
         }
 
-        println!("pub trait Rpc {{");
+        println!("\npub trait Rpc {{");
         for contract in &contracts {
             let code = renders::render_method(&contract.name, contract, &cache);
             println!("\n{code}");
