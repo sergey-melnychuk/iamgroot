@@ -20,7 +20,7 @@ fn main() {
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 }
 
-#[allow(unused_variables)]
-impl gen::Rpc for State {}
+// #[allow(unused_variables)]
+// impl gen::Rpc for State {}
 
 // NOTE: Generated code will be added below this line
