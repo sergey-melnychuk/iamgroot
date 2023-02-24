@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use openrpc_stub_gen::{binding, openrpc, renders};
 
-fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<binding::Contract>) {
-    let mut cache = HashMap::new();
+fn run(spec: openrpc::OpenRpc, cache: &mut HashMap<String, binding::Binding>) -> Vec<binding::Contract> {
     let bindings = spec
         .components
         .as_ref()
@@ -11,7 +10,7 @@ fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<bindin
         .schemas
         .iter()
         .map(|(name, schema)| {
-            binding::get_schema_binding(name.to_string(), schema, &spec, &mut cache)
+            binding::get_schema_binding(name.to_string(), schema, &spec, cache)
         })
         .flat_map(binding::unfold_binding)
         // Make a second pass (extra unfolding might be necessary)
@@ -27,28 +26,46 @@ fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<bindin
         .iter()
         .filter_map(|method| {
             let name = method.name.clone();
-            binding::get_method_contract(name, &spec, &mut cache)
+            binding::get_method_contract(name, &spec, cache)
         })
         .collect::<Vec<_>>();
 
-    (cache, contracts)
+    contracts
+}
+
+fn parse(path: &str) -> openrpc::OpenRpc {
+    let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
+    serde_json::from_str(&json).expect("JSON is valid")
 }
 
 fn main() {
-    let (path, mode) = {
+    let (mode, paths) = {
         let mut args = std::env::args().skip(1);
         let mode = args.next().expect("Output: [JSON, TREE, CODE].");
-        let path = args.next().expect("Path to JSON file.");
-        (path, mode)
+        let paths = args.collect::<Vec<_>>();
+        (mode, paths)
     };
-    let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
-    let spec: openrpc::OpenRpc = serde_json::from_str(&json).expect("JSON is valid");
+
+    if paths.is_empty() {
+        eprintln!("No input files");
+        return;
+    }
 
     if mode.as_str() == "JSON" {
+        if paths.len() > 1 {
+            eprintln!("JSON mode supports only single file");
+            return;
+        }
+        let spec = parse(&paths[0]);
         let text = serde_json::to_string(&spec).expect("JSON serialized.");
         println!("{text}");
     } else if mode.as_str() == "TREE" {
-        let (cache, contracts) = run(spec);
+        let mut cache = HashMap::new();
+
+        let contracts = paths.into_iter()
+            .map(|path| parse(&path))
+            .flat_map(|spec| run(spec, &mut cache))
+            .collect::<Vec<_>>();
 
         cache
             .iter()
@@ -58,7 +75,12 @@ fn main() {
             .iter()
             .for_each(|contract| println!("---\n{contract:#?}"));
     } else if mode.as_str() == "CODE" {
-        let (cache, contracts) = run(spec);
+        let mut cache = HashMap::new();
+
+        let contracts = paths.into_iter()
+            .map(|path| parse(&path))
+            .flat_map(|spec| run(spec, &mut cache))
+            .collect::<Vec<_>>();
 
         println!("// vvv GENERATED CODE BELOW vvv");
         println!("#[allow(dead_code)]");
