@@ -263,7 +263,7 @@ pub fn get_schema_binding(
 ) -> Binding {
     if let Some(id) = &schema.r#ref {
         // Allow shared cache lookups for cross-file references
-        let id = id.split(SCHEMA_REF_PREFIX).skip(1).next().unwrap();
+        let id = id.split(SCHEMA_REF_PREFIX).nth(1).unwrap();
         if cache.contains_key(id) {
             return cache.get(id).cloned().expect("Cache hit");
         }
@@ -383,7 +383,7 @@ pub fn get_method_contract(
         .filter_map(|reference| {
             let key = reference.r#ref?;
             // Enable shared cache lookup for cross-file references
-            let key = key.split(ERROR_REF_PREFIX).skip(1).next().unwrap();
+            let key = key.split(ERROR_REF_PREFIX).nth(1).unwrap();
             spec.components
                 .as_ref()
                 .map(|components| &components.errors)
