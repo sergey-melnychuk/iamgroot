@@ -46,7 +46,9 @@ Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xar
 
 ### Plans:
 
-1. [ ] Error enum/constants
+1. [ ] use value-objects instead of type aliases
+1. [ ] add `#[serde(flatten)]` for reusable chunks included via `allOf`
+1. [ ] error enum/constants
 1. [ ] merge multiple spec files into single consistent spec
    - [ ] cross-file lookup for a schema
    - [ ] cross-file lookup for an error

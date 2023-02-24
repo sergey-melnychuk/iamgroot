@@ -88,6 +88,9 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let name = normalize_type_name(name)?;
             if ty != name {
                 lines.push(format!("pub type {name} = {ty};"));
+                // TODO wrap into value-object
+                // lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+                // lines.push(format!("pub struct {name}({ty});"));
             }
         }
         binding::Binding::Named(name, ty) => {
