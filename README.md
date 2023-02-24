@@ -36,7 +36,7 @@ Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xar
 
 ### Plans:
 
-1. [ ] resolve naming collisions
+1. [x] resolve naming collisions
    - e.g. `starknet_getStateUpdate.result` vs `starknet_getBlockWithTxs.result`
 1. [ ] use value-objects instead of type aliases (?)
 1. [ ] add `#[serde(flatten)]` for reusable chunks included via `allOf`

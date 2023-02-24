@@ -9,7 +9,7 @@ fn run(
     let bindings = spec
         .components
         .as_ref()
-        .expect("Components section")
+        .expect("components")
         .schemas
         .iter()
         .map(|(name, schema)| binding::get_schema_binding(name.to_string(), schema, &spec, cache))
@@ -37,7 +37,7 @@ fn run(
 fn parse(path: &str) -> openrpc::OpenRpc {
     log::info!("Processing file: {path}");
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
-    serde_json::from_str(&json).expect("JSON is valid")
+    serde_json::from_str(&json).expect("json")
 }
 
 fn main() {
@@ -61,7 +61,7 @@ fn main() {
             return;
         }
         let spec = parse(&paths[0]);
-        let text = serde_json::to_string(&spec).expect("JSON serialized.");
+        let text = serde_json::to_string(&spec).expect("json");
         println!("{text}");
     } else if mode.as_str() == "TREE" {
         let mut cache = HashMap::new();
@@ -99,7 +99,7 @@ fn main() {
 
         for (name, binding) in &cache {
             let code = renders::render_object(name, binding)
-                .unwrap_or_else(|e| format!("//! Rendering object '{name}' failed: {e}"));
+                .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed: {e}"));
 
             if !code.is_empty() {
                 println!("\n// object: '{name}'\n{code}");
@@ -108,7 +108,7 @@ fn main() {
 
         println!("\npub trait Rpc {{");
         for contract in &contracts {
-            let code = renders::render_method(&contract.name, contract, &cache);
+            let code = renders::render_method(&contract.name, contract);
             println!("\n{code}");
         }
         println!("}}");

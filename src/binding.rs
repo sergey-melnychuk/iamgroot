@@ -296,7 +296,7 @@ pub fn get_schema_binding(
         return Binding::Basic(codegen::Basic::Boolean);
     }
     if schema.has_type("array") {
-        let schema = schema.items.as_ref().expect("Item schema");
+        let schema = schema.items.as_ref().expect("schema");
         let binding = get_schema_binding(name.clone(), schema, spec, cache);
         let item_type = Box::new(binding.get_type());
         return Binding::Named(name, codegen::Type::Array(item_type));
@@ -304,7 +304,7 @@ pub fn get_schema_binding(
     if schema.properties.is_some()
     /* assuming schema.type="object" */
     {
-        let properties = schema.properties.as_ref().expect("Object properties");
+        let properties = schema.properties.as_ref().expect("properties");
         let properties = properties
             .iter()
             .map(|(prop_name, prop_schema)| {
@@ -346,32 +346,6 @@ pub struct Contract {
     pub description: String,
 }
 
-pub fn get_content_binding(
-    content: &openrpc::Content,
-    spec: &openrpc::OpenRpc,
-    cache: &mut HashMap<String, Binding>,
-) -> Binding {
-    let schema = content.schema.as_ref().unwrap();
-    let name = content.name.clone().unwrap_or_default();
-    let binding = get_schema_binding(name.clone(), schema, spec, cache);
-    if !cache.contains_key(&name) && !cache.contains_key(&name.to_ascii_uppercase()) {
-        cache.insert(name, binding.clone());
-    } else {
-        let existing = cache
-            .get(&name)
-            .or_else(|| cache.get(&name.to_ascii_uppercase()))
-            .cloned()
-            .unwrap();
-        if existing != binding {
-            eprintln!(
-                "\ncache collision: key={name}\n\texisting: {existing:?}\n\tbinding: {binding:?}"
-            );
-            panic!("cache collision detected");
-        }
-    }
-    binding
-}
-
 pub fn get_method_contract(
     name: String,
     spec: &openrpc::OpenRpc,
@@ -382,14 +356,21 @@ pub fn get_method_contract(
         .params
         .iter()
         .map(|param| {
-            let binding = get_content_binding(param, spec, cache);
-            (param.name.clone().unwrap_or_default(), binding.get_type())
+            let schema = param.schema.as_ref().unwrap();
+            let name = param.name.clone().unwrap_or_default();
+            let binding = get_schema_binding(name.clone(), schema, spec, cache);
+            cache.insert(binding.get_name(), binding.clone());
+            (name, binding.get_type())
         })
         .collect();
-    let result = method
-        .result
-        .as_ref()
-        .map(|result| get_content_binding(result, spec, cache));
+    let result = method.result.as_ref().map(|result| {
+        let schema = result.schema.as_ref().unwrap();
+        let name = result.name.clone().unwrap_or_default();
+        let name = format!("{}_{name}", method.name);
+        let binding = get_schema_binding(name.clone(), schema, spec, cache);
+        cache.insert(name, binding.clone());
+        binding
+    });
     let errors = method
         .errors
         .clone()

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::collections::HashSet;
 
 use crate::binding;
@@ -54,7 +53,13 @@ pub fn capitalize(s: &str) -> Result<String> {
     if !s.is_ascii() {
         return Err("cannot capitalize non-ASCII string".into());
     }
-    let mut chars: Vec<char> = s.to_ascii_lowercase().chars().collect();
+    let all_caps = s.chars().all(|c| c.is_uppercase());
+
+    let mut chars: Vec<char> = if all_caps {
+        s.to_ascii_lowercase().chars().collect()
+    } else {
+        s.chars().collect()
+    };
     let head = chars[0].to_ascii_uppercase();
     *chars.get_mut(0).unwrap() = head;
 
@@ -146,11 +151,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
     Ok(lines.join("\n"))
 }
 
-pub fn render_method(
-    name: &str,
-    contract: &binding::Contract,
-    cache: &HashMap<String, binding::Binding>,
-) -> String {
+pub fn render_method(name: &str, contract: &binding::Contract) -> String {
     // TODO FIXME: starknet-specific processing (strip the common prefix)
     let short_name = name.strip_prefix("starknet_").unwrap_or(name);
 
@@ -167,34 +168,18 @@ pub fn render_method(
         lines.push(format!(
             "    {}: {},",
             name,
-            render_type(ty).expect("render type")
+            render_type(ty).expect("type")
         ));
     }
 
-    let mut extra_objects = Vec::new();
+    let ret = contract
+        .result
+        .as_ref()
+        .map(|binding| render_type(&binding.get_type()).unwrap_or_default())
+        .unwrap_or_else(|| "()".to_string());
 
-    let ret = if let Some(binding) = &contract.result {
-        match binding {
-            binding::Binding::Struct(st) if !cache.contains_key(&st.name) => {
-                let object =
-                    render_object(&binding.get_name(), binding).expect("render result object");
-                extra_objects.push(object);
-                st.name.clone()
-            }
-            binding::Binding::Enum(en) if !cache.contains_key(&en.name) => {
-                let object =
-                    render_object(&binding.get_name(), binding).expect("render result object");
-                extra_objects.push(object);
-                en.name.clone()
-            }
-            other => render_type(&other.get_type()).expect("render result type"),
-        }
-    } else {
-        "()".to_string()
-    };
     lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
-
-    vec![extra_objects.join("\n"), lines.join("\n")].join("")
+    lines.join("\n")
 }
 
 const METHOD_HANDLER_FULL: &str = r###"
@@ -273,14 +258,14 @@ pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String
     let params_types_only = contract
         .params
         .iter()
-        .map(|(_, ty)| format!("{},", render_type(ty).expect("render type")))
+        .map(|(_, ty)| format!("{},", render_type(ty).expect("type")))
         .collect::<Vec<_>>()
         .join("\n");
 
     let params_names_with_types = contract
         .params
         .iter()
-        .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("render type")))
+        .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("type")))
         .collect::<Vec<_>>()
         .join("\n");
 
