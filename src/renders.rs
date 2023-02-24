@@ -165,11 +165,7 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
     ];
 
     for (name, ty) in &contract.params {
-        lines.push(format!(
-            "    {}: {},",
-            name,
-            render_type(ty).expect("type")
-        ));
+        lines.push(format!("    {}: {},", name, render_type(ty).expect("type")));
     }
 
     let ret = contract
