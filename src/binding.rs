@@ -28,9 +28,9 @@ impl Binding {
         if !self.get_name().is_empty() {
             match self {
                 Binding::Basic(basic) => codegen::Type::Basic(basic.clone()),
-                Binding::Struct(s) => codegen::Type::Named(s.name.clone()),
-                Binding::Enum(e) => codegen::Type::Named(e.name.clone()),
-                Binding::Named(_, t) => t.clone(),
+                Binding::Struct(r#struct) => codegen::Type::Named(r#struct.name.clone()),
+                Binding::Enum(r#enum) => codegen::Type::Named(r#enum.name.clone()),
+                Binding::Named(name, _) => codegen::Type::Named(name.clone()),
             }
         } else {
             // anonymous types (not named, thus full structure must be represented)

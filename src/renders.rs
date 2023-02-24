@@ -94,7 +94,8 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let ty = render_type(ty)?;
             let name = normalize_type_name(name)?;
             if ty != name {
-                lines.push(format!("pub type {name} = {ty};"));
+                lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+                lines.push(format!("pub struct {name}({ty});"));
             }
         }
         binding::Binding::Enum(the_enum) => {
