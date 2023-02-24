@@ -48,6 +48,8 @@ fn main() {
             }
         }),
     );
+
+    // TODO Add calls to `getStateUpdate`, `getEvents`
 }
 
 fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
