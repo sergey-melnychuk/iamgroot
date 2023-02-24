@@ -21,7 +21,7 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 Dump the AST:
 
 ```
-cargo run --release -- TREE ./api/test/input.openrpc > tree.txt 2> debug.txt
+cargo run --release -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt 2> debug.txt
 ```
 
 Generate the code and then run it:
@@ -32,21 +32,11 @@ cargo run --release -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write
 cargo run --example gen
 ```
 
-The `gen` example output:
-
-```
->>> {"id":42,"jsonrpc":"2.0","method":"starknet_call","params":{"block_id":"0xFF","request":{"calldata":["2"],"contract_address":"1","entry_point_selector":"3"}}}
-<<< {"jsonrpc":"2.0","error":{"code":-42,"message":"Not implemented"},"id":42}
-
->>> {"jsonrpc":"2.0","method":"starknet_call","params":[{"calldata":["2"],"contract_address":"1","entry_point_selector":"3"},"0xFF"]}
-<<< {"jsonrpc":"2.0","result":["x=2"]}
-```
-
 Total lines of code (1134 clean / 2497 full): `find . -type f -name "*.rs" | xargs grep . | wc -l`
 
 ### Plans:
 
-1. [ ] use value-objects instead of type aliases
+1. [ ] use value-objects instead of type aliases (?)
 1. [ ] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 1. [ ] error enum/constants
 1. [ ] merge multiple spec files into single consistent spec
