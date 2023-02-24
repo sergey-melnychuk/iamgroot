@@ -34,11 +34,14 @@ fn run(spec: openrpc::OpenRpc, cache: &mut HashMap<String, binding::Binding>) ->
 }
 
 fn parse(path: &str) -> openrpc::OpenRpc {
+    log::info!("Processing file: {path}");
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
     serde_json::from_str(&json).expect("JSON is valid")
 }
 
 fn main() {
+    env_logger::init();
+
     let (mode, paths) = {
         let mut args = std::env::args().skip(1);
         let mode = args.next().expect("Output: [JSON, TREE, CODE].");
