@@ -37,8 +37,8 @@ fn run(spec: openrpc::OpenRpc) -> (HashMap<String, binding::Binding>, Vec<bindin
 fn main() {
     let (path, mode) = {
         let mut args = std::env::args().skip(1);
-        let path = args.next().expect("Path to JSON file.");
         let mode = args.next().expect("Output: [JSON, TREE, CODE].");
+        let path = args.next().expect("Path to JSON file.");
         (path, mode)
     };
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");

@@ -14,21 +14,21 @@ NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is nec
 JSON-roundtrip and JSON-aware comparison with the input file:
 
 ```
-cargo run --release -- ./api/input.openrpc JSON 2>/dev/null | jq . > debug.json
+cargo run --release -- JSON ./api/input.openrpc 2>/dev/null | jq . > debug.json
 diff <(jq --sort-keys . ./api/input.openrpc) <(jq --sort-keys . debug.json)
 ```
 
 Dump the AST:
 
 ```
-cargo run --release -- ./api/input.openrpc TREE > tree.txt 2> debug.txt
+cargo run --release -- TREE ./api/input.openrpc > tree.txt 2> debug.txt
 ```
 
 Generate the code and then run it:
 
 ```
 git restore examples/gen.rs
-cargo run --release -- ./api/input.openrpc CODE >> examples/gen.rs
+cargo run --release -- CODE ./api/input.openrpc >> examples/gen.rs
 cargo run --example gen
 ```
 
