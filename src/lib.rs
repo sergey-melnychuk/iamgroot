@@ -1,10 +1,15 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display, path::Path};
 
 pub(crate) mod binding;
 pub(crate) mod codegen;
 pub mod jsonrpc;
 pub(crate) mod openrpc;
 pub(crate) mod renders;
+
+pub trait AsPath: AsRef<Path> + Display {}
+
+impl AsPath for String {}
+impl AsPath for &str {}
 
 fn extract_contracts(
     spec: openrpc::OpenRpc,
@@ -38,18 +43,18 @@ fn extract_contracts(
     contracts
 }
 
-fn parse(path: &str) -> openrpc::OpenRpc {
+fn parse<P: AsPath>(path: &P) -> openrpc::OpenRpc {
     log::info!("Processing file: {path}");
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
     serde_json::from_str(&json).expect("json")
 }
 
-pub fn gen_json(path: &str) -> String {
+pub fn gen_json<P: AsPath>(path: &P) -> String {
     let spec = parse(path);
     serde_json::to_string(&spec).expect("json")
 }
 
-pub fn gen_tree(paths: &[String]) -> String {
+pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
     let mut cache = HashMap::new();
 
     let contracts = paths
@@ -72,7 +77,7 @@ pub fn gen_tree(paths: &[String]) -> String {
     target
 }
 
-pub fn gen_code(paths: &[String]) -> String {
+pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     let mut cache = HashMap::new();
 
     let contracts = paths
