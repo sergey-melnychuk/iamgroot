@@ -1,6 +1,9 @@
 use std::{collections::HashMap, fmt::Display, path::Path};
 
+use cache::Cache;
+
 pub(crate) mod binding;
+pub(crate) mod cache;
 pub(crate) mod codegen;
 pub mod jsonrpc;
 pub(crate) mod openrpc;
@@ -11,24 +14,21 @@ pub trait AsPath: AsRef<Path> + Display {}
 impl AsPath for String {}
 impl AsPath for &str {}
 
-fn extract_contracts(
-    spec: &openrpc::OpenRpc,
-    cache: &mut HashMap<String, binding::Binding>,
-) -> Vec<binding::Contract> {
+fn extract_contracts(spec: &openrpc::OpenRpc, cache: &mut Cache) -> Vec<binding::Contract> {
     let bindings = spec
         .components
         .as_ref()
         .expect("components")
         .schemas
         .iter()
-        .map(|(name, schema)| binding::get_schema_binding(name.to_string(), schema, &spec, cache))
+        .map(|(name, schema)| binding::get_schema_binding(name.to_string(), schema, spec, cache))
         .flat_map(binding::unfold_binding)
         // Make a second pass (extra unfolding might be necessary)
         .flat_map(binding::unfold_binding)
         .collect::<Vec<_>>();
 
     for b in bindings {
-        cache.insert(b.get_name(), b);
+        cache.overwrite(b.get_name(), b);
     }
 
     let contracts = spec
@@ -36,7 +36,7 @@ fn extract_contracts(
         .iter()
         .filter_map(|method| {
             let name = method.name.clone();
-            binding::get_method_contract(name, &spec, cache)
+            binding::get_method_contract(name, spec, cache)
         })
         .collect::<Vec<_>>();
 
@@ -55,7 +55,7 @@ pub fn gen_json<P: AsPath>(path: &P) -> String {
 }
 
 pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
-    let mut cache = HashMap::new();
+    let mut cache = Cache::new();
 
     let contracts = paths
         .iter()
@@ -67,6 +67,7 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
     use std::fmt::Write;
 
     cache
+        .data
         .iter()
         .for_each(|(name, binding)| writeln!(target, "---\n{name}: {binding:#?}").unwrap());
 
@@ -78,7 +79,7 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
 }
 
 pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
-    let mut cache = HashMap::new();
+    let mut cache = Cache::new();
 
     let specs = paths.iter().map(|path| parse(path)).collect::<Vec<_>>();
 
@@ -94,7 +95,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     let contracts = specs
         .iter()
-        .flat_map(|spec| extract_contracts(&spec, &mut cache))
+        .flat_map(|spec| extract_contracts(spec, &mut cache))
         .collect::<Vec<_>>();
 
     let mut target = String::new();
@@ -109,7 +110,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     writeln!(target, "use serde_json::Value;").unwrap();
     writeln!(target, "\nuse openrpc_stub_gen::jsonrpc;").unwrap();
 
-    for (name, binding) in &cache {
+    for (name, binding) in &cache.data {
         let code = renders::render_object(name, binding)
             .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed. {e}"));
 

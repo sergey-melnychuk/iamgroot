@@ -219,7 +219,6 @@ pub fn render_errors(errors: HashMap<String, openrpc::Error>) -> String {
     let mut target = String::new();
     use std::fmt::Write;
 
-    writeln!(target, "").unwrap();
     writeln!(target, "pub mod error {{").unwrap();
     for (name, error) in errors {
         writeln!(target, "{}", render_error(&name, error)).unwrap();
