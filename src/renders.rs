@@ -141,7 +141,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 }
                 seen.insert(name.clone());
 
-                if property.r#type.is_opt() {
+                if matches!(property.r#type, codegen::Type::Option(_)) {
                     lines.push("  #[serde(default)]".to_string());
                     lines.push("  #[serde(skip_serializing_if = \"Option::is_none\")]".to_string());
                 }
