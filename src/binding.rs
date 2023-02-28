@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use crate::cache::Cache;
 use crate::codegen;
 use crate::openrpc;
 
@@ -153,7 +152,8 @@ pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
     }
 }
 
-pub fn extract_property(
+pub fn extract_properties(
+    binding_name: String,
     properties: Vec<codegen::Property>,
 ) -> (Vec<codegen::Property>, Vec<Binding>) {
     let mut props = Vec::new();
@@ -245,15 +245,18 @@ pub fn extract_property(
                 }
             },
             codegen::Type::Enum(enum_variants) => {
+                let enum_name = binding_name.to_ascii_uppercase()
+                    + "_"
+                    + &name.clone().to_ascii_lowercase();
                 let prop = codegen::Property {
                     name: name.clone(),
-                    r#type: codegen::Type::Named(name.clone().to_ascii_uppercase() + "_ENUM"),
+                    r#type: codegen::Type::Named(enum_name.clone()),
                     ..Default::default()
                 };
                 props.push(prop);
 
                 let bind = Binding::Enum(codegen::Enum {
-                    name: name.clone().to_ascii_uppercase() + "_ENUM",
+                    name: enum_name,
                     variants: enum_variants
                         .iter()
                         .cloned()
@@ -272,9 +275,10 @@ pub fn extract_property(
 }
 
 pub fn unfold_binding(binding: Binding) -> Vec<Binding> {
+    let binding_name = binding.get_name();
     match binding {
         Binding::Struct(the_struct) => {
-            let (props, mut binds) = extract_property(the_struct.properties);
+            let (props, mut binds) = extract_properties(binding_name, the_struct.properties);
             let binding = Binding::Struct(codegen::Struct {
                 properties: props,
                 ..the_struct
@@ -290,7 +294,7 @@ pub fn get_schema_binding(
     name: String,
     schema: &openrpc::Schema,
     spec: &openrpc::OpenRpc,
-    cache: &mut HashMap<String, Binding>,
+    cache: &mut Cache,
 ) -> Binding {
     if let Some(key) = &schema.r#ref {
         // Allow shared cache lookups for cross-file references
@@ -387,7 +391,7 @@ pub struct Contract {
 pub fn get_method_contract(
     name: String,
     spec: &openrpc::OpenRpc,
-    cache: &mut HashMap<String, Binding>,
+    cache: &mut Cache,
 ) -> Option<Contract> {
     let method = spec.methods.iter().find(|m| m.name == name)?;
     let params = method
@@ -439,12 +443,4 @@ pub fn get_method_contract(
         summary: method.summary.clone().unwrap_or_default(),
         description: method.description.clone().unwrap_or_default(),
     })
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_simple_bindings() {
-        // rigorous testing...
-    }
 }
