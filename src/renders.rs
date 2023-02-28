@@ -114,7 +114,13 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
             lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
-            lines.push("#[serde(untagged)]".to_string());
+            let all_units = the_enum
+                .variants
+                .iter()
+                .all(|variant| variant.r#type == codegen::Type::Unit);
+            if !all_units {
+                lines.push("#[serde(untagged)]".to_string());
+            }
             lines.push(format!("pub enum {} {{", normalize_type_name(name)?));
             for variant in &the_enum.variants {
                 let name = normalize_type_name(&variant.name)?;
