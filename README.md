@@ -34,6 +34,7 @@ cargo run --example gen
 
 ### TODO
 
+1. [ ] add working example for each `starknet_*` method
 1. [ ] verify each method against pathfinder
 1. [ ] `async` version of trait & handlers (?)
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
@@ -44,6 +45,7 @@ cargo run --example gen
 
 ### DONE
 
+* [x] extract name-conflict-aware cache
 * [x] error enum/constants
 * [x] wrap non-required properties with `Option<_>`
 * [x] wrap non-required arguments with `Option<_>`
