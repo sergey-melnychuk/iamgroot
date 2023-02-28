@@ -24,13 +24,6 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn is_vec(&self) -> bool {
-        match self {
-            Self::Array(_) => true,
-            _ => false,
-        }
-    }
-
     pub fn is_opt(&self) -> bool {
         match self {
             Self::Option(_) => true,
@@ -51,6 +44,7 @@ pub struct Property {
     pub r#type: Type,
     pub visibility: Visibility,
     pub decorators: Vec<String>,
+    pub flatten: bool,
 }
 
 impl Property {
@@ -58,8 +52,7 @@ impl Property {
         Self {
             name,
             r#type,
-            visibility: Default::default(),
-            decorators: Default::default(),
+            ..Default::default()
         }
     }
 }

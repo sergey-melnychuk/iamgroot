@@ -79,6 +79,7 @@ fn all_of(name: String, bindings: Vec<Binding>) -> Binding {
             codegen::Property {
                 name,
                 r#type: b.get_type(),
+                flatten: true,
                 ..Default::default()
             }
         })
@@ -292,8 +293,6 @@ pub fn get_schema_binding(
     cache: &mut HashMap<String, Binding>,
 ) -> Binding {
     if let Some(key) = &schema.r#ref {
-        // TODO distinguish anon (empty `name`) named lookups - they have different semantics
-
         // Allow shared cache lookups for cross-file references
         let key = key.split(SCHEMA_REF_PREFIX).nth(1).unwrap();
         if let Some(binding) = cache.get(key) {
@@ -369,6 +368,7 @@ pub fn get_schema_binding(
         return one_of(name, bindings);
     }
     if let Some(schema) = schema.schema.as_ref() {
+        // TODO describe exact reasoning & use-case for this clause (might be deprecated corner-case)
         return get_schema_binding(name, schema, spec, cache);
     }
     unreachable!()

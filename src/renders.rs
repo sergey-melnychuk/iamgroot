@@ -145,10 +145,8 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                     lines.push("  #[serde(default)]".to_string());
                     lines.push("  #[serde(skip_serializing_if = \"Option::is_none\")]".to_string());
                 }
-                if property.r#type.is_vec() {
-                    // TODO double-check if this is really necessary for a Vec
-                    lines.push("  #[serde(default)]".to_string());
-                    lines.push("  #[serde(skip_serializing_if = \"Vec::is_empty\")]".to_string());
+                if property.flatten {
+                    lines.push("  #[serde(flatten)]".to_string());
                 }
                 lines.push(format!(
                     "  pub {}: {},",
