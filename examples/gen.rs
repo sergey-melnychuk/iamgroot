@@ -49,44 +49,6 @@ fn main() {
         }),
     );
 
-    /* 
-    fn getStateUpdate(
-        &self,
-        block_id: gen::BlockId,
-    ) -> std::result::Result<gen::StarknetGetStateUpdateResult, jsonrpc::Error> {
-        Ok(gen::StarknetGetStateUpdateResult::StateUpdate(gen::StateUpdate {
-            new_root: "0xcafebabe".to_string(),
-            block_hash: "0xdeadbeef".to_string(),
-            pending_state_update: gen::PendingStateUpdate {
-                state_diff: gen::StateDiff {
-                    nonces: vec![
-                        gen::NoncesItem {
-                            nonce: Some("nonce-0".to_string()),
-                            contract_address: Some("addr-0".to_string()),
-                        }
-                    ],
-                    deprecated_declared_contract_hashes: Some(vec!["contract-0".to_string()]),
-                    deployed_contracts: vec![gen::DeployedContractItem {
-                        address: "addr-1".to_string(),
-                        class_hash: "hash-0".to_string(),
-                    }],
-                    declared_contract_hashes: vec![gen::DeclaredContractHashesItem {
-                        compiled_class_hash: Some("hash-1".to_string()),
-                        class_hash: Some("hash-2".to_string())
-                    }],
-                    storage_diffs: vec![gen::ContractStorageDiffItem {
-                        address: "addr-2".to_string(),
-                        storage_entries: vec![gen::StorageEntriesItem {
-                            key: Some("key-1".to_string()),
-                            value: Some("val-1".to_string()),
-                        }]
-                    }],
-                },
-                old_root: "0xFACE".to_string(),
-            }
-        }))
-    }
-    */
     call(
         &state,
         4,
@@ -97,30 +59,6 @@ fn main() {
         }),
     );
 
-    /*
-    fn getEvents(
-        &self,
-        filter: gen::Filter,
-    ) -> std::result::Result<gen::EventsChunk, jsonrpc::Error> {
-        Ok(gen::EventsChunk {
-            continuation_token: Some("token-0".to_string()),
-            events: vec![
-                gen::EmittedEvent {
-                    event: gen::Event {
-                        from_address: "addr-0".to_string(),
-                        event_content: gen::EventContent {
-                            keys: vec!["key-0".to_string()],
-                            data: vec!["val-0".to_string()],
-                        }
-                    },
-                    block_hash: "hash-0".to_string(),
-                    block_number: 42,
-                    transaction_hash: "hash-1".to_string(),
-                }
-            ]
-        })
-    }
-    */
     call(
         &state,
         5,
@@ -154,7 +92,210 @@ fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 }
 
-// #[allow(unused_variables)]
-// impl gen::Rpc for State {}
+#[allow(unused_variables)]
+impl gen::Rpc for State {
+    fn getBlockWithTxHashes(
+        &self,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<gen::StarknetGetBlockWithTxHashesResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getBlockWithTxs(
+        &self,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<gen::StarknetGetBlockWithTxsResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getStateUpdate(
+        &self,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<gen::StarknetGetStateUpdateResult, jsonrpc::Error> {
+        Ok(gen::StarknetGetStateUpdateResult::StateUpdate(
+            gen::StateUpdate {
+                new_root: "0xcafebabe".to_string(),
+                block_hash: "0xdeadbeef".to_string(),
+                pending_state_update: gen::PendingStateUpdate {
+                    state_diff: gen::StateDiff {
+                        nonces: vec![gen::NoncesItem {
+                            nonce: Some("nonce-0".to_string()),
+                            contract_address: Some("addr-0".to_string()),
+                        }],
+                        deprecated_declared_contract_hashes: Some(vec!["contract-0".to_string()]),
+                        deployed_contracts: vec![gen::DeployedContractItem {
+                            address: "addr-1".to_string(),
+                            class_hash: "hash-0".to_string(),
+                        }],
+                        declared_contract_hashes: vec![gen::DeclaredContractHashesItem {
+                            compiled_class_hash: Some("hash-1".to_string()),
+                            class_hash: Some("hash-2".to_string()),
+                        }],
+                        storage_diffs: vec![gen::ContractStorageDiffItem {
+                            address: "addr-2".to_string(),
+                            storage_entries: vec![gen::StorageEntriesItem {
+                                key: Some("key-1".to_string()),
+                                value: Some("val-1".to_string()),
+                            }],
+                        }],
+                    },
+                    old_root: "0xFACE".to_string(),
+                },
+            },
+        ))
+    }
+
+    fn getStorageAt(
+        &self,
+        contract_address: String,
+        key: String,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<String, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getTransactionByHash(
+        &self,
+        transaction_hash: String,
+    ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getTransactionByBlockIdAndIndex(
+        &self,
+        block_id: gen::BlockId,
+        index: i64,
+    ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getTransactionReceipt(
+        &self,
+        transaction_hash: String,
+    ) -> std::result::Result<gen::TxnReceipt, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getClass(
+        &self,
+        block_id: gen::BlockId,
+        class_hash: String,
+    ) -> std::result::Result<gen::StarknetGetClassResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getClassHashAt(
+        &self,
+        block_id: gen::BlockId,
+        contract_address: String,
+    ) -> std::result::Result<String, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getClassAt(
+        &self,
+        block_id: gen::BlockId,
+        contract_address: String,
+    ) -> std::result::Result<gen::StarknetGetClassAtResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getBlockTransactionCount(
+        &self,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<i64, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn call(
+        &self,
+        request: gen::FunctionCall,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<gen::StarknetCallResult, jsonrpc::Error> {
+        Ok(gen::StarknetCallResult(vec!["hello".to_string()]))
+    }
+
+    fn estimateFee(
+        &self,
+        request: gen::BroadcastedTxn,
+        block_id: gen::BlockId,
+    ) -> std::result::Result<gen::FeeEstimate, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn blockNumber(&self) -> std::result::Result<i64, jsonrpc::Error> {
+        Ok(42)
+    }
+
+    fn blockHashAndNumber(
+        &self,
+    ) -> std::result::Result<gen::StarknetBlockHashAndNumberResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn chainId(&self) -> std::result::Result<String, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn pendingTransactions(
+        &self,
+    ) -> std::result::Result<gen::StarknetPendingTransactionsResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn syncing(&self) -> std::result::Result<gen::StarknetSyncingSyncing, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn getEvents(
+        &self,
+        filter: gen::Filter,
+    ) -> std::result::Result<gen::EventsChunk, jsonrpc::Error> {
+        Ok(gen::EventsChunk {
+            continuation_token: Some("token-0".to_string()),
+            events: vec![gen::EmittedEvent {
+                event: gen::Event {
+                    from_address: "addr-0".to_string(),
+                    event_content: gen::EventContent {
+                        keys: vec!["key-0".to_string()],
+                        data: vec!["val-0".to_string()],
+                    },
+                },
+                block_hash: "hash-0".to_string(),
+                block_number: 42,
+                transaction_hash: "hash-1".to_string(),
+            }],
+        })
+    }
+
+    fn getNonce(
+        &self,
+        block_id: gen::BlockId,
+        contract_address: String,
+    ) -> std::result::Result<String, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn addInvokeTransaction(
+        &self,
+        invoke_transaction: gen::BroadcastedInvokeTxn,
+    ) -> std::result::Result<gen::StarknetAddInvokeTransactionResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn addDeclareTransaction(
+        &self,
+        declare_transaction: gen::BroadcastedDeclareTxn,
+    ) -> std::result::Result<gen::StarknetAddDeclareTransactionResult, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn addDeployAccountTransaction(
+        &self,
+        deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
+    ) -> std::result::Result<gen::StarknetAddDeployAccountTransactionResult, jsonrpc::Error> {
+        todo!()
+    }
+}
 
 // NOTE: Generated code will be added below this line
