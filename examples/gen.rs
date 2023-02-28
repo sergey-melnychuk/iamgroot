@@ -80,6 +80,49 @@ fn main() {
             }
         }),
     );
+
+    let req = gen::BroadcastedDeployAccountTxn {
+        broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
+            max_fee: "0x01".to_string(),
+            version: "0x02".to_string(),
+            nonce: "0x03".to_string(),
+            signature: gen::Signature(vec!["0x04".to_string()]),
+        },
+        deploy_account_txn_properties: gen::DeployAccountTxnProperties {
+            contract_address_salt: "0x05".to_string(),
+            r#type: gen::DeployAccountTxnPropertiesType::DeployAccount,
+            class_hash: "0x07".to_string(),
+            constructor_calldata: vec!["0x08".to_string()],
+        },
+    };
+
+    let json = serde_json::to_string(&req).unwrap();
+    println!("\n{}", json);
+    let item: gen::BroadcastedDeployAccountTxn = serde_json::from_str(&json).unwrap();
+    println!("{item:#?}");
+
+    call(
+        &state,
+        6,
+        serde_json::json!({
+            "jsonrpc":"2.0",
+            "method":"starknet_addDeployAccountTransaction",
+            "params":{
+                "max_fee": "0x01",
+                "version": "0x02",
+                "nonce": "0x03",
+                "signature": [
+                    "0x04"
+                ],
+                "contract_address_salt": "0x05",
+                "type": "DeployAccount",
+                "class_hash": "0x07",
+                "constructor_calldata": [
+                    "0x08"
+                ]
+            }
+        }),
+    );
 }
 
 fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
@@ -234,7 +277,7 @@ impl gen::Rpc for State {
     }
 
     fn chainId(&self) -> std::result::Result<String, jsonrpc::Error> {
-        todo!()
+        Err(gen::error::NO_BLOCKS.into())
     }
 
     fn pendingTransactions(
@@ -294,7 +337,10 @@ impl gen::Rpc for State {
         &self,
         deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
     ) -> std::result::Result<gen::StarknetAddDeployAccountTransactionResult, jsonrpc::Error> {
-        todo!()
+        Ok(gen::StarknetAddDeployAccountTransactionResult {
+            transaction_hash: Some("0x01".to_string()),
+            contract_address: Some("0x01".to_string()),
+        })
     }
 }
 
