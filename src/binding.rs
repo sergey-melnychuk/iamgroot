@@ -398,7 +398,13 @@ pub fn get_method_contract(
             let name = param.name.clone().unwrap_or_default();
             let binding = get_schema_binding(name.clone(), schema, spec, cache);
             cache.insert(binding.get_name(), binding.clone());
-            (name, binding.get_type())
+            let is_required = param.required.unwrap_or_default();
+            let param_type = if is_required {
+                binding.get_type()
+            } else {
+                codegen::Type::Option(Box::new(binding.get_type()))
+            };
+            (name, param_type)
         })
         .collect();
     let result = method.result.as_ref().map(|result| {

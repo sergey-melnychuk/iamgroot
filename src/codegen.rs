@@ -23,6 +23,22 @@ pub enum Type {
     Unit,
 }
 
+impl Type {
+    pub fn is_vec(&self) -> bool {
+        match self {
+            Self::Array(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_opt(&self) -> bool {
+        match self {
+            Self::Option(_) => true,
+            _ => false,
+        }
+    }
+}
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Visibility {
     #[default]
