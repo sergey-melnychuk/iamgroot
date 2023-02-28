@@ -34,7 +34,6 @@ cargo run --example gen
 
 ### TODO
 
-1. [ ] error enum/constants
 1. [ ] verify each method against pathfinder
 1. [ ] `async` version of trait & handlers (?)
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
@@ -45,9 +44,10 @@ cargo run --example gen
 
 ### DONE
 
-* [X] wrap non-required properties with `Option<_>`
-* [X] wrap non-required arguments with `Option<_>`
-* [X] add `#[serde(flatten)]` for reusable chunks included via `allOf`
+* [x] error enum/constants
+* [x] wrap non-required properties with `Option<_>`
+* [x] wrap non-required arguments with `Option<_>`
+* [x] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 * [x] resolve naming collisions (might required slightly patching the specs)
   - e.g. `starknet_getStateUpdate.result` vs `starknet_getBlockWithTxs.result`
 * [x] use value-objects instead of type aliases

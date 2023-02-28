@@ -1,7 +1,9 @@
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 use crate::binding;
 use crate::codegen;
+use crate::openrpc;
 
 #[derive(Clone, Debug)]
 pub enum Error {
@@ -185,6 +187,40 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
 
     lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
     lines.join("\n")
+}
+
+const IMPL_INTO_ERROR: &str = r###"
+pub struct Error(i64, &'static str);
+
+impl From<Error> for super::jsonrpc::Error {
+    fn from(Error(code, message): Error) -> Self {
+        Self {
+            code,
+            message: message.to_string(),
+        }
+    }
+}
+"###;
+
+fn render_error(name: &str, error: openrpc::Error) -> String {
+    format!(
+        "pub const {}: Error = Error({}, \"{}\");",
+        name, error.code, error.message
+    )
+}
+
+pub fn render_errors(errors: HashMap<String, openrpc::Error>) -> String {
+    let mut target = String::new();
+    use std::fmt::Write;
+
+    writeln!(target, "").unwrap();
+    writeln!(target, "pub mod error {{").unwrap();
+    for (name, error) in errors {
+        writeln!(target, "{}", render_error(&name, error)).unwrap();
+    }
+    writeln!(target, "{IMPL_INTO_ERROR}").unwrap();
+    writeln!(target, "}}").unwrap();
+    target
 }
 
 const METHOD_HANDLER_FULL: &str = r###"

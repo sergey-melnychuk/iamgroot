@@ -12,7 +12,7 @@ impl AsPath for String {}
 impl AsPath for &str {}
 
 fn extract_contracts(
-    spec: openrpc::OpenRpc,
+    spec: &openrpc::OpenRpc,
     cache: &mut HashMap<String, binding::Binding>,
 ) -> Vec<binding::Contract> {
     let bindings = spec
@@ -60,7 +60,7 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
     let contracts = paths
         .iter()
         .map(|path| parse(path))
-        .flat_map(|spec| extract_contracts(spec, &mut cache))
+        .flat_map(|spec| extract_contracts(&spec, &mut cache))
         .collect::<Vec<_>>();
 
     let mut target = String::new();
@@ -80,10 +80,21 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
 pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     let mut cache = HashMap::new();
 
-    let contracts = paths
+    let specs = paths.iter().map(|path| parse(path)).collect::<Vec<_>>();
+
+    let errors = specs
         .iter()
-        .map(|path| parse(path))
-        .flat_map(|spec| extract_contracts(spec, &mut cache))
+        .flat_map(|spec| {
+            spec.components
+                .as_ref()
+                .map(|comps| comps.errors.clone())
+                .unwrap_or_default()
+        })
+        .collect::<HashMap<_, _>>();
+
+    let contracts = specs
+        .iter()
+        .flat_map(|spec| extract_contracts(&spec, &mut cache))
         .collect::<Vec<_>>();
 
     let mut target = String::new();
@@ -121,6 +132,9 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     let handler = renders::render_handle_function(&contracts);
     writeln!(target, "{handler}").unwrap();
+
+    writeln!(target, "{}", renders::render_errors(errors)).unwrap();
+
     writeln!(target, "}}").unwrap();
     writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^").unwrap();
 

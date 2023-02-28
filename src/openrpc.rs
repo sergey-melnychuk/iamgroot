@@ -87,7 +87,7 @@ pub struct Content {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Schema {
     #[serde(rename = "$ref")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -134,7 +134,7 @@ impl Schema {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Components {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contentDescriptors: Option<Value>,
