@@ -245,9 +245,8 @@ pub fn extract_properties(
                 }
             },
             codegen::Type::Enum(enum_variants) => {
-                let enum_name = binding_name.to_ascii_uppercase()
-                    + "_"
-                    + &name.clone().to_ascii_lowercase();
+                let enum_name =
+                    binding_name.to_ascii_uppercase() + "_" + &name.clone().to_ascii_lowercase();
                 let prop = codegen::Property {
                     name: name.clone(),
                     r#type: codegen::Type::Named(enum_name.clone()),
