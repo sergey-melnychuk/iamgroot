@@ -15,6 +15,7 @@ impl std::fmt::Display for Basic {
 pub enum Type {
     Basic(Basic),
     Array(Box<Type>),
+    Option(Box<Type>),
     Struct(Vec<(String, Type)>),
     Enum(Vec<(String, Type)>),
     Named(String),

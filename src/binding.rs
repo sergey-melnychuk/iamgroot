@@ -213,6 +213,36 @@ pub fn extract_property(
                     props.push(property);
                 }
             },
+            codegen::Type::Option(boxed) => match &**boxed {
+                codegen::Type::Struct(struct_fields) => {
+                    let prop = codegen::Property {
+                        name: name.clone(),
+                        r#type: codegen::Type::Option(Box::new(codegen::Type::Named(
+                            name.clone().to_ascii_uppercase() + "_ITEM",
+                        ))),
+                        ..Default::default()
+                    };
+                    props.push(prop);
+
+                    let bind = Binding::Struct(codegen::Struct {
+                        name: name.clone().to_ascii_uppercase() + "_ITEM",
+                        properties: struct_fields
+                            .iter()
+                            .cloned()
+                            .map(|(name, r#type)| codegen::Property {
+                                name,
+                                r#type,
+                                ..Default::default()
+                            })
+                            .collect(),
+                        ..Default::default()
+                    });
+                    binds.push(bind);
+                }
+                _ => {
+                    props.push(property);
+                }
+            },
             codegen::Type::Enum(enum_variants) => {
                 let prop = codegen::Property {
                     name: name.clone(),
@@ -301,15 +331,23 @@ pub fn get_schema_binding(
         let item_type = Box::new(binding.get_type());
         return Binding::Named(name, codegen::Type::Array(item_type));
     }
-    if schema.properties.is_some()
-    /* assuming schema.type="object" */
-    {
+    // assuming schema.type="object"
+    if schema.properties.is_some() {
         let properties = schema.properties.as_ref().expect("properties");
         let properties = properties
             .iter()
             .map(|(prop_name, prop_schema)| {
                 let binding = get_schema_binding(String::default(), prop_schema, spec, cache);
-                let prop_type = binding.get_type();
+                let is_required = schema
+                    .required
+                    .as_ref()
+                    .map(|required| required.contains(prop_name))
+                    .unwrap_or_default();
+                let prop_type = if is_required {
+                    binding.get_type()
+                } else {
+                    codegen::Type::Option(Box::new(binding.get_type()))
+                };
                 codegen::Property::of(prop_name.to_string(), prop_type)
             })
             .flat_map(unfold_property)

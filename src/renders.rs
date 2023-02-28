@@ -79,7 +79,8 @@ pub fn render_type(ty: &codegen::Type) -> Result<String> {
     match ty {
         codegen::Type::Named(name) => normalize_type_name(name),
         codegen::Type::Basic(basic) => Ok(render_basic(basic)),
-        codegen::Type::Array(boxed) => Ok(format!("Vec<{}>", render_type(boxed)?)),
+        codegen::Type::Array(ty) => Ok(format!("Vec<{}>", render_type(ty)?)),
+        codegen::Type::Option(ty) => Ok(format!("Option<{}>", render_type(ty)?)),
         codegen::Type::Unit => Ok(String::default()),
         unexpected => Err(format!("Unexpected enum variant type: {unexpected:?}").into()),
     }

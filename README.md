@@ -36,7 +36,8 @@ Total lines of code (1105): `find . -type f -name "*.rs" | xargs grep . | wc -l`
 
 ### TODO
 
-1. [ ] wrap non-required properties with `Option<_>`
+1. [X] wrap non-required properties with `Option<_>`
+1. [ ] wrap non-required arguments with `Option<_>`
 1. [ ] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 1. [ ] error enum/constants
 1. [ ] verify each method against pathfinder

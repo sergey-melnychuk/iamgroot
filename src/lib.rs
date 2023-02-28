@@ -100,7 +100,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     for (name, binding) in &cache {
         let code = renders::render_object(name, binding)
-            .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed: {e}"));
+            .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed. {e}"));
 
         if !code.is_empty() {
             writeln!(target, "\n// object: '{name}'\n{code}").unwrap();
