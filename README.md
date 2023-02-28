@@ -28,17 +28,12 @@ Generate the code and then run it:
 
 ```
 git restore examples/gen.rs
-cargo run --release -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json >> examples/gen.rs
+cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json >> examples/gen.rs
 cargo run --example gen
 ```
 
-Total lines of code (1105): `find . -type f -name "*.rs" | xargs grep . | wc -l`
-
 ### TODO
 
-1. [X] wrap non-required properties with `Option<_>`
-1. [X] wrap non-required arguments with `Option<_>`
-1. [X] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 1. [ ] error enum/constants
 1. [ ] verify each method against pathfinder
 1. [ ] `async` version of trait & handlers (?)
@@ -50,6 +45,9 @@ Total lines of code (1105): `find . -type f -name "*.rs" | xargs grep . | wc -l`
 
 ### DONE
 
+* [X] wrap non-required properties with `Option<_>`
+* [X] wrap non-required arguments with `Option<_>`
+* [X] add `#[serde(flatten)]` for reusable chunks included via `allOf`
 * [x] resolve naming collisions (might required slightly patching the specs)
   - e.g. `starknet_getStateUpdate.result` vs `starknet_getBlockWithTxs.result`
 * [x] use value-objects instead of type aliases
@@ -63,3 +61,7 @@ Total lines of code (1105): `find . -type f -name "*.rs" | xargs grep . | wc -l`
 * [x] generate the `Rpc` trait
 * [x] generate `handle` function of method handlers
 * [x] provide OpenRPC and JSON-RPC bindings
+
+Misc
+
+Total lines of code: `find . -type f -name "*.rs" | xargs grep . | wc -l`
