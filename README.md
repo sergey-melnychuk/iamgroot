@@ -11,20 +11,9 @@ openrpc-stub-gen
 
 NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is necessary to make existing spec a valid OpenRPC spec.
 
-JSON-roundtrip and JSON-aware comparison with the input file:
+### Usage
 
-```
-cargo run --release -- JSON ./api/test/input.openrpc 2>/dev/null | jq . > debug.json
-diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
-```
-
-Dump the AST:
-
-```
-cargo run --release -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt
-```
-
-Generate the code and then run it:
+* Generate the code and then run suggested example:
 
 ```
 git restore examples/gen.rs
@@ -32,19 +21,30 @@ cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json 
 cargo run --example gen
 ```
 
+* Dump the AST (for debugging):
+
+```
+cargo run --release -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt
+```
+
+* JSON-roundtrip and JSON-aware comparison with the input file (validate bindings):
+
+```
+cargo run --release -- JSON ./api/test/input.openrpc 2>/dev/null | jq . > debug.json
+diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
+```
+
 ### TODO
 
-1. [ ] add working example for each `starknet_*` method
-1. [ ] verify each method against pathfinder
+1. [ ] verify each method against pathfinder (run as proxy?)
 1. [ ] `async` version of trait & handlers (?)
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
-1. [ ] HTTP-based server generation (?)
-1. [ ] HTTP-based client generation (?)
 1. [ ] Seamless inclusion into a build process
-   - publish as a library/binary on crates.io (?)
+   - split into `-build` and `-jsonrpc`/`-openrpc` sub-crates
 
 ### DONE
 
+* [x] add working example for each `starknet_*` method
 * [x] align errors with the [spec](https://www.jsonrpc.org/specification#error_object)
 * [x] extract name-conflict-aware cache
 * [x] error enum/constants
@@ -68,6 +68,10 @@ cargo run --example gen
   - out of scope: can be easily supported on web-framework level
 * [x] impl notifications by the [spec](https://www.jsonrpc.org/specification#notification)
   - out of scope: on web-framework level just don't send the response
+* [x] HTTP-based server generation (?)
+  - nope: can be easily built around `trait Rpc` impl
+* [x] HTTP-based client generation (?)
+  - nope: can be easily built around `trait Rpc` impl
 
 #### Misc
 
