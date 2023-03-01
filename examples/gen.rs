@@ -386,11 +386,10 @@ fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
     println!("<<< {}", serde_json::to_string(&ret).unwrap());
 }
 
-#[allow(unused_variables)]
 impl gen::Rpc for State {
     fn getBlockWithTxHashes(
         &self,
-        block_id: gen::BlockId,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<gen::StarknetGetBlockWithTxHashesResult, jsonrpc::Error> {
         Ok(gen::StarknetGetBlockWithTxHashesResult::BlockWithTxHashes(
             gen::BlockWithTxHashes {
@@ -412,7 +411,7 @@ impl gen::Rpc for State {
 
     fn getBlockWithTxs(
         &self,
-        block_id: gen::BlockId,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<gen::StarknetGetBlockWithTxsResult, jsonrpc::Error> {
         Ok(gen::StarknetGetBlockWithTxsResult::BlockWithTxs(
             gen::BlockWithTxs {
@@ -455,7 +454,7 @@ impl gen::Rpc for State {
 
     fn getStateUpdate(
         &self,
-        block_id: gen::BlockId,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<gen::StarknetGetStateUpdateResult, jsonrpc::Error> {
         Ok(gen::StarknetGetStateUpdateResult::StateUpdate(
             gen::StateUpdate {
@@ -492,16 +491,16 @@ impl gen::Rpc for State {
 
     fn getStorageAt(
         &self,
-        contract_address: String,
-        key: String,
-        block_id: gen::BlockId,
+        _contract_address: String,
+        _key: String,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<String, jsonrpc::Error> {
         Ok("some-storage".to_string())
     }
 
     fn getTransactionByHash(
         &self,
-        transaction_hash: String,
+        _transaction_hash: String,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
         Ok(gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
             r#type: gen::L1HandlerTxnType::L1Handler,
@@ -518,8 +517,8 @@ impl gen::Rpc for State {
 
     fn getTransactionByBlockIdAndIndex(
         &self,
-        block_id: gen::BlockId,
-        index: i64,
+        _block_id: gen::BlockId,
+        _index: i64,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
         Ok(gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(
             gen::DeclareTxnV2 {
@@ -544,7 +543,7 @@ impl gen::Rpc for State {
 
     fn getTransactionReceipt(
         &self,
-        transaction_hash: String,
+        _transaction_hash: String,
     ) -> std::result::Result<gen::TxnReceipt, jsonrpc::Error> {
         Ok(gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
             common_receipt_properties: gen::CommonReceiptProperties {
@@ -572,8 +571,8 @@ impl gen::Rpc for State {
 
     fn getClass(
         &self,
-        block_id: gen::BlockId,
-        class_hash: String,
+        _block_id: gen::BlockId,
+        _class_hash: String,
     ) -> std::result::Result<gen::StarknetGetClassResult, jsonrpc::Error> {
         Ok(gen::StarknetGetClassResult::ContractClass(
             gen::ContractClass {
@@ -600,16 +599,16 @@ impl gen::Rpc for State {
 
     fn getClassHashAt(
         &self,
-        block_id: gen::BlockId,
-        contract_address: String,
+        _block_id: gen::BlockId,
+        _contract_address: String,
     ) -> std::result::Result<String, jsonrpc::Error> {
         Ok("some-hash".to_string())
     }
 
     fn getClassAt(
         &self,
-        block_id: gen::BlockId,
-        contract_address: String,
+        _block_id: gen::BlockId,
+        _contract_address: String,
     ) -> std::result::Result<gen::StarknetGetClassAtResult, jsonrpc::Error> {
         Ok(gen::StarknetGetClassAtResult::ContractClass(
             gen::ContractClass {
@@ -636,23 +635,23 @@ impl gen::Rpc for State {
 
     fn getBlockTransactionCount(
         &self,
-        block_id: gen::BlockId,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<i64, jsonrpc::Error> {
         Ok(42)
     }
 
     fn call(
         &self,
-        request: gen::FunctionCall,
-        block_id: gen::BlockId,
+        _request: gen::FunctionCall,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<gen::StarknetCallResult, jsonrpc::Error> {
         Ok(gen::StarknetCallResult(vec!["hello".to_string()]))
     }
 
     fn estimateFee(
         &self,
-        request: gen::BroadcastedTxn,
-        block_id: gen::BlockId,
+        _request: gen::BroadcastedTxn,
+        _block_id: gen::BlockId,
     ) -> std::result::Result<gen::FeeEstimate, jsonrpc::Error> {
         Ok(gen::FeeEstimate {
             gas_consumed: Some("0xAA".to_string()),
@@ -708,7 +707,7 @@ impl gen::Rpc for State {
 
     fn getEvents(
         &self,
-        filter: gen::Filter,
+        _filter: gen::Filter,
     ) -> std::result::Result<gen::EventsChunk, jsonrpc::Error> {
         Ok(gen::EventsChunk {
             continuation_token: Some("token-0".to_string()),
@@ -729,15 +728,15 @@ impl gen::Rpc for State {
 
     fn getNonce(
         &self,
-        block_id: gen::BlockId,
-        contract_address: String,
+        _block_id: gen::BlockId,
+        _contract_address: String,
     ) -> std::result::Result<String, jsonrpc::Error> {
         Ok("some-nonce".to_string())
     }
 
     fn addInvokeTransaction(
         &self,
-        invoke_transaction: gen::BroadcastedInvokeTxn,
+        _invoke_transaction: gen::BroadcastedInvokeTxn,
     ) -> std::result::Result<gen::StarknetAddInvokeTransactionResult, jsonrpc::Error> {
         Ok(gen::StarknetAddInvokeTransactionResult {
             transaction_hash: Some("0x01".to_string()),
@@ -746,7 +745,7 @@ impl gen::Rpc for State {
 
     fn addDeclareTransaction(
         &self,
-        declare_transaction: gen::BroadcastedDeclareTxn,
+        _declare_transaction: gen::BroadcastedDeclareTxn,
     ) -> std::result::Result<gen::StarknetAddDeclareTransactionResult, jsonrpc::Error> {
         Ok(gen::StarknetAddDeclareTransactionResult {
             class_hash: Some("0x01".to_string()),
@@ -756,7 +755,7 @@ impl gen::Rpc for State {
 
     fn addDeployAccountTransaction(
         &self,
-        deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
+        _deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
     ) -> std::result::Result<gen::StarknetAddDeployAccountTransactionResult, jsonrpc::Error> {
         Ok(gen::StarknetAddDeployAccountTransactionResult {
             transaction_hash: Some("0x01".to_string()),
