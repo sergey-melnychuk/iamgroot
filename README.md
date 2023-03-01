@@ -34,7 +34,9 @@ cargo run --example gen
 
 ### TODO
 
-1. [ ] add batch support ([spec](https://www.jsonrpc.org/specification#batch))
+1. [ ] add batch support by the [spec](https://www.jsonrpc.org/specification#batch)
+1. [ ] align errors with the [spec](https://www.jsonrpc.org/specification#error_object)
+1. [ ] impl notifications by the [spec](https://www.jsonrpc.org/specification#notification)
 1. [ ] add working example for each `starknet_*` method
 1. [ ] verify each method against pathfinder
 1. [ ] `async` version of trait & handlers (?)
