@@ -253,7 +253,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 
     let args: ArgByName = match args {
         Ok(args) => args,
-        Err(e) => return jsonrpc::Response::error(1002, &format!("{e:?}")),
+        Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
     };
 
     let ArgByName { 
@@ -265,7 +265,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
     ) {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
-            Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+            Err(e) => jsonrpc::Response::error(-32603, "Internal error"),
         },
         Err(e) => jsonrpc::Response::error(e.code, &e.message),
     }
@@ -273,7 +273,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 "###;
 
 const METHOD_HANDLER_NO_ARGUMENTS: &str = r###"
-fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
     match rpc.`method_short_name`() {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
@@ -328,12 +328,12 @@ pub fn handle<RPC: Rpc>(rpc: &RPC, req: jsonrpc::Request) -> jsonrpc::Response {
     let params = if let Some(params) = req.params {
         params
     } else {
-        return jsonrpc::Response::error(1001, "Required field is missing: 'params'");
+        return jsonrpc::Response::error(-32600, "Invalid Request");
     };
 
     let response = match req.method.as_str() {
 `handlers`
-        _ => jsonrpc::Response::error(1004, &format!("No such method: '{}'.", req.method)),
+        _ => jsonrpc::Response::error(-32601, "Method not found"),
     };
 
     return if let Some(id) = req.id {

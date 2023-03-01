@@ -34,9 +34,6 @@ cargo run --example gen
 
 ### TODO
 
-1. [ ] add batch support by the [spec](https://www.jsonrpc.org/specification#batch)
-1. [ ] align errors with the [spec](https://www.jsonrpc.org/specification#error_object)
-1. [ ] impl notifications by the [spec](https://www.jsonrpc.org/specification#notification)
 1. [ ] add working example for each `starknet_*` method
 1. [ ] verify each method against pathfinder
 1. [ ] `async` version of trait & handlers (?)
@@ -48,6 +45,7 @@ cargo run --example gen
 
 ### DONE
 
+* [x] align errors with the [spec](https://www.jsonrpc.org/specification#error_object)
 * [x] extract name-conflict-aware cache
 * [x] error enum/constants
 * [x] wrap non-required properties with `Option<_>`
@@ -66,7 +64,11 @@ cargo run --example gen
 * [x] generate the `Rpc` trait
 * [x] generate `handle` function of method handlers
 * [x] provide OpenRPC and JSON-RPC bindings
+* [x] add batch support by the [spec](https://www.jsonrpc.org/specification#batch)
+  - out of scope: can be easily supported on web-framework level
+* [x] impl notifications by the [spec](https://www.jsonrpc.org/specification#notification)
+  - out of scope: on web-framework level just don't send the response
 
-Misc
+#### Misc
 
 Total lines of code: `find . -type f -name "*.rs" | xargs grep . | wc -l`
