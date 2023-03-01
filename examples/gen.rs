@@ -206,7 +206,7 @@ fn main() {
                 },
                 "block_id": 1
             },
-        })
+        }),
     );
 
     call(
@@ -323,7 +323,7 @@ fn main() {
                             "0x0B",
                             "0x0C"
                         ],
-                    }        
+                    }
                 }
             },
         }),
@@ -392,72 +392,65 @@ impl gen::Rpc for State {
         &self,
         block_id: gen::BlockId,
     ) -> std::result::Result<gen::StarknetGetBlockWithTxHashesResult, jsonrpc::Error> {
-        Ok(gen::StarknetGetBlockWithTxHashesResult::BlockWithTxHashes(gen::BlockWithTxHashes {
-            status: gen::BlockStatus::Pending,
-            block_header: gen::BlockHeader {
-                block_hash: "0x01".to_string(),
-                timestamp: 1042,
-                sequencer_address: "0x02".to_string(),
-                block_number: 42,
-                new_root: "0x03".to_string(),
-                parent_hash: "0x04".to_string(),
+        Ok(gen::StarknetGetBlockWithTxHashesResult::BlockWithTxHashes(
+            gen::BlockWithTxHashes {
+                status: gen::BlockStatus::Pending,
+                block_header: gen::BlockHeader {
+                    block_hash: "0x01".to_string(),
+                    timestamp: 1042,
+                    sequencer_address: "0x02".to_string(),
+                    block_number: 42,
+                    new_root: "0x03".to_string(),
+                    parent_hash: "0x04".to_string(),
+                },
+                block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
+                    transactions: vec!["0x05".to_string(), "0x06".to_string()],
+                },
             },
-            block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
-                transactions: vec![
-                    "0x05".to_string(),
-                    "0x06".to_string(),
-                ]
-            }
-        }))
+        ))
     }
 
     fn getBlockWithTxs(
         &self,
         block_id: gen::BlockId,
     ) -> std::result::Result<gen::StarknetGetBlockWithTxsResult, jsonrpc::Error> {
-        Ok(gen::StarknetGetBlockWithTxsResult::BlockWithTxs(gen::BlockWithTxs {
-            status: gen::BlockStatus::AcceptedOnL1,
-            block_header: gen::BlockHeader {
-                block_hash: "0x01".to_string(),
-                timestamp: 1042,
-                sequencer_address: "0x02".to_string(),
-                block_number: 42,
-                new_root: "0x03".to_string(),
-                parent_hash: "0x04".to_string(),
-
-            },
-            block_body_with_txs: gen::BlockBodyWithTxs {
-                transactions: vec![
-                    gen::Txn::InvokeTxn(gen::InvokeTxn {
+        Ok(gen::StarknetGetBlockWithTxsResult::BlockWithTxs(
+            gen::BlockWithTxs {
+                status: gen::BlockStatus::AcceptedOnL1,
+                block_header: gen::BlockHeader {
+                    block_hash: "0x01".to_string(),
+                    timestamp: 1042,
+                    sequencer_address: "0x02".to_string(),
+                    block_number: 42,
+                    new_root: "0x03".to_string(),
+                    parent_hash: "0x04".to_string(),
+                },
+                block_body_with_txs: gen::BlockBodyWithTxs {
+                    transactions: vec![gen::Txn::InvokeTxn(gen::InvokeTxn {
                         common_txn_properties: gen::CommonTxnProperties {
                             transaction_hash: "0x01".to_string(),
-                            broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
-                                nonce: "0x01".to_string(),
-                                version: "0x01".to_string(),
-                                max_fee: "0x01".to_string(),
-                                signature: gen::Signature(vec![
-                                    "0x01".to_string(),
-                                ])
-                            }
+                            broadcasted_txn_common_properties:
+                                gen::BroadcastedTxnCommonProperties {
+                                    nonce: "0x01".to_string(),
+                                    version: "0x01".to_string(),
+                                    max_fee: "0x01".to_string(),
+                                    signature: gen::Signature(vec!["0x01".to_string()]),
+                                },
                         },
                         r#type: gen::InvokeTxnType::Invoke,
                         function_call: gen::FunctionCall {
-                            calldata: vec![
-                                "0x01".to_string(),
-                            ],
+                            calldata: vec!["0x01".to_string()],
                             entry_point_selector: "0x01".to_string(),
                             contract_address: "0x01".to_string(),
                         },
                         invoke_txn_v1: gen::InvokeTxnV1 {
                             sender_address: "0x01".to_string(),
-                            calldata: vec![
-                                "0x01".to_string(),
-                            ],                            
-                        }
-                    })
-                ]
-            }
-        }))
+                            calldata: vec!["0x01".to_string()],
+                        },
+                    })],
+                },
+            },
+        ))
     }
 
     fn getStateUpdate(
@@ -516,12 +509,10 @@ impl gen::Rpc for State {
             version: "0x00".to_string(),
             nonce: "0x00".to_string(),
             function_call: gen::FunctionCall {
-                calldata: vec![
-                    "0x01".to_string(),
-                ],
+                calldata: vec!["0x01".to_string()],
                 entry_point_selector: "0x01".to_string(),
                 contract_address: "0x01".to_string(),
-            }
+            },
         }))
     }
 
@@ -530,25 +521,25 @@ impl gen::Rpc for State {
         block_id: gen::BlockId,
         index: i64,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
-        Ok(gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(gen::DeclareTxnV2 {
-            declare_txn_v1: gen::DeclareTxnV1 {
-                common_txn_properties: gen::CommonTxnProperties {
-                    transaction_hash: "0x01".to_string(),
-                    broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
-                        nonce: "0x01".to_string(),
-                        version: "0x01".to_string(),
-                        max_fee: "0x01".to_string(),
-                        signature: gen::Signature(vec![
-                            "0x01".to_string(),
-                        ])
-                    }
+        Ok(gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(
+            gen::DeclareTxnV2 {
+                declare_txn_v1: gen::DeclareTxnV1 {
+                    common_txn_properties: gen::CommonTxnProperties {
+                        transaction_hash: "0x01".to_string(),
+                        broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
+                            nonce: "0x01".to_string(),
+                            version: "0x01".to_string(),
+                            max_fee: "0x01".to_string(),
+                            signature: gen::Signature(vec!["0x01".to_string()]),
+                        },
+                    },
+                    class_hash: "0x01".to_string(),
+                    sender_address: "0x01".to_string(),
+                    r#type: gen::DeclareTxnV1Type::Declare,
                 },
-                class_hash: "0x01".to_string(),
-                sender_address: "0x01".to_string(),
-                r#type: gen::DeclareTxnV1Type::Declare,
+                compiled_class_hash: Some("0x01".to_string()),
             },
-            compiled_class_hash: Some("0x01".to_string()),
-        })))
+        )))
     }
 
     fn getTransactionReceipt(
@@ -557,30 +548,17 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::TxnReceipt, jsonrpc::Error> {
         Ok(gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
             common_receipt_properties: gen::CommonReceiptProperties {
-                messages_sent: vec![
-                    gen::MsgToL1 {
-                        to_address: "0x01".to_string(),
-                        payload: vec![
-                            "0x01".to_string(),
-                            "0x01".to_string(),
-                        ]
+                messages_sent: vec![gen::MsgToL1 {
+                    to_address: "0x01".to_string(),
+                    payload: vec!["0x01".to_string(), "0x01".to_string()],
+                }],
+                events: vec![gen::Event {
+                    from_address: "0x01".to_string(),
+                    event_content: gen::EventContent {
+                        data: vec!["0x01".to_string(), "0x01".to_string()],
+                        keys: vec!["0x01".to_string(), "0x01".to_string()],
                     },
-                ],
-                events: vec![
-                    gen::Event {
-                        from_address: "0x01".to_string(),
-                        event_content: gen::EventContent {
-                            data: vec![
-                                "0x01".to_string(),
-                                "0x01".to_string(),
-                            ],
-                            keys: vec![
-                                "0x01".to_string(),
-                                "0x01".to_string(),
-                            ]
-                        }
-                    }
-                ],
+                }],
                 transaction_hash: "0x01".to_string(),
                 actual_fee: "0x01".to_string(),
                 status: gen::TxnStatus::AcceptedOnL2,
@@ -597,25 +575,27 @@ impl gen::Rpc for State {
         block_id: gen::BlockId,
         class_hash: String,
     ) -> std::result::Result<gen::StarknetGetClassResult, jsonrpc::Error> {
-        Ok(gen::StarknetGetClassResult::ContractClass(gen::ContractClass {
-            entry_points_by_type: Some(gen::EntryPointsByTypeItem {
-                constructor: Some(vec![gen::SierraEntryPoint {
-                    selector: Some("0x11".to_string()),
-                    function_idx: Some(1),
-                }]),
-                external: Some(vec![gen::SierraEntryPoint {
-                    selector: Some("0x22".to_string()),
-                    function_idx: Some(2),
-                }]),
-                l1_handler: Some(vec![gen::SierraEntryPoint {
-                    selector: Some("0x33".to_string()),
-                    function_idx: Some(3),
-                }]),
-            }),
-            abi: Some("abi".to_string()),
-            sierra_program: Some(vec!["program".to_string()]),
-            sierra_version: Some("0".to_string()),
-        }))
+        Ok(gen::StarknetGetClassResult::ContractClass(
+            gen::ContractClass {
+                entry_points_by_type: Some(gen::EntryPointsByTypeItem {
+                    constructor: Some(vec![gen::SierraEntryPoint {
+                        selector: Some("0x11".to_string()),
+                        function_idx: Some(1),
+                    }]),
+                    external: Some(vec![gen::SierraEntryPoint {
+                        selector: Some("0x22".to_string()),
+                        function_idx: Some(2),
+                    }]),
+                    l1_handler: Some(vec![gen::SierraEntryPoint {
+                        selector: Some("0x33".to_string()),
+                        function_idx: Some(3),
+                    }]),
+                }),
+                abi: Some("abi".to_string()),
+                sierra_program: Some(vec!["program".to_string()]),
+                sierra_version: Some("0".to_string()),
+            },
+        ))
     }
 
     fn getClassHashAt(
@@ -631,25 +611,27 @@ impl gen::Rpc for State {
         block_id: gen::BlockId,
         contract_address: String,
     ) -> std::result::Result<gen::StarknetGetClassAtResult, jsonrpc::Error> {
-        Ok(gen::StarknetGetClassAtResult::ContractClass(gen::ContractClass {
-            entry_points_by_type: Some(gen::EntryPointsByTypeItem {
-                constructor: Some(vec![gen::SierraEntryPoint {
-                    selector: Some("0x11".to_string()),
-                    function_idx: Some(1),
-                }]),
-                external: Some(vec![gen::SierraEntryPoint {
-                    selector: Some("0x22".to_string()),
-                    function_idx: Some(2),
-                }]),
-                l1_handler: Some(vec![gen::SierraEntryPoint {
-                    selector: Some("0x33".to_string()),
-                    function_idx: Some(3),
-                }]),
-            }),
-            abi: Some("abi".to_string()),
-            sierra_program: Some(vec!["program".to_string()]),
-            sierra_version: Some("0".to_string()),
-        }))
+        Ok(gen::StarknetGetClassAtResult::ContractClass(
+            gen::ContractClass {
+                entry_points_by_type: Some(gen::EntryPointsByTypeItem {
+                    constructor: Some(vec![gen::SierraEntryPoint {
+                        selector: Some("0x11".to_string()),
+                        function_idx: Some(1),
+                    }]),
+                    external: Some(vec![gen::SierraEntryPoint {
+                        selector: Some("0x22".to_string()),
+                        function_idx: Some(2),
+                    }]),
+                    l1_handler: Some(vec![gen::SierraEntryPoint {
+                        selector: Some("0x33".to_string()),
+                        function_idx: Some(3),
+                    }]),
+                }),
+                abi: Some("abi".to_string()),
+                sierra_program: Some(vec!["program".to_string()]),
+                sierra_version: Some("0".to_string()),
+            },
+        ))
     }
 
     fn getBlockTransactionCount(
@@ -707,11 +689,9 @@ impl gen::Rpc for State {
                     r#type: gen::DeployTxnPropertiesType::Deploy,
                     version: "".to_string(),
                     contract_address_salt: "".to_string(),
-                    constructor_calldata: vec![
-                        "".to_string(),
-                    ]
-                }
-            })
+                    constructor_calldata: vec!["".to_string()],
+                },
+            }),
         ]))
     }
 
