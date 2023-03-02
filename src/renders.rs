@@ -324,8 +324,8 @@ pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String
 }
 
 const HANDLE_FUNCTION: &str = r###"
-pub fn handle<RPC: Rpc>(rpc: &RPC, req: jsonrpc::Request) -> jsonrpc::Response {
-    let params = if let Some(params) = req.params {
+pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
+    let params = if let Some(params) = req.params.as_ref() {
         params
     } else {
         return jsonrpc::Response::error(-32600, "Invalid Request");
@@ -336,8 +336,8 @@ pub fn handle<RPC: Rpc>(rpc: &RPC, req: jsonrpc::Request) -> jsonrpc::Response {
         _ => jsonrpc::Response::error(-32601, "Method not found"),
     };
 
-    return if let Some(id) = req.id {
-        response.with_id(id)
+    return if let Some(id) = req.id.as_ref() {
+        response.with_id(id.clone())
     } else {
         response
     };
@@ -349,7 +349,7 @@ pub fn render_handle_function(contracts: &[binding::Contract]) -> String {
         .iter()
         .map(|contract| {
             format!(
-                "        \"{}\" => handle_{}(rpc, &params),",
+                "        \"{}\" => handle_{}(rpc, params),",
                 contract.name, contract.name
             )
         })

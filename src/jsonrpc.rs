@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Request {
     pub jsonrpc: String,
     pub method: String,
@@ -29,7 +29,7 @@ impl Request {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Response {
     pub jsonrpc: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -70,7 +70,7 @@ impl Response {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Error {
     pub code: i64,
     pub message: String,
@@ -82,7 +82,7 @@ impl Error {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum Id {
     Number(i64),
