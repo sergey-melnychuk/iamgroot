@@ -319,6 +319,12 @@ pub fn get_schema_binding(
                 .collect();
             return Binding::Enum(codegen::Enum::of(name, variants));
         }
+        if !name.is_empty() {
+            let binding =
+                Binding::Named(name.clone(), codegen::Type::Basic(codegen::Basic::String));
+            cache.insert(name, binding.clone());
+            return binding;
+        }
         return Binding::Basic(codegen::Basic::String);
     }
     if schema.has_type("integer") {
@@ -339,7 +345,13 @@ pub fn get_schema_binding(
         let properties = properties
             .iter()
             .map(|(prop_name, prop_schema)| {
-                let binding = get_schema_binding(String::default(), prop_schema, spec, cache);
+                let type_name = prop_schema
+                    .r#ref
+                    .as_ref()
+                    .and_then(|key| key.split(SCHEMA_REF_PREFIX).nth(1))
+                    .unwrap_or_default()
+                    .to_string();
+                let binding = get_schema_binding(type_name, prop_schema, spec, cache);
                 let is_required = schema
                     .required
                     .as_ref()

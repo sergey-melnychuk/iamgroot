@@ -24,18 +24,20 @@ cargo run --example gen
 * Dump the AST (for debugging):
 
 ```
-cargo run --release -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt
+cargo run -- TREE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json > tree.txt
 ```
 
 * JSON-roundtrip and JSON-aware comparison with the input file (validate bindings):
 
 ```
-cargo run --release -- JSON ./api/test/input.openrpc 2>/dev/null | jq . > debug.json
+cargo run -- JSON ./api/test/input.openrpc 2>/dev/null | jq . > debug.json
 diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 ```
 
 ### TODO
 
+1. [ ] validation (against `schema.{minimum, maximum, pattern}`)
+  - generate custom (de)serializers for such properties/types?
 1. [ ] verify each method against pathfinder (run as proxy?)
 1. [ ] `async` version of trait & handlers (?)
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
@@ -44,6 +46,7 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### DONE
 
+* [x] value-objects wrappers (`Felt`, `NumAsHex` etc)
 * [x] add working example for each `starknet_*` method
 * [x] align errors with the [spec](https://www.jsonrpc.org/specification#error_object)
 * [x] extract name-conflict-aware cache

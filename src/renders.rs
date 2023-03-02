@@ -96,19 +96,26 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let name = normalize_type_name(name)?;
             if ty != name {
                 lines.push("// binding::Basic".to_string());
-                lines.push(format!("pub type {name} = {ty};"));
+                lines.push(format!("// pub type {name} = {ty};"));
                 // TODO? wrap into value-object (see README)
                 // lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
                 // lines.push(format!("pub struct {name}(pub {ty});"));
             }
         }
-        binding::Binding::Named(name, ty) => {
-            let ty = render_type(ty)?;
+        binding::Binding::Named(binding_name, ty) => {
             let name = normalize_type_name(name)?;
-            if name != ty {
-                lines.push("// binding::Named".to_string());
-                lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+            let binding_name = normalize_type_name(&binding_name)?;
+            let ty = normalize_type_name(&render_type(ty)?)?;
+            lines.push("// binding::Named".to_string());
+            lines.push(format!(
+                "// name={} binding_name={} ty={}",
+                name, binding_name, ty
+            ));
+            lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+            if name == binding_name {
                 lines.push(format!("pub struct {name}(pub {ty});"));
+            } else {
+                lines.push(format!("pub struct {name}(pub {binding_name});"));
             }
         }
         binding::Binding::Enum(the_enum) => {
