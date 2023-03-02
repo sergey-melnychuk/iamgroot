@@ -13,7 +13,7 @@ fn main() {
             "method": "starknet_getBlockWithTxHashes",
             "params": {
                 "block_id": "0xFACE"
-            },
+            }
         }),
     );
 
@@ -25,7 +25,7 @@ fn main() {
             "method": "starknet_getBlockWithTxs",
             "params": {
                 "block_id": 123456789
-            },
+            }
         }),
     );
 
@@ -37,7 +37,7 @@ fn main() {
             "method": "starknet_getStateUpdate",
             "params": {
                 "block_id": "Pending"
-            },
+            }
         }),
     );
 
@@ -51,7 +51,7 @@ fn main() {
                 "contract_address": "0x01",
                 "key": "0x02",
                 "block_id": 42,
-            },
+            }
         }),
     );
 
@@ -63,7 +63,7 @@ fn main() {
             "method": "starknet_getTransactionByHash",
             "params": {
                 "transaction_hash": "0xcafebabe",
-            },
+            }
         }),
     );
 
@@ -75,7 +75,7 @@ fn main() {
             "method": "starknet_getTransactionByHash",
             "params": {
                 "transaction_hash": "0xcafebabe",
-            },
+            }
         }),
     );
 
@@ -88,7 +88,7 @@ fn main() {
             "params": {
                 "block_id": 42,
                 "index": 24
-            },
+            }
         }),
     );
 
@@ -100,7 +100,7 @@ fn main() {
             "method": "starknet_getTransactionReceipt",
             "params": {
                 "transaction_hash": "0x01"
-            },
+            }
         }),
     );
 
@@ -113,7 +113,7 @@ fn main() {
             "params": {
                 "block_id": 1,
                 "class_hash": "0x01"
-            },
+            }
         }),
     );
 
@@ -139,7 +139,7 @@ fn main() {
             "params": {
                 "block_id": "Pending",
                 "contract_address": "0x01"
-            },
+            }
         }),
     );
 
@@ -151,7 +151,7 @@ fn main() {
             "method": "starknet_getBlockTransactionCount",
             "params": {
                 "block_id": "Latest"
-            },
+            }
         }),
     );
 
@@ -215,7 +215,7 @@ fn main() {
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_blockNumber",
-            "params": [],
+            "params": []
         }),
     );
 
@@ -225,7 +225,7 @@ fn main() {
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_blockHashAndNumber",
-            "params": [],
+            "params": []
         }),
     );
 
@@ -235,7 +235,7 @@ fn main() {
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_chainId",
-            "params": [],
+            "params": []
         }),
     );
 
@@ -245,7 +245,7 @@ fn main() {
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_pendingTransactions",
-            "params": {},
+            "params": {}
         }),
     );
 
@@ -255,7 +255,7 @@ fn main() {
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_syncing",
-            "params": [],
+            "params": []
         }),
     );
 
@@ -290,7 +290,7 @@ fn main() {
             "params": {
                 "block_id": 12,
                 "contract_address": "0x01"
-            },
+            }
         }),
     );
 
@@ -315,17 +315,17 @@ fn main() {
                             "0x07"
                         ],
                         "entry_point_selector": "0x08",
-                        "contract_address": "0x09",
+                        "contract_address": "0x09"
                     },
                     "invoke_txn_v1": {
                         "sender_address": "0x0A",
                         "calldata": [
                             "0x0B",
                             "0x0C"
-                        ],
+                        ]
                     }
                 }
-            },
+            }
         }),
     );
 
@@ -381,9 +381,20 @@ fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
     let req = req.with_id(jsonrpc::Id::Number(id));
     let json = serde_json::to_string(&req).unwrap();
     println!("\n>>> {}", json);
+
     let req: jsonrpc::Request = serde_json::from_str(&json).unwrap();
-    let ret = gen::handle(rpc, req);
-    println!("<<< {}", serde_json::to_string(&ret).unwrap());
+    let res = gen::handle(rpc, &req);
+    println!("<<<[A] {}", serde_json::to_string(&res).unwrap());
+
+    let client = reqwest::blocking::Client::new();
+    let res: jsonrpc::Response = client
+        .post("http://localhost:3000/api")
+        .json(&req)
+        .send()
+        .unwrap()
+        .json()
+        .unwrap();
+    println!("<<<[B] {}", serde_json::to_string(&res).unwrap());
 }
 
 impl gen::Rpc for State {
