@@ -105,6 +105,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     writeln!(target, "#[allow(dead_code)]").unwrap();
     writeln!(target, "#[allow(non_snake_case)]").unwrap();
     writeln!(target, "#[allow(unused_variables)]").unwrap();
+    writeln!(target, "#[allow(clippy::enum_variant_names)]").unwrap();
     writeln!(target, "mod gen {{").unwrap();
     writeln!(target, "use serde::{{Deserialize, Serialize}};").unwrap();
     writeln!(target, "use serde_json::Value;").unwrap();
