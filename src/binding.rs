@@ -411,7 +411,13 @@ pub fn get_method_contract(
         .map(|param| {
             let schema = param.schema.as_ref().unwrap();
             let name = param.name.clone().unwrap_or_default();
-            let binding = get_schema_binding(name.clone(), schema, spec, cache);
+            let type_name = schema
+                .r#ref
+                .as_ref()
+                .and_then(|key| key.split(SCHEMA_REF_PREFIX).nth(1))
+                .unwrap_or(&name)
+                .to_string();
+            let binding = get_schema_binding(type_name.clone(), schema, spec, cache);
             cache.insert(binding.get_name(), binding.clone());
             let is_required = param.required.unwrap_or_default();
             let param_type = if is_required {
@@ -419,6 +425,12 @@ pub fn get_method_contract(
             } else {
                 codegen::Type::Option(Box::new(binding.get_type()))
             };
+            let param_type =
+                if type_name == binding.get_name() || matches!(binding, Binding::Basic(_)) {
+                    param_type
+                } else {
+                    codegen::Type::Named(type_name)
+                };
             (name, param_type)
         })
         .collect();

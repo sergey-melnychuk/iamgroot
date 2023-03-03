@@ -507,7 +507,7 @@ impl gen::Rpc for State {
 
     fn getStorageAt(
         &self,
-        _contract_address: gen::Felt,
+        _contract_address: gen::Address,
         _key: gen::StorageKey,
         _block_id: gen::BlockId,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
@@ -516,7 +516,7 @@ impl gen::Rpc for State {
 
     fn getTransactionByHash(
         &self,
-        _transaction_hash: gen::Felt,
+        _transaction_hash: gen::TxnHash,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
         Ok(gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
             r#type: gen::L1HandlerTxnType::L1Handler,
@@ -559,7 +559,7 @@ impl gen::Rpc for State {
 
     fn getTransactionReceipt(
         &self,
-        _transaction_hash: gen::Felt,
+        _transaction_hash: gen::TxnHash,
     ) -> std::result::Result<gen::TxnReceipt, jsonrpc::Error> {
         Ok(gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
             common_receipt_properties: gen::CommonReceiptProperties {
@@ -616,7 +616,7 @@ impl gen::Rpc for State {
     fn getClassHashAt(
         &self,
         _block_id: gen::BlockId,
-        _contract_address: gen::Felt,
+        _contract_address: gen::Address,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
         Ok(gen::Felt("some-hash".to_string()))
     }
@@ -624,7 +624,7 @@ impl gen::Rpc for State {
     fn getClassAt(
         &self,
         _block_id: gen::BlockId,
-        _contract_address: gen::Felt,
+        _contract_address: gen::Address,
     ) -> std::result::Result<gen::StarknetGetClassAtResult, jsonrpc::Error> {
         Ok(gen::StarknetGetClassAtResult::ContractClass(
             gen::ContractClass {
@@ -747,7 +747,7 @@ impl gen::Rpc for State {
     fn getNonce(
         &self,
         _block_id: gen::BlockId,
-        _contract_address: gen::Felt,
+        _contract_address: gen::Address,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
         Ok(gen::Felt("some-nonce".to_string()))
     }
