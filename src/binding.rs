@@ -351,7 +351,7 @@ pub fn get_schema_binding(
                     .and_then(|key| key.split(SCHEMA_REF_PREFIX).nth(1))
                     .unwrap_or_default()
                     .to_string();
-                let binding = get_schema_binding(type_name, prop_schema, spec, cache);
+                let binding = get_schema_binding(type_name.clone(), prop_schema, spec, cache);
                 let is_required = schema
                     .required
                     .as_ref()
@@ -362,6 +362,14 @@ pub fn get_schema_binding(
                 } else {
                     codegen::Type::Option(Box::new(binding.get_type()))
                 };
+                let prop_type =
+                    if type_name == binding.get_name() || matches!(binding, Binding::Basic(_)) {
+                        prop_type
+                    } else if is_required {
+                        codegen::Type::Named(type_name)
+                    } else {
+                        codegen::Type::Option(Box::new(codegen::Type::Named(type_name)))
+                    };
                 codegen::Property::of(prop_name.to_string(), prop_type)
             })
             .flat_map(unfold_property)

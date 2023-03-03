@@ -29,3 +29,39 @@ fn main() {
         eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
     }
 }
+
+/* Validation Example:
+
+// once_cell = "1.17.1"
+// regex = "1.7.1"
+
+    // object: 'FELT'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct Felt(String);
+
+    static FELT_REGEX: Lazy<Regex> = Lazy::new(|| {
+        Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$").unwrap()
+    });
+
+    impl Felt {
+        pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+            if FELT_REGEX.is_match(&value) {
+                Ok(Felt(value.to_string()))
+            } else {
+                Err(jsonrpc::Error {
+                    code: 1001,
+                    message: "Felt value does not match regex".to_string(),
+                })
+            }
+        }
+    }
+
+    impl TryFrom<String> for Felt {
+        type Error = jsonrpc::Error;
+
+        fn try_from(value: String) -> Result<Self, Self::Error> {
+            Self::try_new(&value)
+        }
+    }
+
+*/

@@ -406,12 +406,12 @@ impl gen::Rpc for State {
             gen::BlockWithTxHashes {
                 status: gen::BlockStatus::Pending,
                 block_header: gen::BlockHeader {
-                    block_hash: gen::Felt("0x01".to_string()),
+                    block_hash: gen::BlockHash(gen::Felt("0x01".to_string())),
                     timestamp: 1042,
                     sequencer_address: gen::Felt("0x02".to_string()),
                     block_number: 42,
                     new_root: gen::Felt("0x03".to_string()),
-                    parent_hash: gen::Felt("0x04".to_string()),
+                    parent_hash: gen::BlockHash(gen::Felt("0x04".to_string())),
                 },
                 block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
                     transactions: vec![
@@ -431,17 +431,17 @@ impl gen::Rpc for State {
             gen::BlockWithTxs {
                 status: gen::BlockStatus::AcceptedOnL1,
                 block_header: gen::BlockHeader {
-                    block_hash: gen::Felt("0x01".to_string()),
+                    block_hash: gen::BlockHash(gen::Felt("0x01".to_string())),
                     timestamp: 1042,
                     sequencer_address: gen::Felt("0x02".to_string()),
                     block_number: 42,
                     new_root: gen::Felt("0x03".to_string()),
-                    parent_hash: gen::Felt("0x04".to_string()),
+                    parent_hash: gen::BlockHash(gen::Felt("0x04".to_string())),
                 },
                 block_body_with_txs: gen::BlockBodyWithTxs {
                     transactions: vec![gen::Txn::InvokeTxn(gen::InvokeTxn {
                         common_txn_properties: gen::CommonTxnProperties {
-                            transaction_hash: gen::Felt("0x01".to_string()),
+                            transaction_hash: gen::TxnHash(gen::Felt("0x01".to_string())),
                             broadcasted_txn_common_properties:
                                 gen::BroadcastedTxnCommonProperties {
                                     nonce: gen::Felt("0x01".to_string()),
@@ -454,10 +454,10 @@ impl gen::Rpc for State {
                         function_call: gen::FunctionCall {
                             calldata: vec![gen::Felt("0x01".to_string())],
                             entry_point_selector: gen::Felt("0x01".to_string()),
-                            contract_address: gen::Felt("0x01".to_string()),
+                            contract_address: gen::Address(gen::Felt("0x01".to_string())),
                         },
                         invoke_txn_v1: gen::InvokeTxnV1 {
-                            sender_address: gen::Felt("0x01".to_string()),
+                            sender_address: gen::Address(gen::Felt("0x01".to_string())),
                             calldata: vec![gen::Felt("0x01".to_string())],
                         },
                     })],
@@ -473,12 +473,12 @@ impl gen::Rpc for State {
         Ok(gen::StarknetGetStateUpdateResult::StateUpdate(
             gen::StateUpdate {
                 new_root: gen::Felt("0xcafebabe".to_string()),
-                block_hash: gen::Felt("0xdeadbeef".to_string()),
+                block_hash: gen::BlockHash(gen::Felt("0xdeadbeef".to_string())),
                 pending_state_update: gen::PendingStateUpdate {
                     state_diff: gen::StateDiff {
                         nonces: vec![gen::NoncesItem {
                             nonce: Some(gen::Felt("nonce-0".to_string())),
-                            contract_address: Some(gen::Felt("addr-0".to_string())),
+                            contract_address: Some(gen::Address(gen::Felt("addr-0".to_string()))),
                         }],
                         deprecated_declared_contract_hashes: Some(vec![gen::Felt(
                             "contract-0".to_string(),
@@ -520,13 +520,13 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
         Ok(gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
             r#type: gen::L1HandlerTxnType::L1Handler,
-            transaction_hash: gen::Felt("0x00".to_string()),
+            transaction_hash: gen::TxnHash(gen::Felt("0x00".to_string())),
             version: gen::NumAsHex("0x00".to_string()),
             nonce: gen::NumAsHex("0x00".to_string()),
             function_call: gen::FunctionCall {
                 calldata: vec![gen::Felt("0x01".to_string())],
                 entry_point_selector: gen::Felt("0x01".to_string()),
-                contract_address: gen::Felt("0x01".to_string()),
+                contract_address: gen::Address(gen::Felt("0x01".to_string())),
             },
         }))
     }
@@ -540,7 +540,7 @@ impl gen::Rpc for State {
             gen::DeclareTxnV2 {
                 declare_txn_v1: gen::DeclareTxnV1 {
                     common_txn_properties: gen::CommonTxnProperties {
-                        transaction_hash: gen::Felt("0x01".to_string()),
+                        transaction_hash: gen::TxnHash(gen::Felt("0x01".to_string())),
                         broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
                             nonce: gen::Felt("0x01".to_string()),
                             version: gen::NumAsHex("0x01".to_string()),
@@ -549,7 +549,7 @@ impl gen::Rpc for State {
                         },
                     },
                     class_hash: gen::Felt("0x01".to_string()),
-                    sender_address: gen::Felt("0x01".to_string()),
+                    sender_address: gen::Address(gen::Felt("0x01".to_string())),
                     r#type: gen::DeclareTxnV1Type::Declare,
                 },
                 compiled_class_hash: Some(gen::Felt("0x01".to_string())),
@@ -568,16 +568,16 @@ impl gen::Rpc for State {
                     payload: vec![gen::Felt("0x01".to_string()), gen::Felt("0x01".to_string())],
                 }],
                 events: vec![gen::Event {
-                    from_address: gen::Felt("0x01".to_string()),
+                    from_address: gen::Address(gen::Felt("0x01".to_string())),
                     event_content: gen::EventContent {
                         data: vec![gen::Felt("0x01".to_string()), gen::Felt("0x01".to_string())],
                         keys: vec![gen::Felt("0x01".to_string()), gen::Felt("0x01".to_string())],
                     },
                 }],
-                transaction_hash: gen::Felt("0x01".to_string()),
+                transaction_hash: gen::TxnHash(gen::Felt("0x01".to_string())),
                 actual_fee: gen::Felt("0x01".to_string()),
                 status: gen::TxnStatus::AcceptedOnL2,
-                block_hash: gen::Felt("0x01".to_string()),
+                block_hash: gen::BlockHash(gen::Felt("0x01".to_string())),
                 block_number: 42,
             },
             contract_address: gen::Felt("0x01".to_string()),
@@ -687,7 +687,7 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::StarknetBlockHashAndNumberResult, jsonrpc::Error> {
         Ok(gen::StarknetBlockHashAndNumberResult {
             block_number: Some(42),
-            block_hash: Some(gen::Felt("0xface".to_string())),
+            block_hash: Some(gen::BlockHash(gen::Felt("0xface".to_string()))),
         })
     }
 
@@ -700,7 +700,7 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::StarknetPendingTransactionsResult, jsonrpc::Error> {
         Ok(gen::StarknetPendingTransactionsResult(vec![
             gen::Txn::DeployTxn(gen::DeployTxn {
-                transaction_hash: gen::Felt("0x01".to_string()),
+                transaction_hash: gen::TxnHash(gen::Felt("0x01".to_string())),
                 class_hash: gen::Felt("0x01".to_string()),
                 deploy_txn_properties: gen::DeployTxnProperties {
                     r#type: gen::DeployTxnPropertiesType::Deploy,
@@ -715,10 +715,10 @@ impl gen::Rpc for State {
     fn syncing(&self) -> std::result::Result<gen::StarknetSyncingSyncing, jsonrpc::Error> {
         Ok(gen::StarknetSyncingSyncing::SyncStatus(gen::SyncStatus {
             starting_block_num: gen::NumAsHex("0x01".to_string()),
-            current_block_hash: gen::Felt("0x02".to_string()),
-            starting_block_hash: gen::Felt("0x03".to_string()),
+            current_block_hash: gen::BlockHash(gen::Felt("0x02".to_string())),
+            starting_block_hash: gen::BlockHash(gen::Felt("0x03".to_string())),
             current_block_num: gen::NumAsHex("0x04".to_string()),
-            highest_block_hash: gen::Felt("0x05".to_string()),
+            highest_block_hash: gen::BlockHash(gen::Felt("0x05".to_string())),
             highest_block_num: gen::NumAsHex("0x06".to_string()),
         }))
     }
@@ -731,15 +731,15 @@ impl gen::Rpc for State {
             continuation_token: Some("token-0".to_string()),
             events: vec![gen::EmittedEvent {
                 event: gen::Event {
-                    from_address: gen::Felt("addr-0".to_string()),
+                    from_address: gen::Address(gen::Felt("addr-0".to_string())),
                     event_content: gen::EventContent {
                         keys: vec![gen::Felt("key-0".to_string())],
                         data: vec![gen::Felt("val-0".to_string())],
                     },
                 },
-                block_hash: gen::Felt("hash-0".to_string()),
+                block_hash: gen::BlockHash(gen::Felt("hash-0".to_string())),
                 block_number: 42,
-                transaction_hash: gen::Felt("hash-1".to_string()),
+                transaction_hash: gen::TxnHash(gen::Felt("hash-1".to_string())),
             }],
         })
     }
@@ -757,7 +757,7 @@ impl gen::Rpc for State {
         _invoke_transaction: gen::BroadcastedInvokeTxn,
     ) -> std::result::Result<gen::StarknetAddInvokeTransactionResult, jsonrpc::Error> {
         Ok(gen::StarknetAddInvokeTransactionResult {
-            transaction_hash: Some(gen::Felt("0x01".to_string())),
+            transaction_hash: Some(gen::TxnHash(gen::Felt("0x01".to_string()))),
         })
     }
 
@@ -767,7 +767,7 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::StarknetAddDeclareTransactionResult, jsonrpc::Error> {
         Ok(gen::StarknetAddDeclareTransactionResult {
             class_hash: Some(gen::Felt("0x01".to_string())),
-            transaction_hash: Some(gen::Felt("0x02".to_string())),
+            transaction_hash: Some(gen::TxnHash(gen::Felt("0x02".to_string()))),
         })
     }
 
@@ -776,7 +776,7 @@ impl gen::Rpc for State {
         _deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
     ) -> std::result::Result<gen::StarknetAddDeployAccountTransactionResult, jsonrpc::Error> {
         Ok(gen::StarknetAddDeployAccountTransactionResult {
-            transaction_hash: Some(gen::Felt("0x01".to_string())),
+            transaction_hash: Some(gen::TxnHash(gen::Felt("0x01".to_string()))),
             contract_address: Some(gen::Felt("0x02".to_string())),
         })
     }
