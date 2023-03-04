@@ -36,14 +36,16 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### TODO
 
-1. [ ] validation (against `schema.{minimum, maximum, pattern}`)
-  - generate custom (de)serializers for such properties/types?
-  - use [serde_valid](https://docs.rs/serde_valid/latest/serde_valid/)?
-1. [ ] verify each method against pathfinder (run as proxy?)
+1. [ ] validation (against `schema.{minimum, maximum, pattern}` to start with)
+  - for primitive types: generate named value-object wrapper when validation is necessary
+  - (YEAH) `impl TryFrom<T>` + `#[serde(try_from = "T")]` (see example `val`)
+  - (NOPE) generate custom (de)serializers for such properties/types?
+  - (NOPE) use [serde_valid](https://docs.rs/serde_valid/latest/serde_valid/)?
 1. [ ] `async` version of trait & handlers (?)
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
 1. [ ] Seamless inclusion into a build process
    - split into `-build` and `-jsonrpc`/`-openrpc` sub-crates
+1. [ ] verify each method against pathfinder (run as proxy?)
 
 ### DONE
 
