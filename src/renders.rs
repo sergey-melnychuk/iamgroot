@@ -40,11 +40,13 @@ pub fn normalize_prop_name(name: &str) -> Result<String> {
 }
 
 pub fn normalize_type_name(name: &str) -> Result<String> {
+    if name == "i64" {
+        return Ok(name.to_owned());
+    }
     let chunks = name
         .split(|c| c == '_')
         .flat_map(capitalize)
         .collect::<Vec<_>>();
-
     Ok(chunks.join(""))
 }
 
@@ -80,7 +82,7 @@ pub fn render_basic(basic: &codegen::Basic) -> String {
 pub fn render_type(ty: &codegen::Type) -> Result<String> {
     match ty {
         codegen::Type::Named(name) => normalize_type_name(name),
-        codegen::Type::Basic(basic) => Ok(render_basic(basic)),
+        codegen::Type::Basic(basic, _) => Ok(render_basic(basic)),
         codegen::Type::Array(ty) => Ok(format!("Vec<{}>", render_type(ty)?)),
         codegen::Type::Option(ty) => Ok(format!("Option<{}>", render_type(ty)?)),
         codegen::Type::Unit => Ok(String::default()),
@@ -102,13 +104,39 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         binding::Binding::Named(binding_name, ty) => {
             let name = normalize_type_name(name)?;
             let binding_name = normalize_type_name(binding_name)?;
+            let rules = match ty {
+                codegen::Type::Basic(_, rules) => rules.clone(),
+                _ => Default::default(),
+            };
+            let ty_is_basic = matches!(ty, codegen::Type::Basic(_, _));
             let ty = normalize_type_name(&render_type(ty)?)?;
             lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
             if name == binding_name {
-                lines.push(format!("pub struct {name}(pub {ty});"));
+                lines.push(format!(
+                    "pub struct {name}(pub {ty}); // name == binding_name"
+                ));
             } else {
-                lines.push(format!("pub struct {name}(pub {binding_name});"));
+                lines.push(format!(
+                    "pub struct {name}(pub {binding_name}); // name != binding_name"
+                ));
             }
+
+            // Add regex-based validation impl enclosed in a module
+            if name == binding_name && ty_is_basic && rules.pattern.is_some() {
+                *lines.last_mut().unwrap() = format!("// {}", lines.last().unwrap());
+
+                lines.push("#[serde(try_from = \"String\")]".to_string());
+                lines.push(format!("pub struct {name}({ty});"));
+
+                let code = VALIDATION_IMPL
+                    .replace("`type_name`", &name)
+                    .replace("`type_name_uppercase`", &name.to_ascii_uppercase())
+                    .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
+                    .replace("`pattern`", rules.pattern.as_ref().unwrap());
+                lines.push(code);
+            }
+
+            // TODO: add validation impl for min/max
         }
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
@@ -176,7 +204,7 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
         format!("/// Summary: {}", &contract.summary),
         format!("/// Description: {}", &contract.description),
         format!("///"),
-        format!("fn {short_name} ("),
+        format!("fn {short_name}("),
         format!("    &self,"),
     ];
 
@@ -193,6 +221,48 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
     lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
     lines.join("\n")
 }
+
+// `type_name`
+// `type_name_uppercase`
+// `type_name_lowercase`
+// `pattern`
+const VALIDATION_IMPL: &str = r###"
+mod `type_name_lowercase` {
+    use super::jsonrpc;
+    use super::`type_name`;
+    use once_cell::sync::Lazy;
+    use regex::Regex;
+
+    static `type_name_uppercase`_REGEX: Lazy<Regex> =
+        Lazy::new(|| Regex::new("`pattern`").unwrap());
+
+    impl `type_name` {
+        pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+            if `type_name_uppercase`_REGEX.is_match(&value) {
+                Ok(Self(value.to_string()))
+            } else {
+                Err(jsonrpc::Error {
+                    code: 1001,
+                    message: "`type_name` value does not match regex".to_string(),
+                })
+            }
+        }
+    }
+
+    impl TryFrom<String> for `type_name` {
+        type Error = String;
+        fn try_from(value: String) -> Result<Self, Self::Error> {
+            Self::try_new(&value).map_err(|e| e.message)
+        }
+    }
+
+    impl AsRef<String> for `type_name` {
+        fn as_ref(&self) -> &String {
+            &self.0
+        }
+    }
+}
+"###;
 
 const IMPL_INTO_ERROR: &str = r###"
 pub struct Error(i64, &'static str);

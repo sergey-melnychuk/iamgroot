@@ -26,7 +26,9 @@ impl Binding {
     pub fn get_type(&self) -> codegen::Type {
         if !self.get_name().is_empty() {
             match self {
-                Binding::Basic(basic) => codegen::Type::Basic(basic.clone()),
+                Binding::Basic(basic) => {
+                    codegen::Type::Basic(basic.clone(), codegen::Rules::default())
+                }
                 Binding::Struct(r#struct) => codegen::Type::Named(r#struct.name.clone()),
                 Binding::Enum(r#enum) => codegen::Type::Named(r#enum.name.clone()),
                 Binding::Named(name, _) => codegen::Type::Named(name.clone()),
@@ -34,7 +36,9 @@ impl Binding {
         } else {
             // anonymous types (not named, thus full structure must be represented)
             match self {
-                Binding::Basic(basic) => codegen::Type::Basic(basic.clone()),
+                Binding::Basic(basic) => {
+                    codegen::Type::Basic(basic.clone(), codegen::Rules::default())
+                }
                 Binding::Struct(s) => {
                     let props = s
                         .properties
@@ -320,14 +324,38 @@ pub fn get_schema_binding(
             return Binding::Enum(codegen::Enum::of(name, variants));
         }
         if !name.is_empty() {
-            let binding =
-                Binding::Named(name.clone(), codegen::Type::Basic(codegen::Basic::String));
+            let rules = schema
+                .pattern
+                .as_ref()
+                .cloned()
+                .map(|pattern| codegen::Rules {
+                    pattern: Some(pattern),
+                    ..Default::default()
+                })
+                .unwrap_or_default();
+
+            let binding = Binding::Named(
+                name.clone(),
+                codegen::Type::Basic(codegen::Basic::String, rules),
+            );
             cache.insert(name, binding.clone());
             return binding;
         }
         return Binding::Basic(codegen::Basic::String);
     }
     if schema.has_type("integer") {
+        if !name.is_empty() {
+            if schema.minimum.is_some() || schema.maximum.is_some() {
+                // TODO: add range validation rules
+            }
+
+            let binding = Binding::Named(
+                name.clone(),
+                codegen::Type::Basic(codegen::Basic::Integer, codegen::Rules::default()),
+            );
+            cache.insert(name, binding.clone());
+            return binding;
+        }
         return Binding::Basic(codegen::Basic::Integer);
     }
     if schema.has_type("boolean") {
@@ -446,6 +474,8 @@ pub fn get_method_contract(
         let schema = result.schema.as_ref().unwrap();
         let name = result.name.clone().unwrap_or_default();
         let name = format!("{}_{name}", method.name);
+        // TODO FIXME: starknet-specific processing (strip the common prefix)
+        let name = name.strip_prefix("starknet_").unwrap_or(&name).to_string();
         let binding = get_schema_binding(name.clone(), schema, spec, cache);
         cache.insert(name, binding.clone());
         binding

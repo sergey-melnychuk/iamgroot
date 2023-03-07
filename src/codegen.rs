@@ -12,15 +12,22 @@ impl std::fmt::Display for Basic {
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct Rules {
+    pub pattern: Option<String>,
+    pub min: Option<i64>,
+    pub max: Option<i64>,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub enum Type {
-    Basic(Basic),
+    #[default]
+    Unit,
+    Basic(Basic, Rules),
     Array(Box<Type>),
     Option(Box<Type>),
     Struct(Vec<(String, Type)>),
     Enum(Vec<(String, Type)>),
     Named(String),
-    #[default]
-    Unit,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
