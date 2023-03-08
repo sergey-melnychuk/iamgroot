@@ -36,7 +36,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getStateUpdate",
             "params": {
-                "block_id": "Pending"
+                "block_id": "PENDING"
             }
         }),
     );
@@ -137,7 +137,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getClassHashAt",
             "params": {
-                "block_id": "Pending",
+                "block_id": "PENDING",
                 "contract_address": "0x1"
             }
         }),
@@ -150,7 +150,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getBlockTransactionCount",
             "params": {
-                "block_id": "Latest"
+                "block_id": "LATEST"
             }
         }),
     );
@@ -202,7 +202,7 @@ fn main() {
                             "0xC"
                         ]
                     },
-                    "type": "Invoke"
+                    "type": "INVOKE"
                 },
                 "block_id": 1
             },
@@ -308,7 +308,7 @@ fn main() {
                     "signature": [
                         "0x4"
                     ],
-                    "type": "Invoke",
+                    "type": "INVOKE",
                     "function_call": {
                         "calldata": [
                             "0x6",
@@ -343,7 +343,7 @@ fn main() {
                     "0x4"
                 ],
                 "contract_address_salt": "0x5",
-                "type": "DeployAccount",
+                "type": "DEPLOYACCOUNT",
                 "class_hash": "0x7",
                 "constructor_calldata": [
                     "0x8"
@@ -366,7 +366,7 @@ fn main() {
                     "0x4"
                 ],
                 "contract_address_salt": "0x5",
-                "type": "DeployAccount",
+                "type": "DEPLOYACCOUNT",
                 "class_hash": "0x7",
                 "constructor_calldata": [
                     "0x8"
