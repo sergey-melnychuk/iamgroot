@@ -36,21 +36,20 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### TODO
 
-1. [ ] validation of (`schema.{minimum, maximum}`)
-1. [ ] `async` version of trait & handlers (?)
+1. [ ] validation of `schema.{minimum, maximum}`
+1. [ ] `async` version of trait & handlers
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
 1. [ ] Seamless inclusion into a build process
-   - split into `-build` and `-jsonrpc`/`-openrpc` sub-crates
-1. [ ] verify each method against pathfinder (run as proxy?)
+   - extract `-build` sub-crate for `[build-dependencies]`
 
 ### DONE
 
 * [x] consistent ordering of generated structs
 * [x] validation (against `schema.pattern` to start with)
   - for primitive types: generate named value-object wrapper when validation is necessary
-  - (YEAH) `impl TryFrom<T>` + `#[serde(try_from = "T")]` (see example `val`)
-  - (NOPE) generate custom (de)serializers for such properties/types?
-  - (NOPE) use [serde_valid](https://docs.rs/serde_valid/latest/serde_valid/)?
+  - (OK) `impl TryFrom<T>` + `#[serde(try_from = "T")]` (see example `val`)
+  - (NO) generate custom (de)serializers for such properties/types?
+  - (NO) use [serde_valid](https://docs.rs/serde_valid/latest/serde_valid/)?
 * [x] value-objects wrappers (`Felt`, `NumAsHex` etc)
 * [x] add working example for each `starknet_*` method
 * [x] align errors with the [spec](https://www.jsonrpc.org/specification#error_object)
