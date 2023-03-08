@@ -112,7 +112,10 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     // TODO: Replace 'openrpc_stub_gen' with final crate name (candidates: rambo, iamgroot)
     writeln!(target, "\nuse openrpc_stub_gen::jsonrpc;").unwrap();
 
-    for (name, binding) in &cache.data {
+    let mut ordered = cache.data.iter().collect::<Vec<_>>();
+    ordered.sort_by_key(|(name, _)| *name);
+
+    for (name, binding) in ordered {
         let code = renders::render_object(name, binding)
             .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed. {e}"));
 

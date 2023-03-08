@@ -150,7 +150,11 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 lines.push("#[serde(untagged)]".to_string());
             }
             lines.push(format!("pub enum {} {{", normalize_type_name(name)?));
-            for variant in &the_enum.variants {
+
+            let mut ordered = the_enum.variants.iter().collect::<Vec<_>>();
+            ordered.sort_by_key(|v| &v.name);
+
+            for variant in ordered {
                 let name = normalize_type_name(&variant.name)?;
                 if seen.contains(&name) {
                     continue;
@@ -170,7 +174,11 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let mut seen = HashSet::new();
             lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
             lines.push(format!("pub struct {} {{", normalize_type_name(name)?));
-            for property in &the_struct.properties {
+
+            let mut ordered = the_struct.properties.iter().collect::<Vec<_>>();
+            ordered.sort_by_key(|v| &v.name);
+
+            for property in ordered {
                 let name = normalize_prop_name(&property.name)?;
                 if seen.contains(&name) {
                     continue;
@@ -223,10 +231,6 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
     lines.join("\n")
 }
 
-// `type_name`
-// `type_name_uppercase`
-// `type_name_lowercase`
-// `pattern`
 const VALIDATION_IMPL: &str = r###"
 mod `type_name_lowercase` {
     use super::jsonrpc;
@@ -278,7 +282,7 @@ impl From<Error> for super::jsonrpc::Error {
 }
 "###;
 
-fn render_error(name: &str, error: openrpc::Error) -> String {
+fn render_error(name: &str, error: &openrpc::Error) -> String {
     format!(
         "pub const {}: Error = Error({}, \"{}\");",
         name, error.code, error.message
@@ -290,8 +294,12 @@ pub fn render_errors(errors: HashMap<String, openrpc::Error>) -> String {
     use std::fmt::Write;
 
     writeln!(target, "pub mod error {{").unwrap();
-    for (name, error) in errors {
-        writeln!(target, "{}", render_error(&name, error)).unwrap();
+
+    let mut ordered = errors.iter().collect::<Vec<_>>();
+    ordered.sort_by_key(|e| e.0);
+
+    for (name, error) in ordered {
+        writeln!(target, "{}", render_error(name, error)).unwrap();
     }
     writeln!(target, "{IMPL_INTO_ERROR}").unwrap();
     writeln!(target, "}}").unwrap();
