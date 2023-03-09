@@ -17,7 +17,7 @@ NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is nec
 
 ```
 git restore examples/gen.rs
-cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json >> examples/gen.rs
+cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json >> examples/gen.rs && cargo fmt
 cargo run --example gen
 ```
 
