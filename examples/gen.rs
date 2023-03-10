@@ -174,7 +174,7 @@ fn main() {
 
     call(
         &state,
-        14,
+        1401,
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_estimateFee",
@@ -187,21 +187,39 @@ fn main() {
                         "0x4",
                         "0x5"
                     ],
-                    "function_call": {
-                        "calldata": [
-                            "0x6",
-                            "0x7"
-                        ],
-                        "entry_point_selector": "0x8",
-                        "contract_address": "0x9"
-                    },
-                    "invoke_txn_v1": {
-                        "sender_address": "0xA",
-                        "calldata": [
-                            "0xB",
-                            "0xC"
-                        ]
-                    },
+                    "calldata": [
+                        "0x6",
+                        "0x7"
+                    ],
+                    "entry_point_selector": "0x8",
+                    "contract_address": "0x9",
+                    "type": "INVOKE"
+                },
+                "block_id": 1
+            },
+        }),
+    );
+
+    call(
+        &state,
+        1402,
+        serde_json::json!({
+            "jsonrpc": "2.0",
+            "method": "starknet_estimateFee",
+            "params": {
+                "request": {
+                    "nonce": "0x1",
+                    "version": "0x2",
+                    "max_fee": "0x3",
+                    "signature": [
+                        "0x4",
+                        "0x5"
+                    ],
+                    "sender_address": "0xA",
+                    "calldata": [
+                        "0xB",
+                        "0xC"
+                    ],
                     "type": "INVOKE"
                 },
                 "block_id": 1
@@ -291,7 +309,7 @@ fn main() {
 
     call(
         &state,
-        22,
+        2201,
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_addInvokeTransaction",
@@ -304,21 +322,37 @@ fn main() {
                         "0x4"
                     ],
                     "type": "INVOKE",
-                    "function_call": {
-                        "calldata": [
-                            "0x6",
-                            "0x7"
-                        ],
-                        "entry_point_selector": "0x8",
-                        "contract_address": "0x9"
-                    },
-                    "invoke_txn_v1": {
-                        "sender_address": "0xA",
-                        "calldata": [
-                            "0xB",
-                            "0xC"
-                        ]
-                    }
+                    "calldata": [
+                        "0x6",
+                        "0x7"
+                    ],
+                    "entry_point_selector": "0x8",
+                    "contract_address": "0x9"
+                }
+            }
+        }),
+    );
+
+    call(
+        &state,
+        2202,
+        serde_json::json!({
+            "jsonrpc": "2.0",
+            "method": "starknet_addInvokeTransaction",
+            "params": {
+                "invoke_transaction": {
+                    "max_fee": "0x1",
+                    "version": "0x2",
+                    "nonce": "0x3",
+                    "signature": [
+                        "0x4"
+                    ],
+                    "type": "INVOKE",
+                    "sender_address": "0xA",
+                    "calldata": [
+                        "0xB",
+                        "0xC"
+                    ]
                 }
             }
         }),
@@ -379,25 +413,15 @@ fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
 
     let req: jsonrpc::Request = serde_json::from_str(&json).unwrap();
     let res = gen::handle(rpc, &req);
-    println!("<<<[A] {}", serde_json::to_string(&res).unwrap());
-
-    let client = reqwest::blocking::Client::new();
-    let res: jsonrpc::Response = client
-        .post("http://localhost:3000/api")
-        .json(&req)
-        .send()
-        .unwrap()
-        .json()
-        .unwrap();
-    println!("<<<[B] {}", serde_json::to_string(&res).unwrap());
+    println!("<<< {}", serde_json::to_string(&res).unwrap());
 }
 
 impl gen::Rpc for State {
     fn getBlockWithTxHashes(
         &self,
-        _block_id: gen::BlockId,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetBlockWithTxHashesResult, jsonrpc::Error> {
-        Ok(gen::GetBlockWithTxHashesResult::BlockWithTxHashes(
+        let result = gen::GetBlockWithTxHashesResult::BlockWithTxHashes(
             gen::BlockWithTxHashes {
                 status: gen::BlockStatus::Pending,
                 block_header: gen::BlockHeader {
@@ -412,14 +436,16 @@ impl gen::Rpc for State {
                     transactions: vec![gen::Felt::try_new("0x5")?, gen::Felt::try_new("0x6")?],
                 },
             },
-        ))
+        );
+        println!("block_id={block_id:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getBlockWithTxs(
         &self,
-        _block_id: gen::BlockId,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetBlockWithTxsResult, jsonrpc::Error> {
-        Ok(gen::GetBlockWithTxsResult::BlockWithTxs(
+        let result = gen::GetBlockWithTxsResult::BlockWithTxs(
             gen::BlockWithTxs {
                 status: gen::BlockStatus::AcceptedOnL1,
                 block_header: gen::BlockHeader {
@@ -431,38 +457,55 @@ impl gen::Rpc for State {
                     parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
                 },
                 block_body_with_txs: gen::BlockBodyWithTxs {
-                    transactions: vec![gen::Txn::InvokeTxn(gen::InvokeTxn {
-                        common_txn_properties: gen::CommonTxnProperties {
-                            transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
-                            broadcasted_txn_common_properties:
-                                gen::BroadcastedTxnCommonProperties {
-                                    nonce: gen::Felt::try_new("0x1")?,
-                                    version: gen::NumAsHex::try_new("0x1")?,
-                                    max_fee: gen::Felt::try_new("0x1")?,
-                                    signature: gen::Signature(vec![gen::Felt::try_new("0x1")?]),
-                                },
-                        },
-                        r#type: gen::InvokeTxnType::Invoke,
-                        function_call: gen::FunctionCall {
-                            calldata: vec![gen::Felt::try_new("0x1")?],
-                            entry_point_selector: gen::Felt::try_new("0x1")?,
-                            contract_address: gen::Address(gen::Felt::try_new("0x1")?),
-                        },
-                        invoke_txn_v1: gen::InvokeTxnV1 {
-                            sender_address: gen::Address(gen::Felt::try_new("0x1")?),
-                            calldata: vec![gen::Felt::try_new("0x1")?],
-                        },
-                    })],
+                    transactions: vec![
+                        gen::Txn::InvokeTxn(gen::InvokeTxn {
+                            common_txn_properties: gen::CommonTxnProperties {
+                                transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
+                                broadcasted_txn_common_properties:
+                                    gen::BroadcastedTxnCommonProperties {
+                                        nonce: gen::Felt::try_new("0x1")?,
+                                        version: gen::NumAsHex::try_new("0x1")?,
+                                        max_fee: gen::Felt::try_new("0x1")?,
+                                        signature: gen::Signature(vec![gen::Felt::try_new("0x1")?]),
+                                    },
+                            },
+                            r#type: gen::InvokeTxnType::Invoke,
+                            invoke_txn_kind: gen::InvokeTxnKind::FunctionCall(gen::FunctionCall {
+                                calldata: vec![gen::Felt::try_new("0x1")?],
+                                entry_point_selector: gen::Felt::try_new("0x1")?,
+                                contract_address: gen::Address(gen::Felt::try_new("0x1")?),
+                            }),
+                        }),
+                        gen::Txn::InvokeTxn(gen::InvokeTxn {
+                            common_txn_properties: gen::CommonTxnProperties {
+                                transaction_hash: gen::TxnHash(gen::Felt::try_new("0x2")?),
+                                broadcasted_txn_common_properties:
+                                    gen::BroadcastedTxnCommonProperties {
+                                        nonce: gen::Felt::try_new("0x2")?,
+                                        version: gen::NumAsHex::try_new("0x2")?,
+                                        max_fee: gen::Felt::try_new("0x2")?,
+                                        signature: gen::Signature(vec![gen::Felt::try_new("0x2")?]),
+                                    },
+                            },
+                            r#type: gen::InvokeTxnType::Invoke,
+                            invoke_txn_kind: gen::InvokeTxnKind::InvokeTxnV1(gen::InvokeTxnV1 {
+                                sender_address: gen::Address(gen::Felt::try_new("0x1")?),
+                                calldata: vec![gen::Felt::try_new("0x1")?],
+                            }),
+                        }),
+                    ],
                 },
             },
-        ))
+        );
+        println!("block_id={block_id:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getStateUpdate(
         &self,
-        _block_id: gen::BlockId,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetStateUpdateResult, jsonrpc::Error> {
-        Ok(gen::GetStateUpdateResult::StateUpdate(gen::StateUpdate {
+        let result = gen::GetStateUpdateResult::StateUpdate(gen::StateUpdate {
             new_root: gen::Felt::try_new("0xcafebabe")?,
             block_hash: gen::BlockHash(gen::Felt::try_new("0xdeadbeef")?),
             pending_state_update: gen::PendingStateUpdate {
@@ -490,23 +533,27 @@ impl gen::Rpc for State {
                 },
                 old_root: gen::Felt::try_new("0xFACE")?,
             },
-        }))
+        });
+        println!("block_id={block_id:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getStorageAt(
         &self,
-        _contract_address: gen::Address,
-        _key: gen::StorageKey,
-        _block_id: gen::BlockId,
+        contract_address: gen::Address,
+        key: gen::StorageKey,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
-        Ok(gen::Felt::try_new("0xcafebabe")?)
+        let result = gen::Felt::try_new("0xcafebabe")?;
+        println!("contract_address={contract_address:?}\nkey={key:?}\nblock_id={block_id:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getTransactionByHash(
         &self,
-        _transaction_hash: gen::TxnHash,
+        transaction_hash: gen::TxnHash,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
-        Ok(gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
+        let result = gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
             r#type: gen::L1HandlerTxnType::L1Handler,
             transaction_hash: gen::TxnHash(gen::Felt::try_new("0xA")?),
             version: gen::NumAsHex::try_new("0x0")?,
@@ -516,15 +563,17 @@ impl gen::Rpc for State {
                 entry_point_selector: gen::Felt::try_new("0x1")?,
                 contract_address: gen::Address(gen::Felt::try_new("0x1")?),
             },
-        }))
+        });
+        println!("transaction_hash={transaction_hash:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getTransactionByBlockIdAndIndex(
         &self,
-        _block_id: gen::BlockId,
-        _index: gen::Index,
+        block_id: gen::BlockId,
+        index: gen::Index,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
-        Ok(gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(
+        let result = gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(
             gen::DeclareTxnV2 {
                 declare_txn_v1: gen::DeclareTxnV1 {
                     common_txn_properties: gen::CommonTxnProperties {
@@ -542,14 +591,16 @@ impl gen::Rpc for State {
                 },
                 compiled_class_hash: Some(gen::Felt::try_new("0x1")?),
             },
-        )))
+        ));
+        println!("block_id={block_id:?}\nindex={index:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getTransactionReceipt(
         &self,
-        _transaction_hash: gen::TxnHash,
+        transaction_hash: gen::TxnHash,
     ) -> std::result::Result<gen::TxnReceipt, jsonrpc::Error> {
-        Ok(gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
+        let result = gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
             common_receipt_properties: gen::CommonReceiptProperties {
                 messages_sent: vec![gen::MsgToL1 {
                     to_address: gen::Felt::try_new("0x1")?,
@@ -570,15 +621,17 @@ impl gen::Rpc for State {
             },
             contract_address: gen::Felt::try_new("0x1")?,
             r#type: gen::DeployTxnReceiptType::Deploy,
-        }))
+        });
+        println!("transaction_hash={transaction_hash:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getClass(
         &self,
-        _block_id: gen::BlockId,
-        _class_hash: gen::Felt,
+        block_id: gen::BlockId,
+        class_hash: gen::Felt,
     ) -> std::result::Result<gen::GetClassResult, jsonrpc::Error> {
-        Ok(gen::GetClassResult::ContractClass(gen::ContractClass {
+        let result = gen::GetClassResult::ContractClass(gen::ContractClass {
             entry_points_by_type: Some(gen::EntryPointsByTypeItem {
                 constructor: Some(vec![gen::SierraEntryPoint {
                     selector: Some(gen::Felt::try_new("0x11")?),
@@ -596,23 +649,27 @@ impl gen::Rpc for State {
             abi: Some("abi".to_string()),
             sierra_program: Some(vec![gen::Felt::try_new("0xABCD")?]),
             sierra_version: Some("0".to_string()),
-        }))
+        });
+        println!("block_id={block_id:?}\nclass_hash={class_hash:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getClassHashAt(
         &self,
-        _block_id: gen::BlockId,
-        _contract_address: gen::Address,
+        block_id: gen::BlockId,
+        contract_address: gen::Address,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
-        Ok(gen::Felt::try_new("0xF")?)
+        let result = gen::Felt::try_new("0xF")?;
+        println!("block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getClassAt(
         &self,
-        _block_id: gen::BlockId,
-        _contract_address: gen::Address,
+        block_id: gen::BlockId,
+        contract_address: gen::Address,
     ) -> std::result::Result<gen::GetClassAtResult, jsonrpc::Error> {
-        Ok(gen::GetClassAtResult::ContractClass(gen::ContractClass {
+        let result = gen::GetClassAtResult::ContractClass(gen::ContractClass {
             entry_points_by_type: Some(gen::EntryPointsByTypeItem {
                 constructor: Some(vec![gen::SierraEntryPoint {
                     selector: Some(gen::Felt::try_new("0x11")?),
@@ -630,34 +687,42 @@ impl gen::Rpc for State {
             abi: Some("abi".to_string()),
             sierra_program: Some(vec![gen::Felt::try_new("0x44")?]),
             sierra_version: Some("0".to_string()),
-        }))
+        });
+        println!("block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getBlockTransactionCount(
         &self,
-        _block_id: gen::BlockId,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetBlockTransactionCountResult, jsonrpc::Error> {
-        Ok(gen::GetBlockTransactionCountResult(42))
+        let result = gen::GetBlockTransactionCountResult(42);
+        println!("block_id={block_id:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn call(
         &self,
-        _request: gen::FunctionCall,
-        _block_id: gen::BlockId,
+        request: gen::FunctionCall,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::CallResult, jsonrpc::Error> {
-        Ok(gen::CallResult(vec![gen::Felt::try_new("0x0")?]))
+        let result = gen::CallResult(vec![gen::Felt::try_new("0x0")?]);
+        println!("block_id={block_id:?}\nreques={request:#?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn estimateFee(
         &self,
-        _request: gen::BroadcastedTxn,
-        _block_id: gen::BlockId,
+        request: gen::BroadcastedTxn,
+        block_id: gen::BlockId,
     ) -> std::result::Result<gen::FeeEstimate, jsonrpc::Error> {
-        Ok(gen::FeeEstimate {
+        let result = gen::FeeEstimate {
             gas_consumed: Some(gen::NumAsHex::try_new("0xAA")?),
             gas_price: Some(gen::NumAsHex::try_new("0xBB")?),
             overall_fee: Some(gen::NumAsHex::try_new("0xCC")?),
-        })
+        };
+        println!("block_id={block_id:?}\nreques={request:#?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn blockNumber(&self) -> std::result::Result<gen::BlockNumber, jsonrpc::Error> {
@@ -707,9 +772,9 @@ impl gen::Rpc for State {
 
     fn getEvents(
         &self,
-        _filter: gen::Filter,
+        filter: gen::Filter,
     ) -> std::result::Result<gen::EventsChunk, jsonrpc::Error> {
-        Ok(gen::EventsChunk {
+        let result = gen::EventsChunk {
             continuation_token: Some("token-0".to_string()),
             events: vec![gen::EmittedEvent {
                 event: gen::Event {
@@ -723,44 +788,54 @@ impl gen::Rpc for State {
                 block_number: gen::BlockNumber(42),
                 transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
             }],
-        })
+        };
+        println!("filter={filter:#?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn getNonce(
         &self,
-        _block_id: gen::BlockId,
-        _contract_address: gen::Address,
+        block_id: gen::BlockId,
+        contract_address: gen::Address,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
-        Ok(gen::Felt::try_new("0xA")?)
+        let result = gen::Felt::try_new("0xA")?;
+        println!("block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn addInvokeTransaction(
         &self,
-        _invoke_transaction: gen::BroadcastedInvokeTxn,
+        invoke_transaction: gen::BroadcastedInvokeTxn,
     ) -> std::result::Result<gen::AddInvokeTransactionResult, jsonrpc::Error> {
-        Ok(gen::AddInvokeTransactionResult {
+        let result = gen::AddInvokeTransactionResult {
             transaction_hash: Some(gen::TxnHash(gen::Felt::try_new("0x1")?)),
-        })
+        };
+        println!("invoke_transaction={invoke_transaction:#?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn addDeclareTransaction(
         &self,
-        _declare_transaction: gen::BroadcastedDeclareTxn,
+        declare_transaction: gen::BroadcastedDeclareTxn,
     ) -> std::result::Result<gen::AddDeclareTransactionResult, jsonrpc::Error> {
-        Ok(gen::AddDeclareTransactionResult {
+        let result = gen::AddDeclareTransactionResult {
             class_hash: Some(gen::Felt::try_new("0x1")?),
             transaction_hash: Some(gen::TxnHash(gen::Felt::try_new("0x2")?)),
-        })
+        };
+        println!("declare_transaction={declare_transaction:#?}\nresult={result:#?}");
+        Ok(result)
     }
 
     fn addDeployAccountTransaction(
         &self,
-        _deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
+        deploy_account_transaction: gen::BroadcastedDeployAccountTxn,
     ) -> std::result::Result<gen::AddDeployAccountTransactionResult, jsonrpc::Error> {
-        Ok(gen::AddDeployAccountTransactionResult {
+        let result = gen::AddDeployAccountTransactionResult {
             transaction_hash: Some(gen::TxnHash(gen::Felt::try_new("0x1")?)),
             contract_address: Some(gen::Felt::try_new("0x2")?),
-        })
+        };
+        println!("deploy_account_transaction={deploy_account_transaction:#?}\nresult={result:#?}");
+        Ok(result)
     }
 }
 
@@ -873,12 +948,8 @@ pub mod gen {
     pub struct BroadcastedDeclareTxnV1 {
         #[serde(flatten)]
         pub broadcasted_txn_common_properties: BroadcastedTxnCommonProperties,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub contract_class: Option<DeprecatedContractClass>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub sender_address: Option<Address>,
+        pub contract_class: DeprecatedContractClass,
+        pub sender_address: Address,
     }
 
     // object: 'BROADCASTED_DECLARE_TXN_V2'
@@ -914,10 +985,19 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     pub struct BroadcastedInvokeTxn {
         #[serde(flatten)]
+        pub broadcasted_invoke_txn_kind: BroadcastedInvokeTxnKind,
+        #[serde(flatten)]
         pub broadcasted_txn_common_properties: BroadcastedTxnCommonProperties,
-        pub function_call: FunctionCall,
-        pub invoke_txn_v1: InvokeTxnV1,
         pub r#type: BroadcastedInvokeTxnType,
+    }
+
+    // object: 'BROADCASTED_INVOKE_TXN_KIND'
+    #[derive(Debug, Deserialize, Serialize)]
+    #[serde(rename_all = "UPPERCASE")]
+    #[serde(untagged)]
+    pub enum BroadcastedInvokeTxnKind {
+        FunctionCall(FunctionCall),
+        InvokeTxnV1(InvokeTxnV1),
     }
 
     // object: 'BROADCASTED_INVOKE_TXN_type'
@@ -1457,9 +1537,18 @@ pub mod gen {
     pub struct InvokeTxn {
         #[serde(flatten)]
         pub common_txn_properties: CommonTxnProperties,
-        pub function_call: FunctionCall,
-        pub invoke_txn_v1: InvokeTxnV1,
+        #[serde(flatten)]
+        pub invoke_txn_kind: InvokeTxnKind,
         pub r#type: InvokeTxnType,
+    }
+
+    // object: 'INVOKE_TXN_KIND'
+    #[derive(Debug, Deserialize, Serialize)]
+    #[serde(rename_all = "UPPERCASE")]
+    #[serde(untagged)]
+    pub enum InvokeTxnKind {
+        FunctionCall(FunctionCall),
+        InvokeTxnV1(InvokeTxnV1),
     }
 
     // object: 'INVOKE_TXN_RECEIPT'
