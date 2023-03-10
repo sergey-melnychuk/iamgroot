@@ -403,11 +403,7 @@ pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String
 
 const HANDLE_FUNCTION: &str = r###"
 pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
-    let params = if let Some(params) = req.params.as_ref() {
-        params
-    } else {
-        return jsonrpc::Response::error(-32600, "Invalid Request");
-    };
+    let params = &req.params.clone().unwrap_or_default();
 
     let response = match req.method.as_str() {
 `handlers`
