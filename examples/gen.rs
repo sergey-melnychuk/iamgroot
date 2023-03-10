@@ -214,8 +214,7 @@ fn main() {
         15,
         serde_json::json!({
             "jsonrpc": "2.0",
-            "method": "starknet_blockNumber",
-            "params": []
+            "method": "starknet_blockNumber"
         }),
     );
 
@@ -224,8 +223,7 @@ fn main() {
         16,
         serde_json::json!({
             "jsonrpc": "2.0",
-            "method": "starknet_blockHashAndNumber",
-            "params": []
+            "method": "starknet_blockHashAndNumber"
         }),
     );
 
@@ -234,8 +232,7 @@ fn main() {
         17,
         serde_json::json!({
             "jsonrpc": "2.0",
-            "method": "starknet_chainId",
-            "params": []
+            "method": "starknet_chainId"
         }),
     );
 
@@ -244,8 +241,7 @@ fn main() {
         18,
         serde_json::json!({
             "jsonrpc": "2.0",
-            "method": "starknet_pendingTransactions",
-            "params": {}
+            "method": "starknet_pendingTransactions"
         }),
     );
 
@@ -254,8 +250,7 @@ fn main() {
         19,
         serde_json::json!({
             "jsonrpc": "2.0",
-            "method": "starknet_syncing",
-            "params": []
+            "method": "starknet_syncing"
         }),
     );
 
