@@ -408,14 +408,26 @@ pub fn get_schema_binding(
             .iter()
             .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
             .collect::<Vec<_>>();
-        return all_of(name, bindings);
+        let binding = all_of(name.clone(), bindings);
+        cache.insert(name, binding.clone());
+        return binding;
     }
     if let Some(one) = schema.oneOf.as_ref() {
         let bindings = one
             .iter()
             .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
             .collect::<Vec<_>>();
-        return one_of(name, bindings);
+        let name = if !name.is_empty() {
+            name
+        } else {
+            schema.title.clone().unwrap_or_default()
+        };
+        if name.is_empty() {
+            panic!("Anonymous enum detected (schema.title missing):\n{one:#?}");
+        }
+        let binding = one_of(name.clone(), bindings);
+        cache.insert(name, binding.clone());
+        return binding;
     }
     if let Some(schema) = schema.schema.as_ref() {
         // TODO describe exact reasoning & use-case for this clause (might be deprecated corner-case)

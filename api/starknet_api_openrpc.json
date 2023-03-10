@@ -1422,7 +1422,11 @@
                                 "description": "The address of the account contract sending the declaration transaction",
                                 "$ref": "#/components/schemas/ADDRESS"
                             }
-                        }
+                        },
+                        "required": [
+                            "contract_class",
+                            "sender_address"
+                        ]
                     }
                 ]
             },
@@ -1622,6 +1626,7 @@
                         ]
                     },
                     {
+                        "title": "INVOKE_TXN_KIND",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/INVOKE_TXN_V0"
@@ -1654,6 +1659,7 @@
                         ]
                     },
                     {
+                        "title": "BROADCASTED_INVOKE_TXN_KIND",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/INVOKE_TXN_V0"
