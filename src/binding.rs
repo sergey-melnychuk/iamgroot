@@ -367,8 +367,7 @@ pub fn get_schema_binding(
         let item_type = Box::new(binding.get_type());
         return Binding::Named(name, codegen::Type::Array(item_type));
     }
-    // assuming schema.type="object"
-    if schema.properties.is_some() {
+    if schema.has_type("object") && schema.properties.is_some() {
         let properties = schema.properties.as_ref().expect("properties");
         let properties = properties
             .iter()
