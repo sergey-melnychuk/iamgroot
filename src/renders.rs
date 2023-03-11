@@ -141,7 +141,6 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
             lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
-            lines.push("#[serde(rename_all = \"UPPERCASE\")]".to_string());
             let all_units = the_enum
                 .variants
                 .iter()
@@ -160,13 +159,26 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                     continue;
                 }
                 seen.insert(name.clone());
-                let ty = render_type(&variant.r#type)?;
-                let suffix = if ty.is_empty() {
-                    "".to_string()
-                } else {
-                    format!("({ty})")
-                };
-                lines.push(format!("  {name}{suffix},"));
+                if all_units {
+                    lines.push(format!("#[serde(rename = \"{}\")]", variant.name));
+                }
+                match &variant.r#type {
+                    // TODO: generalize for embedded structs with >1 properties
+                    codegen::Type::Struct(props) if props.len() == 1 => {
+                        let (prop_name, prop_type) = &props[0];
+                        let prop_type = render_type(prop_type)?;
+                        lines.push(format!("  {name}{{ {prop_name}: {prop_type} }},"));
+                    }
+                    _ => {
+                        let ty = render_type(&variant.r#type)?;
+                        let suffix = if ty.is_empty() {
+                            "".to_string()
+                        } else {
+                            format!("({ty})")
+                        };
+                        lines.push(format!("  {name}{suffix},"));
+                    }
+                }
             }
             lines.push("}".to_string());
         }

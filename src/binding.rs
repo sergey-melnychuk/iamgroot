@@ -100,15 +100,7 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
         .into_iter()
         .map(|b| {
             let name = deanonimize(&b).to_ascii_uppercase();
-            let r#type = match b.get_type() {
-                codegen::Type::Struct(fields)
-                    if fields.len() == 1 && fields[0].0.to_ascii_uppercase() == name =>
-                {
-                    // avoid creating unnecessary wrappers (single-property tuples)
-                    fields[0].1.clone()
-                }
-                unchanged => unchanged,
-            };
+            let r#type = b.get_type();
             codegen::Variant { name, r#type }
         })
         .collect();

@@ -12,7 +12,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getBlockWithTxHashes",
             "params": {
-                "block_id": "0xFACE"
+                "block_id": {"block_hash": "0xFACE"}
             }
         }),
     );
@@ -24,7 +24,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getBlockWithTxs",
             "params": {
-                "block_id": 123456789
+                "block_id": {"block_number": 123456}
             }
         }),
     );
@@ -36,7 +36,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getStateUpdate",
             "params": {
-                "block_id": "PENDING"
+                "block_id": "pending"
             }
         }),
     );
@@ -50,7 +50,7 @@ fn main() {
             "params": {
                 "contract_address": "0x1",
                 "key": "0x02",
-                "block_id": 42,
+                "block_id": {"block_number": 42},
             }
         }),
     );
@@ -86,7 +86,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getTransactionByBlockIdAndIndex",
             "params": {
-                "block_id": 42,
+                "block_id": {"block_number": 42},
                 "index": 24
             }
         }),
@@ -111,7 +111,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getClass",
             "params": {
-                "block_id": 1,
+                "block_id": {"block_number": 1},
                 "class_hash": "0x1"
             }
         }),
@@ -124,7 +124,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getClassAt",
             "params": {
-                "block_id": 42,
+                "block_id": {"block_number": 42},
                 "contract_address": "0xFF"
             }
         }),
@@ -137,7 +137,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getClassHashAt",
             "params": {
-                "block_id": "PENDING",
+                "block_id": "pending",
                 "contract_address": "0x1"
             }
         }),
@@ -150,7 +150,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getBlockTransactionCount",
             "params": {
-                "block_id": "LATEST"
+                "block_id": "latest"
             }
         }),
     );
@@ -167,7 +167,7 @@ fn main() {
                     "calldata": ["0x2"],
                     "contract_address": "0x3"
                 },
-                42
+                {"block_number": 42}
             ]
         }),
     );
@@ -195,7 +195,7 @@ fn main() {
                     "contract_address": "0x9",
                     "type": "INVOKE"
                 },
-                "block_id": 1
+                "block_id": {"block_number": 1}
             },
         }),
     );
@@ -222,7 +222,7 @@ fn main() {
                     ],
                     "type": "INVOKE"
                 },
-                "block_id": 1
+                "block_id": {"block_number": 1}
             },
         }),
     );
@@ -280,8 +280,8 @@ fn main() {
             "method": "starknet_getEvents",
             "params": {
                 "filter": {
-                    "to_block": 200,
-                    "from_block": 100,
+                    "to_block": {"block_number": 200},
+                    "from_block": {"block_number": 100},
                     "address": "0xA",
                     "keys": [
                         ["0x1", "0x2"],
@@ -301,7 +301,7 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getNonce",
             "params": {
-                "block_id": 12,
+                "block_id": {"block_number": 12},
                 "contract_address": "0x1"
             }
         }),
@@ -360,23 +360,65 @@ fn main() {
 
     call(
         &state,
-        23,
+        2301,
         serde_json::json!({
             "jsonrpc": "2.0",
             "method": "starknet_addDeclareTransaction",
             "params": {
-                "max_fee": "0x1",
-                "version": "0x2",
-                "nonce": "0x3",
-                "signature": [
-                    "0x4"
-                ],
-                "contract_address_salt": "0x5",
-                "type": "DEPLOYACCOUNT",
-                "class_hash": "0x7",
-                "constructor_calldata": [
-                    "0x8"
-                ]
+                "declare_transaction": {
+                    "max_fee": "0x1",
+                    "version": "0x1",
+                    "nonce": "0x3",
+                    "signature": [
+                        "0x4"
+                    ],
+                    "contract_class": {
+                        "abi": [],
+                        "entry_points_by_type": {
+                            "constructor": [],
+                            "external": [],
+                            "l1_handler": []
+                        },
+                        "program": "just-some-string"
+                    },
+                    "sender_address": "0xA"
+                }
+            }
+        }),
+    );
+
+    call(
+        &state,
+        2302,
+        serde_json::json!({
+            "jsonrpc": "2.0",
+            "method": "starknet_addDeclareTransaction",
+            "params": {
+                "declare_transaction": {
+                    "max_fee": "0x1",
+                    "version": "0x1",
+                    "nonce": "0x3",
+                    "signature": [
+                        "0x4"
+                    ],
+                    "compiled_class_hash": "0xB",
+                    "contract_class": {
+                        "abi": "just-another-string",
+                        "entry_points_by_type": {
+                            "constructor": [],
+                            "external": [],
+                            "l1_handler": []
+                        },
+                        "sierra_program": [
+                            "0xAA",
+                            "0xBB",
+                            "0xCC"
+                        ],
+                        "sierra_version": "some-version"
+                    },
+                    "sender_address": "0xC",
+                    "type": "DECLARE"
+                }
             }
         }),
     );
@@ -388,18 +430,20 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_addDeployAccountTransaction",
             "params": {
-                "max_fee": "0x1",
-                "version": "0x2",
-                "nonce": "0x3",
-                "signature": [
-                    "0x4"
-                ],
-                "contract_address_salt": "0x5",
-                "type": "DEPLOYACCOUNT",
-                "class_hash": "0x7",
-                "constructor_calldata": [
-                    "0x8"
-                ]
+                "deploy_account_transaction": {
+                    "max_fee": "0x1",
+                    "version": "0x2",
+                    "nonce": "0x3",
+                    "signature": [
+                        "0x4"
+                    ],
+                    "contract_address_salt": "0x5",
+                    "type": "DEPLOY_ACCOUNT",
+                    "class_hash": "0x7",
+                    "constructor_calldata": [
+                        "0x8"
+                    ]
+                }
             }
         }),
     );
@@ -408,12 +452,12 @@ fn main() {
 fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
     let req: jsonrpc::Request = serde_json::from_value(json).unwrap();
     let req = req.with_id(jsonrpc::Id::Number(id));
-    let json = serde_json::to_string(&req).unwrap();
+    let json = serde_json::to_string_pretty(&req).unwrap();
     println!("\n>>> {}", json);
 
     let req: jsonrpc::Request = serde_json::from_str(&json).unwrap();
     let res = gen::handle(rpc, &req);
-    println!("<<< {}", serde_json::to_string(&res).unwrap());
+    println!("<<< {}", serde_json::to_string_pretty(&res).unwrap());
 }
 
 impl gen::Rpc for State {
@@ -421,22 +465,20 @@ impl gen::Rpc for State {
         &self,
         block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetBlockWithTxHashesResult, jsonrpc::Error> {
-        let result = gen::GetBlockWithTxHashesResult::BlockWithTxHashes(
-            gen::BlockWithTxHashes {
-                status: gen::BlockStatus::Pending,
-                block_header: gen::BlockHeader {
-                    block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
-                    timestamp: 1042,
-                    sequencer_address: gen::Felt::try_new("0x2")?,
-                    block_number: gen::BlockNumber(42),
-                    new_root: gen::Felt::try_new("0x3")?,
-                    parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
-                },
-                block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
-                    transactions: vec![gen::Felt::try_new("0x5")?, gen::Felt::try_new("0x6")?],
-                },
+        let result = gen::GetBlockWithTxHashesResult::BlockWithTxHashes(gen::BlockWithTxHashes {
+            status: gen::BlockStatus::Pending,
+            block_header: gen::BlockHeader {
+                block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
+                timestamp: 1042,
+                sequencer_address: gen::Felt::try_new("0x2")?,
+                block_number: gen::BlockNumber(42),
+                new_root: gen::Felt::try_new("0x3")?,
+                parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
             },
-        );
+            block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
+                transactions: vec![gen::Felt::try_new("0x5")?, gen::Felt::try_new("0x6")?],
+            },
+        });
         println!("block_id={block_id:?}\nresult={result:#?}");
         Ok(result)
     }
@@ -445,58 +487,56 @@ impl gen::Rpc for State {
         &self,
         block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetBlockWithTxsResult, jsonrpc::Error> {
-        let result = gen::GetBlockWithTxsResult::BlockWithTxs(
-            gen::BlockWithTxs {
-                status: gen::BlockStatus::AcceptedOnL1,
-                block_header: gen::BlockHeader {
-                    block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
-                    timestamp: 1042,
-                    sequencer_address: gen::Felt::try_new("0x2")?,
-                    block_number: gen::BlockNumber(42),
-                    new_root: gen::Felt::try_new("0x3")?,
-                    parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
-                },
-                block_body_with_txs: gen::BlockBodyWithTxs {
-                    transactions: vec![
-                        gen::Txn::InvokeTxn(gen::InvokeTxn {
-                            common_txn_properties: gen::CommonTxnProperties {
-                                transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
-                                broadcasted_txn_common_properties:
-                                    gen::BroadcastedTxnCommonProperties {
-                                        nonce: gen::Felt::try_new("0x1")?,
-                                        version: gen::NumAsHex::try_new("0x1")?,
-                                        max_fee: gen::Felt::try_new("0x1")?,
-                                        signature: gen::Signature(vec![gen::Felt::try_new("0x1")?]),
-                                    },
-                            },
-                            r#type: gen::InvokeTxnType::Invoke,
-                            invoke_txn_kind: gen::InvokeTxnKind::FunctionCall(gen::FunctionCall {
-                                calldata: vec![gen::Felt::try_new("0x1")?],
-                                entry_point_selector: gen::Felt::try_new("0x1")?,
-                                contract_address: gen::Address(gen::Felt::try_new("0x1")?),
-                            }),
-                        }),
-                        gen::Txn::InvokeTxn(gen::InvokeTxn {
-                            common_txn_properties: gen::CommonTxnProperties {
-                                transaction_hash: gen::TxnHash(gen::Felt::try_new("0x2")?),
-                                broadcasted_txn_common_properties:
-                                    gen::BroadcastedTxnCommonProperties {
-                                        nonce: gen::Felt::try_new("0x2")?,
-                                        version: gen::NumAsHex::try_new("0x2")?,
-                                        max_fee: gen::Felt::try_new("0x2")?,
-                                        signature: gen::Signature(vec![gen::Felt::try_new("0x2")?]),
-                                    },
-                            },
-                            r#type: gen::InvokeTxnType::Invoke,
-                            invoke_txn_kind: gen::InvokeTxnKind::InvokeTxnV1(gen::InvokeTxnV1 {
-                                sender_address: gen::Address(gen::Felt::try_new("0x1")?),
-                                calldata: vec![gen::Felt::try_new("0x1")?],
-                            }),
-                        }),
-                    ],
-                },
+        let result = gen::GetBlockWithTxsResult::BlockWithTxs(gen::BlockWithTxs {
+            status: gen::BlockStatus::AcceptedOnL1,
+            block_header: gen::BlockHeader {
+                block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
+                timestamp: 1042,
+                sequencer_address: gen::Felt::try_new("0x2")?,
+                block_number: gen::BlockNumber(42),
+                new_root: gen::Felt::try_new("0x3")?,
+                parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
             },
-        );
+            block_body_with_txs: gen::BlockBodyWithTxs {
+                transactions: vec![
+                    gen::Txn::InvokeTxn(gen::InvokeTxn {
+                        common_txn_properties: gen::CommonTxnProperties {
+                            transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
+                            broadcasted_txn_common_properties:
+                                gen::BroadcastedTxnCommonProperties {
+                                    nonce: gen::Felt::try_new("0x1")?,
+                                    version: gen::NumAsHex::try_new("0x1")?,
+                                    max_fee: gen::Felt::try_new("0x1")?,
+                                    signature: gen::Signature(vec![gen::Felt::try_new("0x1")?]),
+                                },
+                        },
+                        r#type: gen::InvokeTxnType::Invoke,
+                        invoke_txn_kind: gen::InvokeTxnKind::FunctionCall(gen::FunctionCall {
+                            calldata: vec![gen::Felt::try_new("0x1")?],
+                            entry_point_selector: gen::Felt::try_new("0x1")?,
+                            contract_address: gen::Address(gen::Felt::try_new("0x1")?),
+                        }),
+                    }),
+                    gen::Txn::InvokeTxn(gen::InvokeTxn {
+                        common_txn_properties: gen::CommonTxnProperties {
+                            transaction_hash: gen::TxnHash(gen::Felt::try_new("0x2")?),
+                            broadcasted_txn_common_properties:
+                                gen::BroadcastedTxnCommonProperties {
+                                    nonce: gen::Felt::try_new("0x2")?,
+                                    version: gen::NumAsHex::try_new("0x2")?,
+                                    max_fee: gen::Felt::try_new("0x2")?,
+                                    signature: gen::Signature(vec![gen::Felt::try_new("0x2")?]),
+                                },
+                        },
+                        r#type: gen::InvokeTxnType::Invoke,
+                        invoke_txn_kind: gen::InvokeTxnKind::InvokeTxnV1(gen::InvokeTxnV1 {
+                            sender_address: gen::Address(gen::Felt::try_new("0x1")?),
+                            calldata: vec![gen::Felt::try_new("0x1")?],
+                        }),
+                    }),
+                ],
+            },
+        });
         println!("block_id={block_id:?}\nresult={result:#?}");
         Ok(result)
     }
@@ -573,25 +613,23 @@ impl gen::Rpc for State {
         block_id: gen::BlockId,
         index: gen::Index,
     ) -> std::result::Result<gen::Txn, jsonrpc::Error> {
-        let result = gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(
-            gen::DeclareTxnV2 {
-                declare_txn_v1: gen::DeclareTxnV1 {
-                    common_txn_properties: gen::CommonTxnProperties {
-                        transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
-                        broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
-                            nonce: gen::Felt::try_new("0x1")?,
-                            version: gen::NumAsHex::try_new("0x1")?,
-                            max_fee: gen::Felt::try_new("0x1")?,
-                            signature: gen::Signature(vec![gen::Felt::try_new("0x1")?]),
-                        },
+        let result = gen::Txn::DeclareTxn(gen::DeclareTxn::DeclareTxnV2(gen::DeclareTxnV2 {
+            declare_txn_v1: gen::DeclareTxnV1 {
+                common_txn_properties: gen::CommonTxnProperties {
+                    transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
+                    broadcasted_txn_common_properties: gen::BroadcastedTxnCommonProperties {
+                        nonce: gen::Felt::try_new("0x1")?,
+                        version: gen::NumAsHex::try_new("0x1")?,
+                        max_fee: gen::Felt::try_new("0x1")?,
+                        signature: gen::Signature(vec![gen::Felt::try_new("0x1")?]),
                     },
-                    class_hash: gen::Felt::try_new("0x1")?,
-                    sender_address: gen::Address(gen::Felt::try_new("0x1")?),
-                    r#type: gen::DeclareTxnV1Type::Declare,
                 },
-                compiled_class_hash: Some(gen::Felt::try_new("0x1")?),
+                class_hash: gen::Felt::try_new("0x1")?,
+                sender_address: gen::Address(gen::Felt::try_new("0x1")?),
+                r#type: gen::DeclareTxnV1Type::Declare,
             },
-        ));
+            compiled_class_hash: Some(gen::Felt::try_new("0x1")?),
+        }));
         println!("block_id={block_id:?}\nindex={index:?}\nresult={result:#?}");
         Ok(result)
     }
@@ -660,7 +698,9 @@ impl gen::Rpc for State {
         contract_address: gen::Address,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
         let result = gen::Felt::try_new("0xF")?;
-        println!("block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}");
+        println!(
+            "block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}"
+        );
         Ok(result)
     }
 
@@ -688,7 +728,9 @@ impl gen::Rpc for State {
             sierra_program: Some(vec![gen::Felt::try_new("0x44")?]),
             sierra_version: Some("0".to_string()),
         });
-        println!("block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}");
+        println!(
+            "block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}"
+        );
         Ok(result)
     }
 
@@ -799,7 +841,9 @@ impl gen::Rpc for State {
         contract_address: gen::Address,
     ) -> std::result::Result<gen::Felt, jsonrpc::Error> {
         let result = gen::Felt::try_new("0xA")?;
-        println!("block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}");
+        println!(
+            "block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}"
+        );
         Ok(result)
     }
 
@@ -884,11 +928,10 @@ pub mod gen {
 
     // object: 'BLOCK_ID'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum BlockId {
-        BlockHash(BlockHash),
-        BlockNumber(BlockNumber),
+        BlockHash { block_hash: BlockHash },
+        BlockNumber { block_number: BlockNumber },
         BlockTag(BlockTag),
     }
 
@@ -898,19 +941,23 @@ pub mod gen {
 
     // object: 'BLOCK_STATUS'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum BlockStatus {
+        #[serde(rename = "ACCEPTED_ON_L1")]
         AcceptedOnL1,
+        #[serde(rename = "ACCEPTED_ON_L2")]
         AcceptedOnL2,
+        #[serde(rename = "PENDING")]
         Pending,
+        #[serde(rename = "REJECTED")]
         Rejected,
     }
 
     // object: 'BLOCK_TAG'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum BlockTag {
+        #[serde(rename = "latest")]
         Latest,
+        #[serde(rename = "pending")]
         Pending,
     }
 
@@ -936,7 +983,6 @@ pub mod gen {
 
     // object: 'BROADCASTED_DECLARE_TXN'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum BroadcastedDeclareTxn {
         BroadcastedDeclareTxnV1(BroadcastedDeclareTxnV1),
@@ -967,8 +1013,8 @@ pub mod gen {
 
     // object: 'BROADCASTED_DECLARE_TXN_V2_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum BroadcastedDeclareTxnV2Type {
+        #[serde(rename = "DECLARE")]
         Declare,
     }
 
@@ -993,7 +1039,6 @@ pub mod gen {
 
     // object: 'BROADCASTED_INVOKE_TXN_KIND'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum BroadcastedInvokeTxnKind {
         FunctionCall(FunctionCall),
@@ -1002,14 +1047,13 @@ pub mod gen {
 
     // object: 'BROADCASTED_INVOKE_TXN_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum BroadcastedInvokeTxnType {
+        #[serde(rename = "INVOKE")]
         Invoke,
     }
 
     // object: 'BROADCASTED_TXN'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum BroadcastedTxn {
         BroadcastedDeclareTxn(BroadcastedDeclareTxn),
@@ -1093,7 +1137,6 @@ pub mod gen {
 
     // object: 'CONTRACT_ABI_ENTRY'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum ContractAbiEntry {
         EventAbiEntry(EventAbiEntry),
@@ -1138,7 +1181,6 @@ pub mod gen {
 
     // object: 'DECLARE_TXN'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum DeclareTxn {
         DeclareTxnV1(DeclareTxnV1),
@@ -1155,8 +1197,8 @@ pub mod gen {
 
     // object: 'DECLARE_TXN_RECEIPT_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum DeclareTxnReceiptType {
+        #[serde(rename = "DECLARE")]
         Declare,
     }
 
@@ -1172,8 +1214,8 @@ pub mod gen {
 
     // object: 'DECLARE_TXN_V1_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum DeclareTxnV1Type {
+        #[serde(rename = "DECLARE")]
         Declare,
     }
 
@@ -1214,8 +1256,8 @@ pub mod gen {
 
     // object: 'DEPLOY_ACCOUNT_TXN_PROPERTIES_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum DeployAccountTxnPropertiesType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
         DeployAccount,
     }
 
@@ -1230,8 +1272,8 @@ pub mod gen {
 
     // object: 'DEPLOY_ACCOUNT_TXN_RECEIPT_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum DeployAccountTxnReceiptType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
         DeployAccount,
     }
 
@@ -1255,8 +1297,8 @@ pub mod gen {
 
     // object: 'DEPLOY_TXN_PROPERTIES_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum DeployTxnPropertiesType {
+        #[serde(rename = "DEPLOY")]
         Deploy,
     }
 
@@ -1271,8 +1313,8 @@ pub mod gen {
 
     // object: 'DEPLOY_TXN_RECEIPT_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum DeployTxnReceiptType {
+        #[serde(rename = "DEPLOY")]
         Deploy,
     }
 
@@ -1413,8 +1455,8 @@ pub mod gen {
 
     // object: 'EVENT_ABI_TYPE'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum EventAbiType {
+        #[serde(rename = "event")]
         Event,
     }
 
@@ -1517,10 +1559,12 @@ pub mod gen {
 
     // object: 'FUNCTION_ABI_TYPE'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum FunctionAbiType {
+        #[serde(rename = "constructor")]
         Constructor,
+        #[serde(rename = "function")]
         Function,
+        #[serde(rename = "l1_handler")]
         L1Handler,
     }
 
@@ -1544,7 +1588,6 @@ pub mod gen {
 
     // object: 'INVOKE_TXN_KIND'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum InvokeTxnKind {
         FunctionCall(FunctionCall),
@@ -1561,8 +1604,8 @@ pub mod gen {
 
     // object: 'INVOKE_TXN_RECEIPT_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum InvokeTxnReceiptType {
+        #[serde(rename = "INVOKE")]
         Invoke,
     }
 
@@ -1583,8 +1626,8 @@ pub mod gen {
 
     // object: 'INVOKE_TXN_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum InvokeTxnType {
+        #[serde(rename = "INVOKE")]
         Invoke,
     }
 
@@ -1609,15 +1652,15 @@ pub mod gen {
 
     // object: 'L1_HANDLER_TXN_RECEIPT_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum L1HandlerTxnReceiptType {
+        #[serde(rename = "L1_HANDLER")]
         L1Handler,
     }
 
     // object: 'L1_HANDLER_TXN_type'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum L1HandlerTxnType {
+        #[serde(rename = "L1_HANDLER")]
         L1Handler,
     }
 
@@ -1743,7 +1786,6 @@ pub mod gen {
 
     // object: 'PENDING_TXN_RECEIPT'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum PendingTxnReceipt {
         PendingCommonReceiptProperties(PendingCommonReceiptProperties),
@@ -1867,8 +1909,8 @@ pub mod gen {
 
     // object: 'STRUCT_ABI_TYPE'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum StructAbiType {
+        #[serde(rename = "struct")]
         Struct,
     }
 
@@ -1895,7 +1937,6 @@ pub mod gen {
 
     // object: 'TXN'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum Txn {
         DeclareTxn(DeclareTxn),
@@ -1911,7 +1952,6 @@ pub mod gen {
 
     // object: 'TXN_RECEIPT'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum TxnReceipt {
         DeclareTxnReceipt(DeclareTxnReceipt),
@@ -1924,22 +1964,29 @@ pub mod gen {
 
     // object: 'TXN_STATUS'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum TxnStatus {
+        #[serde(rename = "ACCEPTED_ON_L1")]
         AcceptedOnL1,
+        #[serde(rename = "ACCEPTED_ON_L2")]
         AcceptedOnL2,
+        #[serde(rename = "PENDING")]
         Pending,
+        #[serde(rename = "REJECTED")]
         Rejected,
     }
 
     // object: 'TXN_TYPE'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     pub enum TxnType {
+        #[serde(rename = "DECLARE")]
         Declare,
+        #[serde(rename = "DEPLOY")]
         Deploy,
+        #[serde(rename = "DEPLOY_ACCOUNT")]
         DeployAccount,
+        #[serde(rename = "INVOKE")]
         Invoke,
+        #[serde(rename = "L1_HANDLER")]
         L1Handler,
     }
 
@@ -2036,7 +2083,6 @@ pub mod gen {
 
     // object: 'getBlockWithTxHashes_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetBlockWithTxHashesResult {
         BlockWithTxHashes(BlockWithTxHashes),
@@ -2045,7 +2091,6 @@ pub mod gen {
 
     // object: 'getBlockWithTxs_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetBlockWithTxsResult {
         BlockWithTxs(BlockWithTxs),
@@ -2054,7 +2099,6 @@ pub mod gen {
 
     // object: 'getClassAt_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetClassAtResult {
         ContractClass(ContractClass),
@@ -2067,7 +2111,6 @@ pub mod gen {
 
     // object: 'getClass_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetClassResult {
         ContractClass(ContractClass),
@@ -2089,7 +2132,6 @@ pub mod gen {
 
     // object: 'getStateUpdate_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetStateUpdateResult {
         PendingStateUpdate(PendingStateUpdate),
@@ -2102,7 +2144,6 @@ pub mod gen {
 
     // object: 'getTransactionByBlockIdAndIndex_transactionResult'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetTransactionByBlockIdAndIndexTransactionResult {
         DeclareTxn(DeclareTxn),
@@ -2114,7 +2155,6 @@ pub mod gen {
 
     // object: 'getTransactionByHash_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetTransactionByHashResult {
         DeclareTxn(DeclareTxn),
@@ -2126,7 +2166,6 @@ pub mod gen {
 
     // object: 'getTransactionReceipt_result'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum GetTransactionReceiptResult {
         DeclareTxnReceipt(DeclareTxnReceipt),
@@ -2147,7 +2186,6 @@ pub mod gen {
 
     // object: 'syncing_syncing'
     #[derive(Debug, Deserialize, Serialize)]
-    #[serde(rename_all = "UPPERCASE")]
     #[serde(untagged)]
     pub enum SyncingSyncing {
         Boolean(bool),
