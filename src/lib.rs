@@ -141,6 +141,8 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     writeln!(target, "{}", renders::render_errors(errors)).unwrap();
 
+    writeln!(target, "{}", renders::render_client(&contracts)).unwrap();
+
     writeln!(target, "}}").unwrap();
     writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^").unwrap();
 

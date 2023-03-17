@@ -444,3 +444,154 @@ pub fn render_handle_function(contracts: &[binding::Contract]) -> String {
 
     HANDLE_FUNCTION.replace("`handlers`", &lines)
 }
+
+const CLIENT_MOD_REQWEST_BLOCKING: &str = r###"
+mod client {
+    use super::*;
+
+    pub struct Client {
+        client: reqwest::blocking::Client,
+        url: String,
+    }
+
+    impl Client {
+        pub fn new(url: &str) -> Self {
+            Self {
+                url: url.to_string(),
+                client: reqwest::blocking::Client::new(),
+            }
+        }
+    }
+
+    impl super::Rpc for Client {
+`client_methods`
+    }
+}
+"###;
+
+const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
+fn `method_short_name`(
+    &self,
+`arg_names_and_types`
+) -> std::result::Result<`result_type`, jsonrpc::Error> {
+    #[derive(serde::Deserialize, serde::Serialize)]
+    struct ArgsByName {
+`arg_names_and_types`
+    }
+
+    let args = ArgsByName { 
+`arg_names`
+    };
+
+    let params: serde_json::Value = serde_json::to_value(args)
+        .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+    let req = jsonrpc::Request::new("`method_name`".to_string(), params);
+
+    let mut res: jsonrpc::Response = self
+        .client
+        .post(&self.url)
+        .json(&req)
+        .send()
+        .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+        .json()
+        .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
+
+    if let Some(err) = res.error.take() {
+        return Err(err);
+    }
+
+    if let Some(value) = res.result.take() {
+        let out: `result_type` =
+            serde_json::from_value(value).map_err(|e| {
+                jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+            })?;
+        Ok(out)
+    } else {
+        Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+    }
+}
+"###;
+
+const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
+fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
+    let req = jsonrpc::Request::new(
+        "`method_name`".to_string(),
+        serde_json::Value::default(),
+    );
+
+    let mut res: jsonrpc::Response = self
+        .client
+        .post(&self.url)
+        .json(&req)
+        .send()
+        .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+        .json()
+        .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
+
+    if let Some(err) = res.error.take() {
+        return Err(err);
+    }
+
+    if let Some(value) = res.result.take() {
+        let out: `result_type` = serde_json::from_value(value).map_err(|e| {
+            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+        })?;
+        Ok(out)
+    } else {
+        Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+    }
+}
+"###;
+
+pub fn render_client(contracts: &[binding::Contract]) -> String {
+    let methods = contracts
+        .into_iter()
+        .map(|contract| render_client_method(contract))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    CLIENT_MOD_REQWEST_BLOCKING.replace("`client_methods`", &methods)
+}
+
+pub fn render_client_method(contract: &binding::Contract) -> String {
+    // TODO FIXME: starknet-specific processing (strip the common prefix)
+    let short_name = contract
+        .name
+        .strip_prefix("starknet_")
+        .unwrap_or(&contract.name);
+
+    let return_type = contract
+        .result
+        .as_ref()
+        .map(|b| b.get_type())
+        .unwrap_or_default();
+    let return_type = render_type(&return_type).expect("return type");
+
+    if contract.params.is_empty() {
+        return CLIENT_METHOD_NO_ARGS_BLOCKING
+            .replace("`method_name`", &contract.name)
+            .replace("`method_short_name`", short_name)
+            .replace("`result_type`", &return_type);
+    }
+
+    let params_names_only = contract
+        .params
+        .iter()
+        .map(|(name, _)| format!("{},", name))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let params_names_with_types = contract
+        .params
+        .iter()
+        .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("type")))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    CLIENT_METHOD_REQWEST_BLOCKING
+        .replace("`arg_names`", &params_names_only)
+        .replace("`arg_names_and_types`", &params_names_with_types)
+        .replace("`method_name`", &contract.name)
+        .replace("`method_short_name`", short_name)
+        .replace("`result_type`", &return_type)
+}
