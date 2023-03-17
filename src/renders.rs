@@ -446,7 +446,7 @@ pub fn render_handle_function(contracts: &[binding::Contract]) -> String {
 }
 
 const CLIENT_MOD_REQWEST_BLOCKING: &str = r###"
-mod client {
+pub mod client {
     use super::*;
 
     pub struct Client {

@@ -3173,7 +3173,7 @@ pub mod gen {
         }
     }
 
-    mod client {
+    pub mod client {
         use super::*;
 
         pub struct Client {
