@@ -1008,6 +1008,7 @@ pub mod gen {
         pub compiled_class_hash: Option<Felt>,
         pub contract_class: ContractClass,
         pub sender_address: Address,
+        #[serde(rename = "type")]
         pub r#type: BroadcastedDeclareTxnV2Type,
     }
 
@@ -1034,6 +1035,7 @@ pub mod gen {
         pub broadcasted_invoke_txn_kind: BroadcastedInvokeTxnKind,
         #[serde(flatten)]
         pub broadcasted_txn_common_properties: BroadcastedTxnCommonProperties,
+        #[serde(rename = "type")]
         pub r#type: BroadcastedInvokeTxnType,
     }
 
@@ -1192,6 +1194,7 @@ pub mod gen {
     pub struct DeclareTxnReceipt {
         #[serde(flatten)]
         pub common_receipt_properties: CommonReceiptProperties,
+        #[serde(rename = "type")]
         pub r#type: DeclareTxnReceiptType,
     }
 
@@ -1209,6 +1212,7 @@ pub mod gen {
         #[serde(flatten)]
         pub common_txn_properties: CommonTxnProperties,
         pub sender_address: Address,
+        #[serde(rename = "type")]
         pub r#type: DeclareTxnV1Type,
     }
 
@@ -1251,6 +1255,7 @@ pub mod gen {
         pub class_hash: Felt,
         pub constructor_calldata: Vec<Felt>,
         pub contract_address_salt: Felt,
+        #[serde(rename = "type")]
         pub r#type: DeployAccountTxnPropertiesType,
     }
 
@@ -1267,6 +1272,7 @@ pub mod gen {
         #[serde(flatten)]
         pub common_receipt_properties: CommonReceiptProperties,
         pub contract_address: Felt,
+        #[serde(rename = "type")]
         pub r#type: DeployAccountTxnReceiptType,
     }
 
@@ -1291,6 +1297,7 @@ pub mod gen {
     pub struct DeployTxnProperties {
         pub constructor_calldata: Vec<Felt>,
         pub contract_address_salt: Felt,
+        #[serde(rename = "type")]
         pub r#type: DeployTxnPropertiesType,
         pub version: NumAsHex,
     }
@@ -1308,6 +1315,7 @@ pub mod gen {
         #[serde(flatten)]
         pub common_receipt_properties: CommonReceiptProperties,
         pub contract_address: Felt,
+        #[serde(rename = "type")]
         pub r#type: DeployTxnReceiptType,
     }
 
@@ -1354,12 +1362,15 @@ pub mod gen {
     pub struct EntryPointsByType {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "CONSTRUCTOR")]
         pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "EXTERNAL")]
         pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "L1_HANDLER")]
         pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
     }
 
@@ -1368,12 +1379,15 @@ pub mod gen {
     pub struct EntryPointsByTypeItem {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "CONSTRUCTOR")]
         pub constructor: Option<Vec<SierraEntryPoint>>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "EXTERNAL")]
         pub external: Option<Vec<SierraEntryPoint>>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "L1_HANDLER")]
         pub l1_handler: Option<Vec<SierraEntryPoint>>,
     }
 
@@ -1450,6 +1464,7 @@ pub mod gen {
         pub name: Option<String>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "type")]
         pub r#type: Option<EventAbiType>,
     }
 
@@ -1554,6 +1569,7 @@ pub mod gen {
         pub outputs: Option<Vec<TypedParameter>>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "type")]
         pub r#type: Option<FunctionAbiType>,
     }
 
@@ -1583,6 +1599,7 @@ pub mod gen {
         pub common_txn_properties: CommonTxnProperties,
         #[serde(flatten)]
         pub invoke_txn_kind: InvokeTxnKind,
+        #[serde(rename = "type")]
         pub r#type: InvokeTxnType,
     }
 
@@ -1599,6 +1616,7 @@ pub mod gen {
     pub struct InvokeTxnReceipt {
         #[serde(flatten)]
         pub common_receipt_properties: CommonReceiptProperties,
+        #[serde(rename = "type")]
         pub r#type: InvokeTxnReceiptType,
     }
 
@@ -1638,6 +1656,7 @@ pub mod gen {
         pub function_call: FunctionCall,
         pub nonce: NumAsHex,
         pub transaction_hash: TxnHash,
+        #[serde(rename = "type")]
         pub r#type: L1HandlerTxnType,
         pub version: NumAsHex,
     }
@@ -1647,6 +1666,7 @@ pub mod gen {
     pub struct L1HandlerTxnReceipt {
         #[serde(flatten)]
         pub common_receipt_properties: CommonReceiptProperties,
+        #[serde(rename = "type")]
         pub r#type: L1HandlerTxnReceiptType,
     }
 
@@ -1764,6 +1784,7 @@ pub mod gen {
         pub transaction_hash: TxnHash,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "type")]
         pub r#type: Option<TxnType>,
     }
 
@@ -1904,6 +1925,7 @@ pub mod gen {
         pub size: Option<i64>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "type")]
         pub r#type: Option<StructAbiType>,
     }
 
@@ -1998,6 +2020,7 @@ pub mod gen {
         pub name: Option<String>,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "type")]
         pub r#type: Option<String>,
     }
 

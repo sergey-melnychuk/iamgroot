@@ -204,6 +204,9 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 if property.flatten {
                     lines.push("  #[serde(flatten)]".to_string());
                 }
+                if property.name != name {
+                    lines.push(format!("  #[serde(rename = \"{}\")]", property.name));
+                }
                 lines.push(format!(
                     "  pub {}: {},",
                     name,
