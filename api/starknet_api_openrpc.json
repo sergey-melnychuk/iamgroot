@@ -1414,6 +1414,12 @@
                     {
                         "type": "object",
                         "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "DECLARE"
+                                ]
+                            },
                             "contract_class": {
                                 "description": "The class to be declared",
                                 "$ref": "#/components/schemas/DEPRECATED_CONTRACT_CLASS"

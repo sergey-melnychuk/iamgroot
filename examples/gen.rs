@@ -996,6 +996,17 @@ pub mod gen {
         pub broadcasted_txn_common_properties: BroadcastedTxnCommonProperties,
         pub contract_class: DeprecatedContractClass,
         pub sender_address: Address,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "type")]
+        pub r#type: Option<BroadcastedDeclareTxnV1Type>,
+    }
+
+    // object: 'BROADCASTED_DECLARE_TXN_V1_type'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV1Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
     }
 
     // object: 'BROADCASTED_DECLARE_TXN_V2'
