@@ -180,6 +180,27 @@ pub fn extract_properties(
                 });
                 binds.push(bind);
             }
+            codegen::Type::Enum(enum_variants) => {
+                let enum_name =
+                    binding_name.to_ascii_uppercase() + "_" + &name.clone().to_ascii_lowercase();
+                let prop = codegen::Property {
+                    name: name.clone(),
+                    r#type: codegen::Type::Named(enum_name.clone()),
+                    ..Default::default()
+                };
+                props.push(prop);
+
+                let bind = Binding::Enum(codegen::Enum {
+                    name: enum_name,
+                    variants: enum_variants
+                        .iter()
+                        .cloned()
+                        .map(|(name, r#type)| codegen::Variant { name, r#type })
+                        .collect(),
+                    ..Default::default()
+                });
+                binds.push(bind);
+            }
             codegen::Type::Array(boxed) => match &**boxed {
                 codegen::Type::Struct(struct_fields) => {
                     let prop = codegen::Property {
@@ -236,31 +257,34 @@ pub fn extract_properties(
                     });
                     binds.push(bind);
                 }
+                codegen::Type::Enum(enum_variants) => {
+                    let enum_name = binding_name.to_ascii_uppercase()
+                        + "_"
+                        + &name.clone().to_ascii_lowercase();
+                    let prop = codegen::Property {
+                        name: name.clone(),
+                        r#type: codegen::Type::Option(Box::new(codegen::Type::Named(
+                            enum_name.clone(),
+                        ))),
+                        ..Default::default()
+                    };
+                    props.push(prop);
+
+                    let bind = Binding::Enum(codegen::Enum {
+                        name: enum_name,
+                        variants: enum_variants
+                            .iter()
+                            .cloned()
+                            .map(|(name, r#type)| codegen::Variant { name, r#type })
+                            .collect(),
+                        ..Default::default()
+                    });
+                    binds.push(bind);
+                }
                 _ => {
                     props.push(property);
                 }
             },
-            codegen::Type::Enum(enum_variants) => {
-                let enum_name =
-                    binding_name.to_ascii_uppercase() + "_" + &name.clone().to_ascii_lowercase();
-                let prop = codegen::Property {
-                    name: name.clone(),
-                    r#type: codegen::Type::Named(enum_name.clone()),
-                    ..Default::default()
-                };
-                props.push(prop);
-
-                let bind = Binding::Enum(codegen::Enum {
-                    name: enum_name,
-                    variants: enum_variants
-                        .iter()
-                        .cloned()
-                        .map(|(name, r#type)| codegen::Variant { name, r#type })
-                        .collect(),
-                    ..Default::default()
-                });
-                binds.push(bind);
-            }
             _ => {
                 props.push(property);
             }
