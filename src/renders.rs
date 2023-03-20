@@ -154,7 +154,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             lines.push(format!("pub enum {} {{", normalize_type_name(name)?));
 
             let mut ordered = the_enum.variants.iter().collect::<Vec<_>>();
-            ordered.sort_by_key(|v| &v.name);
+            ordered.sort_by_key(|v| v.name.to_ascii_lowercase());
 
             for variant in ordered {
                 let name = normalize_type_name(&variant.name)?;
@@ -193,7 +193,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             lines.push(format!("pub struct {} {{", normalize_type_name(name)?));
 
             let mut ordered = the_struct.properties.iter().collect::<Vec<_>>();
-            ordered.sort_by_key(|v| &v.name);
+            ordered.sort_by_key(|v| v.name.to_ascii_lowercase());
 
             for property in ordered {
                 let name = normalize_prop_name(&property.name)?;
@@ -482,18 +482,15 @@ fn `method_short_name`(
     &self,
 `arg_names_and_types`
 ) -> std::result::Result<`result_type`, jsonrpc::Error> {
-    #[derive(serde::Deserialize, serde::Serialize)]
-    struct ArgsByName {
-`arg_names_and_types`
-    }
 
-    let args = ArgsByName { 
+    let args = (
 `arg_names`
-    };
+    );
 
     let params: serde_json::Value = serde_json::to_value(args)
         .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-    let req = jsonrpc::Request::new("`method_name`".to_string(), params);
+    let req = jsonrpc::Request::new("`method_name`".to_string(), params)
+        .with_id(jsonrpc::Id::Number(1));
 
     let mut res: jsonrpc::Response = self
         .client
