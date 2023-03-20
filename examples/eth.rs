@@ -135,41 +135,6 @@ pub mod gen {
     // object: 'Boolean'
     // pub type Boolean = bool;
 
-    // object: 'ContextualInformation'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct ContextualInformation {
-        #[serde(rename = "blockHash")]
-        pub blockhash: Hash32,
-        #[serde(rename = "blockNumber")]
-        pub blocknumber: Uint,
-        pub from: Address,
-        pub hash: Hash32,
-        #[serde(rename = "transactionIndex")]
-        pub transactionindex: Uint,
-    }
-
-    // object: 'Eip1559TransactionSignatureProperties'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct Eip1559TransactionSignatureProperties {
-        pub r: Uint,
-        pub s: Uint,
-        #[serde(rename = "yParity")]
-        pub yparity: Uint,
-    }
-
-    // object: 'Eip2930TransactionSignatureProperties'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct Eip2930TransactionSignatureProperties {
-        pub r: Uint,
-        pub s: Uint,
-        #[serde(rename = "yParity")]
-        pub yparity: Uint,
-    }
-
-    // object: 'Full'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct Full(pub Vec<TransactionSigned>); // name == binding_name
-
     // object: 'GenericTransaction'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct GenericTransaction {
@@ -215,18 +180,6 @@ pub mod gen {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
         pub value: Option<Uint>,
-    }
-
-    // object: 'Hash'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct Hash(pub Vec<Hash32>); // name == binding_name
-
-    // object: 'LegacyTransactionSignatureProperties'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct LegacyTransactionSignatureProperties {
-        pub r: Uint,
-        pub s: Uint,
-        pub v: Uint,
     }
 
     // object: 'Log'
@@ -308,7 +261,7 @@ pub mod gen {
         pub value: Uint256,
     }
 
-    // object: 'Syncing progress'
+    // object: 'SyncingProgress'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct SyncingProgress {
         #[serde(default)]
@@ -330,24 +283,25 @@ pub mod gen {
     #[serde(untagged)]
     pub enum SyncingStatus {
         Boolean(bool),
-        SyncingProgress(SyncingProgress),
+        Syncingprogress(SyncingProgress),
     }
 
     // object: 'Transaction'
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum Transaction {
-        Full(Full),
-        Hash(Hash),
+        Transactionfull(TransactionFull),
+        Transactionhash(TransactionHash),
     }
 
     // object: 'Transaction1559Signed'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Transaction1559Signed {
-        #[serde(flatten)]
-        pub eip1559transactionsignatureproperties: Eip1559TransactionSignatureProperties,
+        pub r: Uint,
+        pub s: Uint,
         #[serde(flatten)]
         pub transaction1559unsigned: Transaction1559Unsigned,
+        pub yparity: Uint,
     }
 
     // object: 'Transaction1559Unsigned'
@@ -375,10 +329,11 @@ pub mod gen {
     // object: 'Transaction2930Signed'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Transaction2930Signed {
-        #[serde(flatten)]
-        pub eip2930transactionsignatureproperties: Eip2930TransactionSignatureProperties,
+        pub r: Uint,
+        pub s: Uint,
         #[serde(flatten)]
         pub transaction2930unsigned: Transaction2930Unsigned,
+        pub yparity: Uint,
     }
 
     // object: 'Transaction2930Unsigned'
@@ -401,11 +356,22 @@ pub mod gen {
         pub value: Uint,
     }
 
+    // object: 'TransactionFull'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct TransactionFull(pub Vec<TransactionSigned>); // name == binding_name
+
+    // object: 'TransactionHash'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct TransactionHash(pub Vec<Hash32>); // name == binding_name
+
     // object: 'TransactionInfo'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct TransactionInfo {
-        #[serde(flatten)]
-        pub contextualinformation: ContextualInformation,
+        pub blockhash: Hash32,
+        pub blocknumber: Uint,
+        pub from: Address,
+        pub hash: Hash32,
+        pub transactionindex: Uint,
         #[serde(flatten)]
         pub transactionsigned: TransactionSigned,
     }
@@ -413,10 +379,11 @@ pub mod gen {
     // object: 'TransactionLegacySigned'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct TransactionLegacySigned {
-        #[serde(flatten)]
-        pub legacytransactionsignatureproperties: LegacyTransactionSignatureProperties,
+        pub r: Uint,
+        pub s: Uint,
         #[serde(flatten)]
         pub transactionlegacyunsigned: TransactionLegacyUnsigned,
+        pub v: Uint,
     }
 
     // object: 'TransactionLegacyUnsigned'
@@ -1017,8 +984,11 @@ pub mod gen {
     // object: 'eth_getTransactionByBlockHashAndIndex_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByBlockHashAndIndexTransactionInformation {
-        #[serde(flatten)]
-        pub contextualinformation: ContextualInformation,
+        pub blockhash: Hash32,
+        pub blocknumber: Uint,
+        pub from: Address,
+        pub hash: Hash32,
+        pub transactionindex: Uint,
         #[serde(flatten)]
         pub transactionsigned: TransactionSigned,
     }
@@ -1026,8 +996,11 @@ pub mod gen {
     // object: 'eth_getTransactionByBlockNumberAndIndex_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByBlockNumberAndIndexTransactionInformation {
-        #[serde(flatten)]
-        pub contextualinformation: ContextualInformation,
+        pub blockhash: Hash32,
+        pub blocknumber: Uint,
+        pub from: Address,
+        pub hash: Hash32,
+        pub transactionindex: Uint,
         #[serde(flatten)]
         pub transactionsigned: TransactionSigned,
     }
@@ -1035,8 +1008,11 @@ pub mod gen {
     // object: 'eth_getTransactionByHash_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByHashTransactionInformation {
-        #[serde(flatten)]
-        pub contextualinformation: ContextualInformation,
+        pub blockhash: Hash32,
+        pub blocknumber: Uint,
+        pub from: Address,
+        pub hash: Hash32,
+        pub transactionindex: Uint,
         #[serde(flatten)]
         pub transactionsigned: TransactionSigned,
     }
@@ -1122,7 +1098,7 @@ pub mod gen {
     #[serde(untagged)]
     pub enum EthSyncingSyncingStatus {
         Boolean(bool),
-        SyncingProgress(SyncingProgress),
+        Syncingprogress(SyncingProgress),
     }
 
     // object: 'eth_uninstallFilter_Success'
