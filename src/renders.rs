@@ -209,7 +209,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 if property.flatten {
                     lines.push("  #[serde(flatten)]".to_string());
                 }
-                if property.name != name {
+                if property.name != name && !property.flatten {
                     lines.push(format!("  #[serde(rename = \"{}\")]", property.name));
                 }
                 lines.push(format!(

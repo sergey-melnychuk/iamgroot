@@ -2,7 +2,6 @@ use crate::cache::Cache;
 use crate::codegen;
 use crate::openrpc;
 use crate::renders;
-use crate::renders::normalize_type_name;
 
 const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
 const ERROR_REF_PREFIX: &str = "#/components/errors/";
@@ -419,24 +418,12 @@ pub fn get_schema_binding(
             })
             .flat_map(unfold_property)
             .collect();
-        let name = if !name.is_empty() {
-            name
-        } else {
-            normalize_type_name(&schema.title.clone().unwrap_or_default()).expect("type")
-        };
         return Binding::Struct(codegen::Struct::of(name, properties));
     }
     if let Some(all) = schema.allOf.as_ref() {
         let bindings = all
             .iter()
-            .map(|schema| {
-                let binding = get_schema_binding(String::default(), schema, spec, cache);
-                let name = binding.get_name();
-                if !name.is_empty() {
-                    cache.insert(name, binding.clone());
-                }
-                binding
-            })
+            .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
             .collect::<Vec<_>>();
         let binding = all_of(name.clone(), bindings);
         cache.insert(name, binding.clone());
@@ -445,15 +432,7 @@ pub fn get_schema_binding(
     if let Some(one) = schema.oneOf.as_ref() {
         let bindings = one
             .iter()
-            .map(|schema| {
-                let name = schema.title.clone().unwrap_or_default();
-                let binding = get_schema_binding(name, schema, spec, cache);
-                let name = binding.get_name();
-                if !name.is_empty() {
-                    cache.insert(name, binding.clone());
-                }
-                binding
-            })
+            .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
             .collect::<Vec<_>>();
         let name = if !name.is_empty() {
             name
