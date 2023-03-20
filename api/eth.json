@@ -1040,21 +1040,31 @@
 					}
 				}
 			},
+			"TransactionHash": {
+				"schema": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/hash32"
+					}
+				}
+			},
+			"TransactionFull": {
+				"schema": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/TransactionSigned"
+					}
+				}
+			},
 			"Transaction": {
 				"oneOf": [
 					{
 						"title": "Hash",
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/hash32"
-						}
+						"$ref": "#/components/schemas/TransactionHash"
 					},
 					{
 						"title": "Full",
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/TransactionSigned"
-						}
+						"$ref": "#/components/schemas/TransactionFull"
 					}
 				]
 			},
@@ -1123,26 +1133,29 @@
 					}
 				}
 			},
+			"SyncingProgress": {
+				"type": "object",
+				"properties": {
+					"startingBlock": {
+						"title": "Starting block",
+						"$ref": "#/components/schemas/uint"
+					},
+					"currentBlock": {
+						"title": "Current block",
+						"$ref": "#/components/schemas/uint"
+					},
+					"highestBlock": {
+						"title": "Highest block",
+						"$ref": "#/components/schemas/uint"
+					}
+				}
+			},
 			"SyncingStatus": {
 				"title": "Syncing status",
 				"oneOf": [
 					{
 						"title": "Syncing progress",
-						"type": "object",
-						"properties": {
-							"startingBlock": {
-								"title": "Starting block",
-								"$ref": "#/components/schemas/uint"
-							},
-							"currentBlock": {
-								"title": "Current block",
-								"$ref": "#/components/schemas/uint"
-							},
-							"highestBlock": {
-								"title": "Highest block",
-								"$ref": "#/components/schemas/uint"
-							}
-						}
+						"$ref": "#/components/schemas/SyncingProgress"
 					},
 					{
 						"title": "Not syncing",
