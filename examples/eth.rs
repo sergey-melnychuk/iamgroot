@@ -1,4 +1,12 @@
-fn main() {}
+fn main() {
+    {
+        let json = include_str!("../0x10165f5.json");
+        let mut res: openrpc_stub_gen::jsonrpc::Response = serde_json::from_str(json).unwrap();
+        let res: gen::Block = serde_json::from_value(res.result.take().unwrap()).unwrap();
+        println!("{res:?}");
+    }
+}
+
 // vvv GENERATED CODE BELOW vvv
 #[allow(dead_code)]
 #[allow(non_snake_case)]
@@ -104,7 +112,7 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum BlockNumberOrTag {
-        Blocktag(BlockTag),
+        BlockTag(BlockTag),
         Uint(Uint),
     }
 
@@ -112,8 +120,8 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum BlockNumberOrTagOrHash {
-        Blocktag(BlockTag),
-        HASH32(Hash32),
+        BlockTag(BlockTag),
+        Hash32(Hash32),
         Uint(Uint),
     }
 
@@ -283,24 +291,25 @@ pub mod gen {
     #[serde(untagged)]
     pub enum SyncingStatus {
         Boolean(bool),
-        Syncingprogress(SyncingProgress),
+        SyncingProgress(SyncingProgress),
     }
 
     // object: 'Transaction'
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum Transaction {
-        Transactionfull(TransactionFull),
-        Transactionhash(TransactionHash),
+        TransactionSigned(TransactionSigned),
+        Hash32(Hash32),
     }
 
     // object: 'Transaction1559Signed'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Transaction1559Signed {
-        pub r: Uint,
-        pub s: Uint,
         #[serde(flatten)]
         pub transaction1559unsigned: Transaction1559Unsigned,
+        pub r: Uint,
+        pub s: Uint,
+        #[serde(rename = "yParity")]
         pub yparity: Uint,
     }
 
@@ -329,10 +338,11 @@ pub mod gen {
     // object: 'Transaction2930Signed'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Transaction2930Signed {
-        pub r: Uint,
-        pub s: Uint,
         #[serde(flatten)]
         pub transaction2930unsigned: Transaction2930Unsigned,
+        pub r: Uint,
+        pub s: Uint,
+        #[serde(rename = "yParity")]
         pub yparity: Uint,
     }
 
@@ -358,31 +368,39 @@ pub mod gen {
 
     // object: 'TransactionFull'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct TransactionFull(pub Vec<TransactionSigned>); // name == binding_name
+    #[serde(untagged)]
+    pub enum TransactionFull {
+        Transaction1559Signed(Transaction1559Signed),
+        Transaction2930Signed(Transaction2930Signed),
+        TransactionLegacySigned(TransactionLegacySigned),
+    }
 
     // object: 'TransactionHash'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct TransactionHash(pub Vec<Hash32>); // name == binding_name
+    pub struct TransactionHash(pub Hash32); // name != binding_name
 
     // object: 'TransactionInfo'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct TransactionInfo {
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
+        #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
+        #[serde(rename = "blockNumber")]
         pub blocknumber: Uint,
         pub from: Address,
         pub hash: Hash32,
+        #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'TransactionLegacySigned'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct TransactionLegacySigned {
-        pub r: Uint,
-        pub s: Uint,
         #[serde(flatten)]
         pub transactionlegacyunsigned: TransactionLegacyUnsigned,
+        pub r: Uint,
+        pub s: Uint,
         pub v: Uint,
     }
 
@@ -410,18 +428,18 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum TransactionSigned {
-        TRANSACTION1559SIGNED(Transaction1559Signed),
-        TRANSACTION2930SIGNED(Transaction2930Signed),
-        Transactionlegacysigned(TransactionLegacySigned),
+        Transaction1559Signed(Transaction1559Signed),
+        Transaction2930Signed(Transaction2930Signed),
+        TransactionLegacySigned(TransactionLegacySigned),
     }
 
     // object: 'TransactionUnsigned'
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum TransactionUnsigned {
-        TRANSACTION1559UNSIGNED(Transaction1559Unsigned),
-        TRANSACTION2930UNSIGNED(Transaction2930Unsigned),
-        Transactionlegacyunsigned(TransactionLegacyUnsigned),
+        Transaction1559Unsigned(Transaction1559Unsigned),
+        Transaction2930Unsigned(Transaction2930Unsigned),
+        TransactionLegacyUnsigned(TransactionLegacyUnsigned),
     }
 
     // object: 'Withdrawal'
@@ -984,37 +1002,46 @@ pub mod gen {
     // object: 'eth_getTransactionByBlockHashAndIndex_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByBlockHashAndIndexTransactionInformation {
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
+        #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
+        #[serde(rename = "blockNumber")]
         pub blocknumber: Uint,
         pub from: Address,
         pub hash: Hash32,
+        #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'eth_getTransactionByBlockNumberAndIndex_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByBlockNumberAndIndexTransactionInformation {
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
+        #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
+        #[serde(rename = "blockNumber")]
         pub blocknumber: Uint,
         pub from: Address,
         pub hash: Hash32,
+        #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'eth_getTransactionByHash_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByHashTransactionInformation {
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
+        #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
+        #[serde(rename = "blockNumber")]
         pub blocknumber: Uint,
         pub from: Address,
         pub hash: Hash32,
+        #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'eth_getTransactionCount_Transaction count'
@@ -1098,7 +1125,7 @@ pub mod gen {
     #[serde(untagged)]
     pub enum EthSyncingSyncingStatus {
         Boolean(bool),
-        Syncingprogress(SyncingProgress),
+        SyncingProgress(SyncingProgress),
     }
 
     // object: 'eth_uninstallFilter_Success'
@@ -2793,20 +2820,12 @@ pub mod gen {
                 block_hash: Hash32,
                 hydrated_transactions: bool,
             ) -> std::result::Result<Block, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_hash: Hash32,
-                    hydrated_transactions: bool,
-                }
-
-                let args = ArgsByName {
-                    block_hash,
-                    hydrated_transactions,
-                };
+                let args = (block_hash, hydrated_transactions);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getBlockByHash".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getBlockByHash".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -2838,20 +2857,12 @@ pub mod gen {
                 block: BlockNumberOrTag,
                 hydrated_transactions: bool,
             ) -> std::result::Result<Block, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: BlockNumberOrTag,
-                    hydrated_transactions: bool,
-                }
-
-                let args = ArgsByName {
-                    block,
-                    hydrated_transactions,
-                };
+                let args = (block, hydrated_transactions);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getBlockByNumber".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getBlockByNumber".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -2882,17 +2893,13 @@ pub mod gen {
                 &self,
                 block_hash: Option<Hash32>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_hash: Option<Hash32>,
-                }
-
-                let args = ArgsByName { block_hash };
+                let args = (block_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("eth_getBlockTransactionCountByHash".to_string(), params);
+                    jsonrpc::Request::new("eth_getBlockTransactionCountByHash".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -2923,19 +2930,15 @@ pub mod gen {
                 &self,
                 block: Option<BlockNumberOrTag>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: Option<BlockNumberOrTag>,
-                }
-
-                let args = ArgsByName { block };
+                let args = (block,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new(
                     "eth_getBlockTransactionCountByNumber".to_string(),
                     params,
-                );
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -2966,16 +2969,12 @@ pub mod gen {
                 &self,
                 block_hash: Option<Hash32>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_hash: Option<Hash32>,
-                }
-
-                let args = ArgsByName { block_hash };
+                let args = (block_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getUncleCountByBlockHash".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getUncleCountByBlockHash".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3006,17 +3005,13 @@ pub mod gen {
                 &self,
                 block: Option<BlockNumberOrTag>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: Option<BlockNumberOrTag>,
-                }
-
-                let args = ArgsByName { block };
+                let args = (block,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("eth_getUncleCountByBlockNumber".to_string(), params);
+                    jsonrpc::Request::new("eth_getUncleCountByBlockNumber".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3195,17 +3190,12 @@ pub mod gen {
                 transaction: GenericTransaction,
                 block: Option<BlockNumberOrTagOrHash>,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction: GenericTransaction,
-                    block: Option<BlockNumberOrTagOrHash>,
-                }
-
-                let args = ArgsByName { transaction, block };
+                let args = (transaction, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_call".to_string(), params);
+                let req = jsonrpc::Request::new("eth_call".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3237,17 +3227,12 @@ pub mod gen {
                 transaction: GenericTransaction,
                 block: Option<BlockNumberOrTag>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction: GenericTransaction,
-                    block: Option<BlockNumberOrTag>,
-                }
-
-                let args = ArgsByName { transaction, block };
+                let args = (transaction, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_estimateGas".to_string(), params);
+                let req = jsonrpc::Request::new("eth_estimateGas".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3279,17 +3264,12 @@ pub mod gen {
                 transaction: GenericTransaction,
                 block: Option<BlockNumberOrTag>,
             ) -> std::result::Result<EthCreateAccessListGasUsed, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction: GenericTransaction,
-                    block: Option<BlockNumberOrTag>,
-                }
-
-                let args = ArgsByName { transaction, block };
+                let args = (transaction, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_createAccessList".to_string(), params);
+                let req = jsonrpc::Request::new("eth_createAccessList".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3383,22 +3363,12 @@ pub mod gen {
                 newestblock: BlockNumberOrTag,
                 rewardpercentiles: Rewardpercentiles,
             ) -> std::result::Result<EthFeeHistoryFeeHistoryResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    blockcount: Uint,
-                    newestblock: BlockNumberOrTag,
-                    rewardpercentiles: Rewardpercentiles,
-                }
-
-                let args = ArgsByName {
-                    blockcount,
-                    newestblock,
-                    rewardpercentiles,
-                };
+                let args = (blockcount, newestblock, rewardpercentiles);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_feeHistory".to_string(), params);
+                let req = jsonrpc::Request::new("eth_feeHistory".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3492,16 +3462,12 @@ pub mod gen {
                 &self,
                 filter_identifier: Option<Uint>,
             ) -> std::result::Result<bool, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    filter_identifier: Option<Uint>,
-                }
-
-                let args = ArgsByName { filter_identifier };
+                let args = (filter_identifier,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_uninstallFilter".to_string(), params);
+                let req = jsonrpc::Request::new("eth_uninstallFilter".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3533,17 +3499,12 @@ pub mod gen {
                 address: Address,
                 message: Bytes,
             ) -> std::result::Result<Bytes65, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    address: Address,
-                    message: Bytes,
-                }
-
-                let args = ArgsByName { address, message };
+                let args = (address, message);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_sign".to_string(), params);
+                let req = jsonrpc::Request::new("eth_sign".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3574,16 +3535,12 @@ pub mod gen {
                 &self,
                 transaction: GenericTransaction,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction: GenericTransaction,
-                }
-
-                let args = ArgsByName { transaction };
+                let args = (transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_signTransaction".to_string(), params);
+                let req = jsonrpc::Request::new("eth_signTransaction".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3615,17 +3572,12 @@ pub mod gen {
                 address: Address,
                 block: Option<BlockNumberOrTagOrHash>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    address: Address,
-                    block: Option<BlockNumberOrTagOrHash>,
-                }
-
-                let args = ArgsByName { address, block };
+                let args = (address, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getBalance".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getBalance".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3658,22 +3610,12 @@ pub mod gen {
                 storage_slot: Uint256,
                 block: Option<BlockNumberOrTagOrHash>,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    address: Address,
-                    storage_slot: Uint256,
-                    block: Option<BlockNumberOrTagOrHash>,
-                }
-
-                let args = ArgsByName {
-                    address,
-                    storage_slot,
-                    block,
-                };
+                let args = (address, storage_slot, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getStorageAt".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getStorageAt".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3705,17 +3647,12 @@ pub mod gen {
                 address: Address,
                 block: Option<BlockNumberOrTagOrHash>,
             ) -> std::result::Result<Uint, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    address: Address,
-                    block: Option<BlockNumberOrTagOrHash>,
-                }
-
-                let args = ArgsByName { address, block };
+                let args = (address, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getTransactionCount".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getTransactionCount".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3747,17 +3684,12 @@ pub mod gen {
                 address: Address,
                 block: Option<BlockNumberOrTagOrHash>,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    address: Address,
-                    block: Option<BlockNumberOrTagOrHash>,
-                }
-
-                let args = ArgsByName { address, block };
+                let args = (address, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getCode".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getCode".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3790,22 +3722,12 @@ pub mod gen {
                 storagekeys: Storagekeys,
                 block: BlockNumberOrTagOrHash,
             ) -> std::result::Result<AccountProof, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    address: Address,
-                    storagekeys: Storagekeys,
-                    block: BlockNumberOrTagOrHash,
-                }
-
-                let args = ArgsByName {
-                    address,
-                    storagekeys,
-                    block,
-                };
+                let args = (address, storagekeys, block);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getProof".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getProof".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3836,16 +3758,12 @@ pub mod gen {
                 &self,
                 transaction: GenericTransaction,
             ) -> std::result::Result<Hash32, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction: GenericTransaction,
-                }
-
-                let args = ArgsByName { transaction };
+                let args = (transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_sendTransaction".to_string(), params);
+                let req = jsonrpc::Request::new("eth_sendTransaction".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3876,16 +3794,12 @@ pub mod gen {
                 &self,
                 transaction: Bytes,
             ) -> std::result::Result<Hash32, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction: Bytes,
-                }
-
-                let args = ArgsByName { transaction };
+                let args = (transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_sendRawTransaction".to_string(), params);
+                let req = jsonrpc::Request::new("eth_sendRawTransaction".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3916,16 +3830,12 @@ pub mod gen {
                 &self,
                 transaction_hash: Hash32,
             ) -> std::result::Result<TransactionInfo, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction_hash: Hash32,
-                }
-
-                let args = ArgsByName { transaction_hash };
+                let args = (transaction_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getTransactionByHash".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getTransactionByHash".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3957,23 +3867,15 @@ pub mod gen {
                 block_hash: Hash32,
                 transaction_index: Uint,
             ) -> std::result::Result<TransactionInfo, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_hash: Hash32,
-                    transaction_index: Uint,
-                }
-
-                let args = ArgsByName {
-                    block_hash,
-                    transaction_index,
-                };
+                let args = (block_hash, transaction_index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new(
                     "eth_getTransactionByBlockHashAndIndex".to_string(),
                     params,
-                );
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4005,23 +3907,15 @@ pub mod gen {
                 block: BlockNumberOrTag,
                 transaction_index: Uint,
             ) -> std::result::Result<TransactionInfo, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: BlockNumberOrTag,
-                    transaction_index: Uint,
-                }
-
-                let args = ArgsByName {
-                    block,
-                    transaction_index,
-                };
+                let args = (block, transaction_index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new(
                     "eth_getTransactionByBlockNumberAndIndex".to_string(),
                     params,
-                );
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4052,16 +3946,12 @@ pub mod gen {
                 &self,
                 transaction_hash: Option<Hash32>,
             ) -> std::result::Result<ReceiptInfo, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction_hash: Option<Hash32>,
-                }
-
-                let args = ArgsByName { transaction_hash };
+                let args = (transaction_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getTransactionReceipt".to_string(), params);
+                let req = jsonrpc::Request::new("eth_getTransactionReceipt".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4092,16 +3982,12 @@ pub mod gen {
                 &self,
                 block: BlockNumberOrTag,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: BlockNumberOrTag,
-                }
-
-                let args = ArgsByName { block };
+                let args = (block,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("debug_getRawHeader".to_string(), params);
+                let req = jsonrpc::Request::new("debug_getRawHeader".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4132,16 +4018,12 @@ pub mod gen {
                 &self,
                 block: BlockNumberOrTag,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: BlockNumberOrTag,
-                }
-
-                let args = ArgsByName { block };
+                let args = (block,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("debug_getRawBlock".to_string(), params);
+                let req = jsonrpc::Request::new("debug_getRawBlock".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4172,16 +4054,12 @@ pub mod gen {
                 &self,
                 transaction_hash: Hash32,
             ) -> std::result::Result<Bytes, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction_hash: Hash32,
-                }
-
-                let args = ArgsByName { transaction_hash };
+                let args = (transaction_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("debug_getRawTransaction".to_string(), params);
+                let req = jsonrpc::Request::new("debug_getRawTransaction".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4212,16 +4090,12 @@ pub mod gen {
                 &self,
                 block: BlockNumberOrTag,
             ) -> std::result::Result<DebugGetRawReceiptsReceipts, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block: BlockNumberOrTag,
-                }
-
-                let args = ArgsByName { block };
+                let args = (block,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("debug_getRawReceipts".to_string(), params);
+                let req = jsonrpc::Request::new("debug_getRawReceipts".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client

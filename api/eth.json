@@ -1041,20 +1041,10 @@
 				}
 			},
 			"TransactionHash": {
-				"schema": {
-					"type": "array",
-					"items": {
-						"$ref": "#/components/schemas/hash32"
-					}
-				}
+				"$ref": "#/components/schemas/hash32"
 			},
 			"TransactionFull": {
-				"schema": {
-					"type": "array",
-					"items": {
-						"$ref": "#/components/schemas/TransactionSigned"
-					}
-				}
+				"$ref": "#/components/schemas/TransactionSigned"
 			},
 			"Transaction": {
 				"oneOf": [

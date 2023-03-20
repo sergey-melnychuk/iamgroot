@@ -23,7 +23,7 @@ cargo run --example gen
 ```
 
 ```
-cargo run -- CODE ./api/eth.json > examples/eth.rs && cargo fmt
+cargo run -- CODE ./api/eth.json >> examples/eth.rs && cargo fmt
 ```
 
 * Dump the AST (for debugging):
