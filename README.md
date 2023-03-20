@@ -22,6 +22,10 @@ cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json 
 cargo run --example gen
 ```
 
+```
+cargo run -- CODE ./api/eth.json > examples/eth.rs && cargo fmt
+```
+
 * Dump the AST (for debugging):
 
 ```
