@@ -7,6 +7,8 @@ use serde_json::Value;
 pub struct OpenRpc {
     pub openrpc: String,
     pub info: Value,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub servers: Vec<Server>,
     pub methods: Vec<Method>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -140,6 +142,7 @@ pub struct Components {
     pub contentDescriptors: Option<Value>,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub schemas: HashMap<String, Schema>,
+    #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub errors: HashMap<String, Error>,
 }

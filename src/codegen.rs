@@ -3,6 +3,7 @@ pub enum Basic {
     String,
     Integer,
     Boolean,
+    Null,
 }
 
 impl std::fmt::Display for Basic {

@@ -1,6 +1,8 @@
 use crate::cache::Cache;
 use crate::codegen;
 use crate::openrpc;
+use crate::renders;
+use crate::renders::normalize_type_name;
 
 const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
 const ERROR_REF_PREFIX: &str = "#/components/errors/";
@@ -359,7 +361,7 @@ pub fn get_schema_binding(
         }
         return Binding::Basic(codegen::Basic::String);
     }
-    if schema.has_type("integer") {
+    if schema.has_type("integer") || schema.has_type("number") {
         if !name.is_empty() {
             if schema.minimum.is_some() || schema.maximum.is_some() {
                 // TODO: add range validation rules
@@ -383,7 +385,7 @@ pub fn get_schema_binding(
         let item_type = Box::new(binding.get_type());
         return Binding::Named(name, codegen::Type::Array(item_type));
     }
-    if schema.has_type("object") && schema.properties.is_some() {
+    if schema.properties.is_some() {
         let properties = schema.properties.as_ref().expect("properties");
         let properties = properties
             .iter()
@@ -417,12 +419,24 @@ pub fn get_schema_binding(
             })
             .flat_map(unfold_property)
             .collect();
+        let name = if !name.is_empty() {
+            name
+        } else {
+            normalize_type_name(&schema.title.clone().unwrap_or_default()).expect("type")
+        };
         return Binding::Struct(codegen::Struct::of(name, properties));
     }
     if let Some(all) = schema.allOf.as_ref() {
         let bindings = all
             .iter()
-            .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
+            .map(|schema| {
+                let binding = get_schema_binding(String::default(), schema, spec, cache);
+                let name = binding.get_name();
+                if !name.is_empty() {
+                    cache.insert(name, binding.clone());
+                }
+                binding
+            })
             .collect::<Vec<_>>();
         let binding = all_of(name.clone(), bindings);
         cache.insert(name, binding.clone());
@@ -431,7 +445,15 @@ pub fn get_schema_binding(
     if let Some(one) = schema.oneOf.as_ref() {
         let bindings = one
             .iter()
-            .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
+            .map(|schema| {
+                let name = schema.title.clone().unwrap_or_default();
+                let binding = get_schema_binding(name, schema, spec, cache);
+                let name = binding.get_name();
+                if !name.is_empty() {
+                    cache.insert(name, binding.clone());
+                }
+                binding
+            })
             .collect::<Vec<_>>();
         let name = if !name.is_empty() {
             name
@@ -449,6 +471,11 @@ pub fn get_schema_binding(
         // TODO describe exact reasoning & use-case for this clause (might be deprecated corner-case)
         return get_schema_binding(name, schema, spec, cache);
     }
+    if schema.has_type("null") {
+        cache.insert("null".to_string(), Binding::Basic(codegen::Basic::Null));
+        return Binding::Basic(codegen::Basic::Null);
+    }
+    eprintln!("unreachable: name={name} schema={schema:#?}");
     unreachable!()
 }
 
@@ -474,6 +501,7 @@ pub fn get_method_contract(
         .map(|param| {
             let schema = param.schema.as_ref().unwrap();
             let name = param.name.clone().unwrap_or_default();
+            let name = renders::normalize_prop_name(&name).expect("name");
             let type_name = schema
                 .r#ref
                 .as_ref()

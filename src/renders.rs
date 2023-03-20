@@ -36,6 +36,7 @@ pub fn normalize_prop_name(name: &str) -> Result<String> {
     if "type" == name || "enum" == name || "struct" == name {
         return Ok(format!("r#{name}"));
     }
+    let name = name.replace([' ', '-'], "_");
     Ok(name.to_ascii_lowercase())
 }
 
@@ -43,6 +44,7 @@ pub fn normalize_type_name(name: &str) -> Result<String> {
     if name == "i64" {
         return Ok(name.to_owned());
     }
+    let name = name.replace([' ', '-'], "_");
     let chunks = name
         .split(|c| c == '_')
         .flat_map(capitalize)
@@ -75,6 +77,7 @@ pub fn render_basic(basic: &codegen::Basic) -> String {
         codegen::Basic::String => "String",
         codegen::Basic::Integer => "i64",
         codegen::Basic::Boolean => "bool",
+        codegen::Basic::Null => "Null",
     };
     ty.to_string()
 }
@@ -163,11 +166,13 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                     lines.push(format!("#[serde(rename = \"{}\")]", variant.name));
                 }
                 match &variant.r#type {
-                    // TODO: generalize for embedded structs with >1 properties
-                    codegen::Type::Struct(props) if props.len() == 1 => {
-                        let (prop_name, prop_type) = &props[0];
-                        let prop_type = render_type(prop_type)?;
-                        lines.push(format!("  {name}{{ {prop_name}: {prop_type} }},"));
+                    codegen::Type::Struct(props) => {
+                        lines.push(format!("  {name}{{"));
+                        for (prop_name, prop_type) in props {
+                            let prop_type = render_type(prop_type)?;
+                            lines.push(format!("  {prop_name}: {prop_type},"));
+                        }
+                        lines.push("  },".to_string());
                     }
                     _ => {
                         let ty = render_type(&variant.r#type)?;
@@ -548,8 +553,8 @@ fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Err
 
 pub fn render_client(contracts: &[binding::Contract]) -> String {
     let methods = contracts
-        .into_iter()
-        .map(|contract| render_client_method(contract))
+        .iter()
+        .map(render_client_method)
         .collect::<Vec<_>>()
         .join("\n");
 
