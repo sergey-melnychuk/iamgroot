@@ -79,7 +79,7 @@ fn all_of(name: String, bindings: Vec<Binding>) -> Binding {
     let properties = bindings
         .into_iter()
         .map(|b| {
-            let name = deanonimize(&b).to_ascii_lowercase();
+            let name = deanonimize(&b);
             codegen::Property {
                 name,
                 r#type: b.get_type(),
@@ -100,7 +100,7 @@ fn one_of(name: String, bindings: Vec<Binding>) -> Binding {
     let variants = bindings
         .into_iter()
         .map(|b| {
-            let name = deanonimize(&b).to_ascii_uppercase();
+            let name = deanonimize(&b);
             let r#type = b.get_type();
             codegen::Variant { name, r#type }
         })
@@ -119,7 +119,7 @@ pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
                 .into_iter()
                 .take(1)
                 .map(|(name, r#type)| codegen::Property {
-                    name: name.to_ascii_lowercase(),
+                    name,
                     r#type,
                     ..Default::default()
                 })
@@ -132,7 +132,7 @@ pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
         codegen::Type::Struct(fields) => fields
             .into_iter()
             .map(|(name, r#type)| codegen::Property {
-                name: name.to_ascii_lowercase(),
+                name,
                 r#type,
                 ..Default::default()
             })
@@ -140,7 +140,7 @@ pub fn unfold_property(property: codegen::Property) -> Vec<codegen::Property> {
         codegen::Type::Enum(variants) => variants
             .into_iter()
             .map(|(name, r#type)| codegen::Property {
-                name: name.to_ascii_lowercase(),
+                name,
                 r#type,
                 ..Default::default()
             })
