@@ -554,13 +554,17 @@ impl gen::Rpc for State {
                         nonce: Some(gen::Felt::try_new("0x1")?),
                         contract_address: Some(gen::Address(gen::Felt::try_new("0x2")?)),
                     }],
-                    deprecated_declared_contract_hashes: Some(vec![gen::Felt::try_new("0x3")?]),
+                    declared_classes: vec![gen::DeclaredClassesItem {
+                        class_hash: Some(gen::Felt::try_new("0x101")?),
+                        compiled_class_hash: Some(gen::Felt::try_new("0x102")?),
+                    }],
+                    deprecated_declared_classes: vec![gen::Felt::try_new("0x3")?],
                     deployed_contracts: vec![gen::DeployedContractItem {
                         address: gen::Felt::try_new("0x4")?,
                         class_hash: gen::Felt::try_new("0x5")?,
                     }],
-                    declared_contract_hashes: vec![gen::DeclaredContractHashesItem {
-                        compiled_class_hash: Some(gen::Felt::try_new("0x6")?),
+                    replaced_classes: vec![gen::ReplacedClassesItem {
+                        contract_address: Some(gen::Address(gen::Felt::try_new("0x6")?)),
                         class_hash: Some(gen::Felt::try_new("0x7")?),
                     }],
                     storage_diffs: vec![gen::ContractStorageDiffItem {
@@ -670,7 +674,7 @@ impl gen::Rpc for State {
         class_hash: gen::Felt,
     ) -> std::result::Result<gen::GetClassResult, jsonrpc::Error> {
         let result = gen::GetClassResult::ContractClass(gen::ContractClass {
-            entry_points_by_type: Some(gen::EntryPointsByTypeItem {
+            entry_points_by_type: gen::EntryPointsByType {
                 constructor: Some(vec![gen::SierraEntryPoint {
                     selector: Some(gen::Felt::try_new("0x11")?),
                     function_idx: Some(1),
@@ -683,10 +687,10 @@ impl gen::Rpc for State {
                     selector: Some(gen::Felt::try_new("0x33")?),
                     function_idx: Some(3),
                 }]),
-            }),
+            },
             abi: Some("abi".to_string()),
-            sierra_program: Some(vec![gen::Felt::try_new("0xABCD")?]),
-            sierra_version: Some("0".to_string()),
+            sierra_program: vec![gen::Felt::try_new("0xABCD")?],
+            contract_class_version: "0".to_string(),
         });
         println!("block_id={block_id:?}\nclass_hash={class_hash:?}\nresult={result:#?}");
         Ok(result)
@@ -710,7 +714,7 @@ impl gen::Rpc for State {
         contract_address: gen::Address,
     ) -> std::result::Result<gen::GetClassAtResult, jsonrpc::Error> {
         let result = gen::GetClassAtResult::ContractClass(gen::ContractClass {
-            entry_points_by_type: Some(gen::EntryPointsByTypeItem {
+            entry_points_by_type: gen::EntryPointsByType {
                 constructor: Some(vec![gen::SierraEntryPoint {
                     selector: Some(gen::Felt::try_new("0x11")?),
                     function_idx: Some(1),
@@ -723,10 +727,10 @@ impl gen::Rpc for State {
                     selector: Some(gen::Felt::try_new("0x33")?),
                     function_idx: Some(3),
                 }]),
-            }),
+            },
             abi: Some("abi".to_string()),
-            sierra_program: Some(vec![gen::Felt::try_new("0x44")?]),
-            sierra_version: Some("0".to_string()),
+            sierra_program: vec![gen::Felt::try_new("0x44")?],
+            contract_class_version: "0".to_string(),
         });
         println!(
             "block_id={block_id:?}\ncontract_address={contract_address:?}\nresult={result:#?}"
@@ -755,14 +759,14 @@ impl gen::Rpc for State {
 
     fn estimateFee(
         &self,
-        request: gen::BroadcastedTxn,
+        request: gen::Request,
         block_id: gen::BlockId,
-    ) -> std::result::Result<gen::FeeEstimate, jsonrpc::Error> {
-        let result = gen::FeeEstimate {
+    ) -> std::result::Result<gen::EstimateFeeResult, jsonrpc::Error> {
+        let result = gen::EstimateFeeResult(vec![gen::FeeEstimate {
             gas_consumed: Some(gen::NumAsHex::try_new("0xAA")?),
             gas_price: Some(gen::NumAsHex::try_new("0xBB")?),
             overall_fee: Some(gen::NumAsHex::try_new("0xCC")?),
-        };
+        }]);
         println!("block_id={block_id:?}\nreques={request:#?}\nresult={result:#?}");
         Ok(result)
     }
@@ -994,19 +998,12 @@ pub mod gen {
     pub struct BroadcastedDeclareTxnV1 {
         #[serde(flatten)]
         pub broadcasted_txn_common_properties: BroadcastedTxnCommonProperties,
-        pub contract_class: DeprecatedContractClass,
-        pub sender_address: Address,
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "type")]
-        pub r#type: Option<BroadcastedDeclareTxnV1Type>,
-    }
-
-    // object: 'BROADCASTED_DECLARE_TXN_V1_type'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV1Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
+        pub contract_class: Option<DeprecatedContractClass>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub sender_address: Option<Address>,
     }
 
     // object: 'BROADCASTED_DECLARE_TXN_V2'
@@ -1163,15 +1160,9 @@ pub mod gen {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
         pub abi: Option<String>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub entry_points_by_type: Option<EntryPointsByTypeItem>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub sierra_program: Option<Vec<Felt>>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub sierra_version: Option<String>,
+        pub contract_class_version: String,
+        pub entry_points_by_type: EntryPointsByType,
+        pub sierra_program: Vec<Felt>,
     }
 
     // object: 'CONTRACT_STORAGE_DIFF_ITEM'
@@ -1181,9 +1172,9 @@ pub mod gen {
         pub storage_entries: Vec<StorageEntriesItem>,
     }
 
-    // object: 'DECLARED_CONTRACT_HASHES_ITEM'
+    // object: 'DECLARED_CLASSES_ITEM'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct DeclaredContractHashesItem {
+    pub struct DeclaredClassesItem {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
         pub class_hash: Option<Felt>,
@@ -1371,23 +1362,6 @@ pub mod gen {
     // object: 'ENTRY_POINTS_BY_TYPE'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EntryPointsByType {
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "CONSTRUCTOR")]
-        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "EXTERNAL")]
-        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "L1_HANDLER")]
-        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
-    }
-
-    // object: 'ENTRY_POINTS_BY_TYPE_ITEM'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct EntryPointsByTypeItem {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(rename = "CONSTRUCTOR")]
@@ -1824,6 +1798,17 @@ pub mod gen {
         PendingDeployTxnReceipt(PendingDeployTxnReceipt),
     }
 
+    // object: 'REPLACED_CLASSES_ITEM'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct ReplacedClassesItem {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub class_hash: Option<Felt>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub contract_address: Option<Address>,
+    }
+
     // object: 'RESULT_PAGE_REQUEST'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct ResultPageRequest {
@@ -1851,12 +1836,11 @@ pub mod gen {
     // object: 'STATE_DIFF'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct StateDiff {
-        pub declared_contract_hashes: Vec<DeclaredContractHashesItem>,
+        pub declared_classes: Vec<DeclaredClassesItem>,
         pub deployed_contracts: Vec<DeployedContractItem>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub deprecated_declared_contract_hashes: Option<Vec<Felt>>,
+        pub deprecated_declared_classes: Vec<Felt>,
         pub nonces: Vec<NoncesItem>,
+        pub replaced_classes: Vec<ReplacedClassesItem>,
         pub storage_diffs: Vec<ContractStorageDiffItem>,
     }
 
@@ -2090,17 +2074,7 @@ pub mod gen {
 
     // object: 'estimateFee_result'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct EstimateFeeResult {
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub gas_consumed: Option<NumAsHex>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub gas_price: Option<NumAsHex>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        pub overall_fee: Option<NumAsHex>,
-    }
+    pub struct EstimateFeeResult(pub Vec<FeeEstimate>); // name == binding_name
 
     // object: 'filter'
     #[derive(Debug, Deserialize, Serialize)]
@@ -2217,6 +2191,10 @@ pub mod gen {
     // object: 'pendingTransactions_result'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct PendingTransactionsResult(pub Vec<Txn>); // name == binding_name
+
+    // object: 'request'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct Request(pub Vec<BroadcastedTxn>); // name == binding_name
 
     // object: 'syncing_syncing'
     #[derive(Debug, Deserialize, Serialize)]
@@ -2343,14 +2321,14 @@ pub mod gen {
         ) -> std::result::Result<CallResult, jsonrpc::Error>;
 
         /// Method: 'starknet_estimateFee'
-        /// Summary: estimate the fee for a given StarkNet transaction
-        /// Description: estimates the resources required by a transaction relative to a given state
+        /// Summary: estimate the fee for of StarkNet transactions
+        /// Description: estimates the resources required by transactions when applyed on a given state
         ///
         fn estimateFee(
             &self,
-            request: BroadcastedTxn,
+            request: Request,
             block_id: BlockId,
-        ) -> std::result::Result<FeeEstimate, jsonrpc::Error>;
+        ) -> std::result::Result<EstimateFeeResult, jsonrpc::Error>;
 
         /// Method: 'starknet_blockNumber'
         /// Summary: Get the most recent accepted block number
@@ -2864,11 +2842,11 @@ pub mod gen {
 
     fn handle_starknet_estimateFee<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedTxn, BlockId);
+        struct ArgByPos(Request, BlockId);
 
         #[derive(Deserialize, Serialize)]
         struct ArgByName {
-            request: BroadcastedTxn,
+            request: Request,
             block_id: BlockId,
         }
 
@@ -3744,12 +3722,12 @@ pub mod gen {
 
             fn estimateFee(
                 &self,
-                request: BroadcastedTxn,
+                request: Request,
                 block_id: BlockId,
-            ) -> std::result::Result<FeeEstimate, jsonrpc::Error> {
+            ) -> std::result::Result<EstimateFeeResult, jsonrpc::Error> {
                 #[derive(serde::Deserialize, serde::Serialize)]
                 struct ArgsByName {
-                    request: BroadcastedTxn,
+                    request: Request,
                     block_id: BlockId,
                 }
 
@@ -3775,7 +3753,7 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: FeeEstimate = serde_json::from_value(value).map_err(|e| {
+                    let out: EstimateFeeResult = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
                     Ok(out)

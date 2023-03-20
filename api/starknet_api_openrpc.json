@@ -451,14 +451,18 @@
         },
         {
             "name": "starknet_estimateFee",
-            "summary": "estimate the fee for a given StarkNet transaction",
-            "description": "estimates the resources required by a transaction relative to a given state",
+            "summary": "estimate the fee for of StarkNet transactions",
+            "description": "estimates the resources required by transactions when applyed on a given state",
             "params": [
                 {
                     "name": "request",
                     "summary": "The transaction to estimate",
                     "schema": {
-                        "$ref": "#/components/schemas/BROADCASTED_TXN"
+                        "type": "array",
+                        "description": "a sequence of transactions to estimate, running each transaction on the state resulting from applying all the previous ones",
+                        "items": {
+                            "$ref": "#/components/schemas/BROADCASTED_TXN"
+                        }
                     },
                     "required": true
                 },
@@ -473,9 +477,13 @@
             ],
             "result": {
                 "name": "result",
-                "description": "the fee estimation",
+                "description": "the fee estimations",
                 "schema": {
-                    "$ref": "#/components/schemas/FEE_ESTIMATE"
+                    "type": "array",
+                    "description": "a sequence of fee estimatione where the i'th estimate corresponds to the i'th transaction",
+                    "items": {
+                        "$ref": "#/components/schemas/FEE_ESTIMATE"
+                    }
                 }
             },
             "errors": [
@@ -940,14 +948,14 @@
                                     "$ref": "#/components/schemas/CONTRACT_STORAGE_DIFF_ITEM"
                                 }
                             },
-                            "deprecated_declared_contract_hashes": {
+                            "deprecated_declared_classes": {
                                 "type": "array",
                                 "items": {
                                     "description": "The hash of the declared class",
                                     "$ref": "#/components/schemas/FELT"
                                 }
                             },
-                            "declared_contract_hashes": {
+                            "declared_classes": {
                                 "type": "array",
                                 "items": {
                                     "description": "The declared class hash and compiled class hash",
@@ -967,8 +975,25 @@
                             "deployed_contracts": {
                                 "type": "array",
                                 "items": {
-                                    "description": "A new contract deployed as part of the new state",
+                                    "description": "A new contract deployed as part of the state update",
                                     "$ref": "#/components/schemas/DEPLOYED_CONTRACT_ITEM"
+                                }
+                            },
+                            "replaced_classes": {
+                                "type": "array",
+                                "items": {
+                                    "description": "The list of contracts whose class was replaced",
+                                    "type": "object",
+                                    "properties": {
+                                        "contract_address": {
+                                            "description": "The address of the contract whose class was replaced",
+                                            "$ref": "#/components/schemas/ADDRESS"
+                                        },
+                                        "class_hash": {
+                                            "description": "The new class hash",
+                                            "$ref": "#/components/schemas/FELT"
+                                        }
+                                    }
                                 }
                             },
                             "nonces": {
@@ -991,7 +1016,9 @@
                         },
                         "required": [
                             "storage_diffs",
-                            "declared_contract_hashes",
+                            "deprecated_declared_classes",
+                            "declared_classes",
+                            "replaced_classes",
                             "deployed_contracts",
                             "nonces"
                         ]
@@ -1414,12 +1441,6 @@
                     {
                         "type": "object",
                         "properties": {
-                            "type": {
-                                "type": "string",
-                                "enum": [
-                                    "DECLARE"
-                                ]
-                            },
                             "contract_class": {
                                 "description": "The class to be declared",
                                 "$ref": "#/components/schemas/DEPRECATED_CONTRACT_CLASS"
@@ -1428,11 +1449,7 @@
                                 "description": "The address of the account contract sending the declaration transaction",
                                 "$ref": "#/components/schemas/ADDRESS"
                             }
-                        },
-                        "required": [
-                            "contract_class",
-                            "sender_address"
-                        ]
+                        }
                     }
                 ]
             },
@@ -2051,9 +2068,9 @@
                             "$ref": "#/components/schemas/FELT"
                         }
                     },
-                    "sierra_version": {
+                    "contract_class_version": {
                         "type": "string",
-                        "description": "the Sierra program version"
+                        "description": "The version of the contract class object. Currently, the Starknet OS supports version 0.1.0"
                     },
                     "entry_points_by_type": {
                         "type": "object",
@@ -2082,7 +2099,12 @@
                         "type": "string",
                         "descripition": "The class ABI, as supplied by the user declaring the class"
                     }
-                }
+                },
+                "required": [
+                    "sierra_program",
+                    "contract_class_version",
+                    "entry_points_by_type"
+                ]
             },
             "DEPRECATED_CONTRACT_CLASS": {
                 "title": "The definition of a StarkNet contract class",
