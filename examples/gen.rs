@@ -674,7 +674,7 @@ impl gen::Rpc for State {
         class_hash: gen::Felt,
     ) -> std::result::Result<gen::GetClassResult, jsonrpc::Error> {
         let result = gen::GetClassResult::ContractClass(gen::ContractClass {
-            entry_points_by_type: gen::EntryPointsByType {
+            entry_points_by_type: gen::ContractClassEntryPoint {
                 constructor: Some(vec![gen::SierraEntryPoint {
                     selector: Some(gen::Felt::try_new("0x11")?),
                     function_idx: Some(1),
@@ -714,7 +714,7 @@ impl gen::Rpc for State {
         contract_address: gen::Address,
     ) -> std::result::Result<gen::GetClassAtResult, jsonrpc::Error> {
         let result = gen::GetClassAtResult::ContractClass(gen::ContractClass {
-            entry_points_by_type: gen::EntryPointsByType {
+            entry_points_by_type: gen::ContractClassEntryPoint {
                 constructor: Some(vec![gen::SierraEntryPoint {
                     selector: Some(gen::Felt::try_new("0x11")?),
                     function_idx: Some(1),
@@ -1161,8 +1161,25 @@ pub mod gen {
         #[serde(skip_serializing_if = "Option::is_none")]
         pub abi: Option<String>,
         pub contract_class_version: String,
-        pub entry_points_by_type: EntryPointsByType,
+        pub entry_points_by_type: ContractClassEntryPoint,
         pub sierra_program: Vec<Felt>,
+    }
+
+    // object: 'CONTRACT_CLASS_ENTRY_POINT'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct ContractClassEntryPoint {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "CONSTRUCTOR")]
+        pub constructor: Option<Vec<SierraEntryPoint>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "EXTERNAL")]
+        pub external: Option<Vec<SierraEntryPoint>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "L1_HANDLER")]
+        pub l1_handler: Option<Vec<SierraEntryPoint>>,
     }
 
     // object: 'CONTRACT_STORAGE_DIFF_ITEM'
@@ -1345,8 +1362,25 @@ pub mod gen {
         #[serde(default)]
         #[serde(skip_serializing_if = "Option::is_none")]
         pub abi: Option<ContractAbi>,
-        pub entry_points_by_type: EntryPointsByType,
+        pub entry_points_by_type: DeprecatedContractClassEntryPoint,
         pub program: String,
+    }
+
+    // object: 'DEPRECATED_CONTRACT_CLASS_ENTRY_POINT'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct DeprecatedContractClassEntryPoint {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "CONSTRUCTOR")]
+        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "EXTERNAL")]
+        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "L1_HANDLER")]
+        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
     }
 
     // object: 'EMITTED_EVENT'
@@ -1357,23 +1391,6 @@ pub mod gen {
         #[serde(flatten)]
         pub event: Event,
         pub transaction_hash: TxnHash,
-    }
-
-    // object: 'ENTRY_POINTS_BY_TYPE'
-    #[derive(Debug, Deserialize, Serialize)]
-    pub struct EntryPointsByType {
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "CONSTRUCTOR")]
-        pub constructor: Option<Vec<SierraEntryPoint>>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "EXTERNAL")]
-        pub external: Option<Vec<SierraEntryPoint>>,
-        #[serde(default)]
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(rename = "L1_HANDLER")]
-        pub l1_handler: Option<Vec<SierraEntryPoint>>,
     }
 
     // object: 'ETH_ADDRESS'
@@ -3207,17 +3224,13 @@ pub mod gen {
                 &self,
                 block_id: BlockId,
             ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName { block_id };
+                let args = (block_id,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("starknet_getBlockWithTxHashes".to_string(), params);
+                    jsonrpc::Request::new("starknet_getBlockWithTxHashes".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3249,16 +3262,12 @@ pub mod gen {
                 &self,
                 block_id: BlockId,
             ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName { block_id };
+                let args = (block_id,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getBlockWithTxs".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getBlockWithTxs".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3290,16 +3299,12 @@ pub mod gen {
                 &self,
                 block_id: BlockId,
             ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName { block_id };
+                let args = (block_id,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getStateUpdate".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getStateUpdate".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3332,22 +3337,12 @@ pub mod gen {
                 key: StorageKey,
                 block_id: BlockId,
             ) -> std::result::Result<Felt, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    contract_address: Address,
-                    key: StorageKey,
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName {
-                    contract_address,
-                    key,
-                    block_id,
-                };
+                let args = (contract_address, key, block_id);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getStorageAt".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getStorageAt".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3378,17 +3373,13 @@ pub mod gen {
                 &self,
                 transaction_hash: TxnHash,
             ) -> std::result::Result<Txn, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction_hash: TxnHash,
-                }
-
-                let args = ArgsByName { transaction_hash };
+                let args = (transaction_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("starknet_getTransactionByHash".to_string(), params);
+                    jsonrpc::Request::new("starknet_getTransactionByHash".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3420,20 +3411,15 @@ pub mod gen {
                 block_id: BlockId,
                 index: Index,
             ) -> std::result::Result<Txn, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                    index: Index,
-                }
-
-                let args = ArgsByName { block_id, index };
+                let args = (block_id, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new(
                     "starknet_getTransactionByBlockIdAndIndex".to_string(),
                     params,
-                );
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3464,17 +3450,13 @@ pub mod gen {
                 &self,
                 transaction_hash: TxnHash,
             ) -> std::result::Result<TxnReceipt, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    transaction_hash: TxnHash,
-                }
-
-                let args = ArgsByName { transaction_hash };
+                let args = (transaction_hash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("starknet_getTransactionReceipt".to_string(), params);
+                    jsonrpc::Request::new("starknet_getTransactionReceipt".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3506,20 +3488,12 @@ pub mod gen {
                 block_id: BlockId,
                 class_hash: Felt,
             ) -> std::result::Result<GetClassResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                    class_hash: Felt,
-                }
-
-                let args = ArgsByName {
-                    block_id,
-                    class_hash,
-                };
+                let args = (block_id, class_hash);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getClass".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getClass".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3551,20 +3525,12 @@ pub mod gen {
                 block_id: BlockId,
                 contract_address: Address,
             ) -> std::result::Result<Felt, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                    contract_address: Address,
-                }
-
-                let args = ArgsByName {
-                    block_id,
-                    contract_address,
-                };
+                let args = (block_id, contract_address);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getClassHashAt".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getClassHashAt".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3596,20 +3562,12 @@ pub mod gen {
                 block_id: BlockId,
                 contract_address: Address,
             ) -> std::result::Result<GetClassAtResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                    contract_address: Address,
-                }
-
-                let args = ArgsByName {
-                    block_id,
-                    contract_address,
-                };
+                let args = (block_id, contract_address);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getClassAt".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getClassAt".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3640,17 +3598,13 @@ pub mod gen {
                 &self,
                 block_id: BlockId,
             ) -> std::result::Result<GetBlockTransactionCountResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName { block_id };
+                let args = (block_id,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("starknet_getBlockTransactionCount".to_string(), params);
+                    jsonrpc::Request::new("starknet_getBlockTransactionCount".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3683,17 +3637,12 @@ pub mod gen {
                 request: FunctionCall,
                 block_id: BlockId,
             ) -> std::result::Result<CallResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    request: FunctionCall,
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName { request, block_id };
+                let args = (request, block_id);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_call".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_call".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3725,17 +3674,12 @@ pub mod gen {
                 request: Request,
                 block_id: BlockId,
             ) -> std::result::Result<EstimateFeeResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    request: Request,
-                    block_id: BlockId,
-                }
-
-                let args = ArgsByName { request, block_id };
+                let args = (request, block_id);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_estimateFee".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_estimateFee".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3927,16 +3871,12 @@ pub mod gen {
                 &self,
                 filter: Filter,
             ) -> std::result::Result<EventsChunk, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    filter: Filter,
-                }
-
-                let args = ArgsByName { filter };
+                let args = (filter,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getEvents".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getEvents".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3968,20 +3908,12 @@ pub mod gen {
                 block_id: BlockId,
                 contract_address: Address,
             ) -> std::result::Result<Felt, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    block_id: BlockId,
-                    contract_address: Address,
-                }
-
-                let args = ArgsByName {
-                    block_id,
-                    contract_address,
-                };
+                let args = (block_id, contract_address);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("starknet_getNonce".to_string(), params);
+                let req = jsonrpc::Request::new("starknet_getNonce".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4012,17 +3944,13 @@ pub mod gen {
                 &self,
                 invoke_transaction: BroadcastedInvokeTxn,
             ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    invoke_transaction: BroadcastedInvokeTxn,
-                }
-
-                let args = ArgsByName { invoke_transaction };
+                let args = (invoke_transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("starknet_addInvokeTransaction".to_string(), params);
+                    jsonrpc::Request::new("starknet_addInvokeTransaction".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4054,19 +3982,13 @@ pub mod gen {
                 &self,
                 declare_transaction: BroadcastedDeclareTxn,
             ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error> {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    declare_transaction: BroadcastedDeclareTxn,
-                }
-
-                let args = ArgsByName {
-                    declare_transaction,
-                };
+                let args = (declare_transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req =
-                    jsonrpc::Request::new("starknet_addDeclareTransaction".to_string(), params);
+                    jsonrpc::Request::new("starknet_addDeclareTransaction".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4099,21 +4021,15 @@ pub mod gen {
                 deploy_account_transaction: BroadcastedDeployAccountTxn,
             ) -> std::result::Result<AddDeployAccountTransactionResult, jsonrpc::Error>
             {
-                #[derive(serde::Deserialize, serde::Serialize)]
-                struct ArgsByName {
-                    deploy_account_transaction: BroadcastedDeployAccountTxn,
-                }
-
-                let args = ArgsByName {
-                    deploy_account_transaction,
-                };
+                let args = (deploy_account_transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new(
                     "starknet_addDeployAccountTransaction".to_string(),
                     params,
-                );
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 let mut res: jsonrpc::Response = self
                     .client
