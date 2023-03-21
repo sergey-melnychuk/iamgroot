@@ -14,35 +14,6 @@ pub trait AsPath: AsRef<Path> + Display {}
 impl AsPath for String {}
 impl AsPath for &str {}
 
-fn extract_contracts(spec: &openrpc::OpenRpc, cache: &mut Cache) -> Vec<binding::Contract> {
-    let bindings = spec
-        .components
-        .as_ref()
-        .expect("components")
-        .schemas
-        .iter()
-        .map(|(name, schema)| binding::get_schema_binding(name.to_string(), schema, spec, cache))
-        .flat_map(binding::unfold_binding)
-        // Make a second pass (extra unfolding might be necessary)
-        .flat_map(binding::unfold_binding)
-        .collect::<Vec<_>>();
-
-    for b in bindings {
-        cache.overwrite(b.get_name(), b);
-    }
-
-    let contracts = spec
-        .methods
-        .iter()
-        .filter_map(|method| {
-            let name = method.name.clone();
-            binding::get_method_contract(name, spec, cache)
-        })
-        .collect::<Vec<_>>();
-
-    contracts
-}
-
 fn parse<P: AsPath>(path: &P) -> openrpc::OpenRpc {
     log::info!("Processing file: {path}");
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
@@ -60,7 +31,7 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
     let contracts = paths
         .iter()
         .map(|path| parse(path))
-        .flat_map(|spec| extract_contracts(&spec, &mut cache))
+        .flat_map(|spec| binding::extract_contracts(&spec, &mut cache))
         .collect::<Vec<_>>();
 
     let mut target = String::new();
@@ -95,7 +66,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     let contracts = specs
         .iter()
-        .flat_map(|spec| extract_contracts(spec, &mut cache))
+        .flat_map(|spec| binding::extract_contracts(spec, &mut cache))
         .collect::<Vec<_>>();
 
     let mut target = String::new();
@@ -109,7 +80,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     writeln!(target, "pub mod gen {{").unwrap();
     writeln!(target, "use serde::{{Deserialize, Serialize}};").unwrap();
     writeln!(target, "use serde_json::Value;").unwrap();
-    // TODO: Replace 'openrpc_stub_gen' with final crate name (candidates: rambo, iamgroot)
+    // TODO: Replace 'openrpc_stub_gen' with final crate name
     writeln!(target, "\nuse openrpc_stub_gen::jsonrpc;").unwrap();
 
     let mut ordered = cache.data.iter().collect::<Vec<_>>();

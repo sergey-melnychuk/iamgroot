@@ -316,6 +316,10 @@ pub fn get_schema_binding(
     spec: &openrpc::OpenRpc,
     cache: &mut Cache,
 ) -> Binding {
+    println!("\nname={name} schema={schema:?}");
+    if let Some(binding) = cache.get(&name) {
+        return binding.clone();
+    }
     if let Some(key) = &schema.r#ref {
         // Allow shared cache lookups for cross-file references
         let key = key.split(SCHEMA_REF_PREFIX).nth(1).unwrap();
@@ -538,4 +542,37 @@ pub fn get_method_contract(
         summary: method.summary.clone().unwrap_or_default(),
         description: method.description.clone().unwrap_or_default(),
     })
+}
+
+pub fn extract_contracts(spec: &openrpc::OpenRpc, cache: &mut Cache) -> Vec<Contract> {
+    let bindings = spec
+        .components
+        .as_ref()
+        .expect("components")
+        .schemas
+        .iter()
+        .map(|(name, schema)| {
+            let binding = get_schema_binding(name.to_string(), schema, spec, cache);
+            cache.insert(name.clone(), binding.clone());
+            binding
+        })
+        .flat_map(unfold_binding)
+        // Make a second pass (extra unfolding might be necessary)
+        .flat_map(unfold_binding)
+        .collect::<Vec<_>>();
+
+    for b in bindings {
+        cache.overwrite(b.get_name(), b);
+    }
+
+    let contracts = spec
+        .methods
+        .iter()
+        .filter_map(|method| {
+            let name = method.name.clone();
+            get_method_contract(name, spec, cache)
+        })
+        .collect::<Vec<_>>();
+
+    contracts
 }
