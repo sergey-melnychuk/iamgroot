@@ -27,11 +27,12 @@ pub fn gen_json<P: AsPath>(path: &P) -> String {
 
 pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
     let mut cache = Cache::new();
+    let mut trace = Vec::with_capacity(32);
 
     let contracts = paths
         .iter()
         .map(|path| parse(path))
-        .flat_map(|spec| binding::extract_contracts(&spec, &mut cache))
+        .flat_map(|spec| binding::extract_contracts(&spec, &mut cache, &mut trace))
         .collect::<Vec<_>>();
 
     let mut target = String::new();
@@ -51,6 +52,7 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
 
 pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     let mut cache = Cache::new();
+    let mut trace = Vec::with_capacity(32);
 
     let specs = paths.iter().map(|path| parse(path)).collect::<Vec<_>>();
 
@@ -66,7 +68,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     let contracts = specs
         .iter()
-        .flat_map(|spec| binding::extract_contracts(spec, &mut cache))
+        .flat_map(|spec| binding::extract_contracts(spec, &mut cache, &mut trace))
         .collect::<Vec<_>>();
 
     let mut target = String::new();

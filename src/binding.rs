@@ -315,21 +315,33 @@ pub fn get_schema_binding(
     schema: &openrpc::Schema,
     spec: &openrpc::OpenRpc,
     cache: &mut Cache,
+    trace: &mut Vec<String>,
 ) -> Binding {
-    println!("\nname={name} schema={schema:?}");
+    //println!("\n// name={name}\n// schema={schema:?}\n// trace={trace:?}");
     if let Some(binding) = cache.get(&name) {
         return binding.clone();
     }
+
+    // Avoid stack overflow for cyclic definitions (starknet_simulateTransaction)
+    // TODO: Provide more elegan solution for tracing (RAII-style guard with custom dtor)
+    let has_cycle = trace.iter().filter(|item| item == &&name).count() > 2;
+    if has_cycle && !name.is_empty() {
+        return Binding::Named(name.clone(), codegen::Type::Named(name.clone()));
+    }
+
+    trace.push(name.clone());
     if let Some(key) = &schema.r#ref {
         // Allow shared cache lookups for cross-file references
         let key = key.split(SCHEMA_REF_PREFIX).nth(1).unwrap();
         if let Some(binding) = cache.get(key) {
+            trace.pop().unwrap_or_default();
             return binding.clone();
         }
 
         let schema = spec.get_schema(key).expect("schema");
-        let binding = get_schema_binding(key.to_string(), schema, spec, cache);
+        let binding = get_schema_binding(key.to_string(), schema, spec, cache, trace);
         cache.insert(key.to_string(), binding.clone());
+        trace.pop().unwrap_or_default();
         return binding;
     }
     if schema.has_type("string") {
@@ -342,6 +354,7 @@ pub fn get_schema_binding(
                     r#type: codegen::Type::Unit,
                 })
                 .collect();
+            trace.pop().unwrap_or_default();
             return Binding::Enum(codegen::Enum::of(name, variants));
         }
         if !name.is_empty() {
@@ -360,8 +373,10 @@ pub fn get_schema_binding(
                 codegen::Type::Basic(codegen::Basic::String, rules),
             );
             cache.insert(name, binding.clone());
+            trace.pop().unwrap_or_default();
             return binding;
         }
+        trace.pop().unwrap_or_default();
         return Binding::Basic(codegen::Basic::String);
     }
     if schema.has_type("integer") || schema.has_type("number") {
@@ -375,17 +390,21 @@ pub fn get_schema_binding(
                 codegen::Type::Basic(codegen::Basic::Integer, codegen::Rules::default()),
             );
             cache.insert(name, binding.clone());
+            trace.pop().unwrap_or_default();
             return binding;
         }
+        trace.pop().unwrap_or_default();
         return Binding::Basic(codegen::Basic::Integer);
     }
     if schema.has_type("boolean") {
+        trace.pop().unwrap_or_default();
         return Binding::Basic(codegen::Basic::Boolean);
     }
     if schema.has_type("array") {
         let schema = schema.items.as_ref().expect("schema");
-        let binding = get_schema_binding(name.clone(), schema, spec, cache);
+        let binding = get_schema_binding(name.clone(), schema, spec, cache, trace);
         let item_type = Box::new(binding.get_type());
+        trace.pop().unwrap_or_default();
         return Binding::Named(name, codegen::Type::Array(item_type));
     }
     if schema.properties.is_some() {
@@ -399,7 +418,8 @@ pub fn get_schema_binding(
                     .and_then(|key| key.split(SCHEMA_REF_PREFIX).nth(1))
                     .unwrap_or_default()
                     .to_string();
-                let binding = get_schema_binding(type_name.clone(), prop_schema, spec, cache);
+                let binding =
+                    get_schema_binding(type_name.clone(), prop_schema, spec, cache, trace);
                 let is_required = schema
                     .required
                     .as_ref()
@@ -422,21 +442,23 @@ pub fn get_schema_binding(
             })
             .flat_map(unfold_property)
             .collect();
+        trace.pop().unwrap_or_default();
         return Binding::Struct(codegen::Struct::of(name, properties));
     }
     if let Some(all) = schema.allOf.as_ref() {
         let bindings = all
             .iter()
-            .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
+            .map(|schema| get_schema_binding(String::default(), schema, spec, cache, trace))
             .collect::<Vec<_>>();
         let binding = all_of(name.clone(), bindings);
         cache.insert(name, binding.clone());
+        trace.pop().unwrap_or_default();
         return binding;
     }
     if let Some(one) = schema.oneOf.as_ref() {
         let bindings = one
             .iter()
-            .map(|schema| get_schema_binding(String::default(), schema, spec, cache))
+            .map(|schema| get_schema_binding(String::default(), schema, spec, cache, trace))
             .collect::<Vec<_>>();
         let name = if !name.is_empty() {
             name
@@ -448,17 +470,21 @@ pub fn get_schema_binding(
         }
         let binding = one_of(name.clone(), bindings);
         cache.insert(name, binding.clone());
+        trace.pop().unwrap_or_default();
         return binding;
     }
     if let Some(schema) = schema.schema.as_ref() {
         // TODO describe exact reasoning & use-case for this clause (might be deprecated corner-case)
-        return get_schema_binding(name, schema, spec, cache);
+        trace.pop().unwrap_or_default();
+        return get_schema_binding(name, schema, spec, cache, trace);
     }
     if schema.has_type("null") {
         cache.insert("null".to_string(), Binding::Basic(codegen::Basic::Null));
+        trace.pop().unwrap_or_default();
         return Binding::Basic(codegen::Basic::Null);
     }
     eprintln!("unreachable: name={name} schema={schema:#?}");
+    trace.pop().unwrap_or_default();
     unreachable!()
 }
 
@@ -476,6 +502,7 @@ pub fn get_method_contract(
     name: String,
     spec: &openrpc::OpenRpc,
     cache: &mut Cache,
+    trace: &mut Vec<String>,
 ) -> Option<Contract> {
     let method = spec.methods.iter().find(|m| m.name == name)?;
     let params = method
@@ -491,7 +518,7 @@ pub fn get_method_contract(
                 .and_then(|key| key.split(SCHEMA_REF_PREFIX).nth(1))
                 .unwrap_or(&name)
                 .to_string();
-            let binding = get_schema_binding(type_name.clone(), schema, spec, cache);
+            let binding = get_schema_binding(type_name.clone(), schema, spec, cache, trace);
             cache.insert(binding.get_name(), binding.clone());
             let is_required = param.required.unwrap_or_default();
             let param_type = if is_required {
@@ -514,7 +541,7 @@ pub fn get_method_contract(
         let name = format!("{}_{name}", method.name);
         // TODO FIXME: starknet-specific processing (strip the common prefix)
         let name = name.strip_prefix("starknet_").unwrap_or(&name).to_string();
-        let binding = get_schema_binding(name.clone(), schema, spec, cache);
+        let binding = get_schema_binding(name.clone(), schema, spec, cache, trace);
         cache.insert(name, binding.clone());
         binding
     });
@@ -544,7 +571,11 @@ pub fn get_method_contract(
     })
 }
 
-pub fn extract_contracts(spec: &openrpc::OpenRpc, cache: &mut Cache) -> Vec<Contract> {
+pub fn extract_contracts(
+    spec: &openrpc::OpenRpc,
+    cache: &mut Cache,
+    trace: &mut Vec<String>,
+) -> Vec<Contract> {
     let bindings = spec
         .components
         .as_ref()
@@ -552,7 +583,7 @@ pub fn extract_contracts(spec: &openrpc::OpenRpc, cache: &mut Cache) -> Vec<Cont
         .schemas
         .iter()
         .map(|(name, schema)| {
-            let binding = get_schema_binding(name.to_string(), schema, spec, cache);
+            let binding = get_schema_binding(name.to_string(), schema, spec, cache, trace);
             cache.insert(name.clone(), binding.clone());
             binding
         })
@@ -570,7 +601,7 @@ pub fn extract_contracts(spec: &openrpc::OpenRpc, cache: &mut Cache) -> Vec<Cont
         .iter()
         .filter_map(|method| {
             let name = method.name.clone();
-            get_method_contract(name, spec, cache)
+            get_method_contract(name, spec, cache, trace)
         })
         .collect::<Vec<_>>();
 
