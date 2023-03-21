@@ -79,19 +79,7 @@
                 "schema": {
                     "type": "array",
                     "items": {
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "transaction_trace": {
-                                    "title": "the transaction's trace",
-                                    "$ref": "#/components/schemas/TRANSACTION_TRACE"
-                                },
-                                "fee_estimation": {
-                                    "title": "the transaction's resources and fee",
-                                    "$ref": "#/components/schemas/FEE_ESTIMATE"
-                                }
-                            }
-                        }
+                        "$ref":"#/components/schemas/SIMULATED_TRANSACTION"
                     }
                 }
             },
@@ -133,16 +121,7 @@
                 "schema": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "description": "A single pair of transaction hash and corresponding trace",
-                        "properties": {
-                            "transaction_hash": {
-                                "$ref": "#/components/schemas/FELT"
-                            },
-                            "trace_root": {
-                                "$ref": "#/components/schemas/TRANSACTION_TRACE"
-                            }
-                        }
+                        "$ref":"#/components/schemas/BLOCK_TRANSACTION_TRACE"
                     }
                 }
             },
@@ -156,67 +135,102 @@
     "components": {
         "contentDescriptors": {},
         "schemas": {
+            "SIMULATED_TRANSACTION": {
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "transaction_trace": {
+                            "title": "the transaction's trace",
+                            "$ref": "#/components/schemas/TRANSACTION_TRACE"
+                        },
+                        "fee_estimation": {
+                            "title": "the transaction's resources and fee",
+                            "$ref": "#/components/schemas/FEE_ESTIMATE"
+                        }
+                    }
+                }
+            },
+            "INVOKE_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of an invoke transaction",
+                "properties": {
+                    "validate_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "execute_invocation": {
+                        "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "fee_transfer_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    }
+                }
+            },
+            "DECLARE_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of a declare transaction",
+                "properties": {
+                    "validate_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "fee_transfer_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    }
+                }
+            },
+            "DEPLOY_ACCOUNT_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of a deploy account transaction",
+                "properties": {
+                    "validate_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "constructor_invocation": {
+                        "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "fee_transfer_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    }
+                }
+            },
+            "L1_HANDLER_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of an L1 handler transaction",
+                "properties": {
+                    "function_invocation": {
+                        "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    }
+                }
+            },
             "TRANSACTION_TRACE": {
                 "oneOf": [
                     {
-                        "name": "INVOKE_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of an invoke transaction",
-                        "properties": {
-                            "validate_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "execute_invocation": {
-                                "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "fee_transfer_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            }
-                        }
+                        "$ref": "#/components/schemas/INVOKE_TXN_TRACE"
                     },
                     {
-                        "name": "DECLARE_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of a declare transaction",
-                        "properties": {
-                            "validate_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "fee_transfer_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            }
-                        }
+                        "$ref": "#/components/schemas/DECLARE_TXN_TRACE"
                     },
                     {
-                        "name": "DEPLOY_ACCOUNT_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of a deploy account transaction",
-                        "properties": {
-                            "validate_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "constructor_invocation": {
-                                "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "fee_transfer_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            }
-                        }
+                        "$ref": "#/components/schemas/DEPLOY_ACCOUNT_TXN_TRACE"
                     },
                     {
-                        "name": "L1_HANDLER_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of an L1 handler transaction",
-                        "properties": {
-                            "function_invocation": {
-                                "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            }
-                        }
+                        "$ref": "#/components/schemas/L1_HANDLER_TXN_TRACE"
                     }
                 ]
+            },
+            "BLOCK_TRANSACTION_TRACE": {
+                "type": "object",
+                "description": "A single pair of transaction hash and corresponding trace",
+                "properties": {
+                    "transaction_hash": {
+                        "$ref": "#/components/schemas/FELT"
+                    },
+                    "trace_root": {
+                        "$ref": "#/components/schemas/TRANSACTION_TRACE"
+                    }
+                }
             },
             "SIMULATION_FLAG": {
                 "type": "string",
