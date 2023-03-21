@@ -447,6 +447,85 @@ fn main() {
             }
         }),
     );
+
+    {
+        let json = r#"{
+            "version": "0x100000000000000000000000000000001",
+            "max_fee": "0x0",
+            "contract_address_salt": "0x46c0d4abf0192a788aca261e58d7031576f7d8ea5229f452b0f23e691dd5971",
+            "nonce": "0x0",
+            "signature": [
+                "0x296ab4b0b7cb0c6929c4fb1e04b782511dffb049f72a90efe5d53f0515eab88",
+                "0x4e80d8bb98a9baf47f6f0459c2329a5401538576e76436acaf5f56c573c7d77"
+            ],
+            "constructor_calldata": [
+                "0x63c056da088a767a6685ea0126f447681b5bceff5629789b70738bc26b5469d"
+            ],
+            "class_hash": "0x2b63cad399dd78efbc9938631e74079cbf19c9c08828e820e7606f46b947513",
+            "type": "DEPLOY_ACCOUNT"
+          }"#;
+        let tx: gen::BroadcastedTxn = serde_json::from_str(json).unwrap();
+        println!("{tx:#?}");
+    }
+    {
+        let json = r#"[
+            {
+                "call_type": "CALL",
+                "caller_address": "0x0",
+                "contract_address": "0x332141f07b2081e840cd12f62fb161606a24d1d81d54549cd5fb2ed419db415",
+                "calldata": [
+                    "0x2b63cad399dd78efbc9938631e74079cbf19c9c08828e820e7606f46b947513",
+                    "0x46c0d4abf0192a788aca261e58d7031576f7d8ea5229f452b0f23e691dd5971",
+                    "0x63c056da088a767a6685ea0126f447681b5bceff5629789b70738bc26b5469d"
+                ],
+                "class_hash": "0x2b63cad399dd78efbc9938631e74079cbf19c9c08828e820e7606f46b947513",
+                "entry_point_selector": "0x36fcbf06cd96843058359e1a75928beacfac10727dab22a3972f0af8aa92895",
+                "entry_point_type": "EXTERNAL",
+                "result": [],
+                "execution_resources": {
+                    "n_steps": 75,
+                    "builtin_instance_counter": {
+                    "ecdsa_builtin": 1
+                    },
+                    "n_memory_holes": 0
+                },
+                "internal_calls": [],
+                "events": [],
+                "messages": []
+            },
+            {
+                "call_type": "CALL",
+                "caller_address": "0x0",
+                "contract_address": "0x332141f07b2081e840cd12f62fb161606a24d1d81d54549cd5fb2ed419db415",
+                "calldata": [
+                    "0x63c056da088a767a6685ea0126f447681b5bceff5629789b70738bc26b5469d"
+                ],
+                "class_hash": "0x2b63cad399dd78efbc9938631e74079cbf19c9c08828e820e7606f46b947513",
+                "entry_point_selector": "0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194",
+                "entry_point_type": "CONSTRUCTOR",
+                "result": [],
+                "execution_resources": {
+                    "n_steps": 41,
+                    "builtin_instance_counter": {},
+                    "n_memory_holes": 0
+                },
+                "internal_calls": [],
+                "events": [],
+                "messages": []
+            }
+          ]"#;
+        let tx: Vec<gen::FunctionInvocation> = serde_json::from_str(json).unwrap();
+        println!("{tx:#?}");
+    }
+    {
+        let json = r#"{
+            "overall_fee": "0x1",
+            "gas_price": "0x2",
+            "gas_consumed": "0x3"
+          }"#;
+        let fee: gen::FeeEstimate = serde_json::from_str(json).unwrap();
+        println!("{fee:#?}");
+    }
 }
 
 fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
@@ -885,6 +964,29 @@ impl gen::Rpc for State {
         println!("deploy_account_transaction={deploy_account_transaction:#?}\nresult={result:#?}");
         Ok(result)
     }
+
+    fn traceTransaction(
+        &self,
+        _transaction_hash: gen::TxnHash,
+    ) -> std::result::Result<gen::TransactionTrace, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn simulateTransaction(
+        &self,
+        _block_id: gen::BlockId,
+        _transaction: gen::Transaction,
+        _simulation_flags: gen::SimulationFlags,
+    ) -> std::result::Result<gen::SimulateTransactionSimulatedTransactions, jsonrpc::Error> {
+        todo!()
+    }
+
+    fn traceBlockTransactions(
+        &self,
+        _block_hash: gen::BlockHash,
+    ) -> std::result::Result<gen::TraceBlockTransactionsTraces, jsonrpc::Error> {
+        todo!()
+    }
 }
 
 // NOTE: Generated code will be added below this line
@@ -963,6 +1065,17 @@ pub mod gen {
         Latest,
         #[serde(rename = "pending")]
         Pending,
+    }
+
+    // object: 'BLOCK_TRANSACTION_TRACE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct BlockTransactionTrace {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub trace_root: Option<TransactionTrace>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub transaction_hash: Option<Felt>,
     }
 
     // object: 'BLOCK_WITH_TXS'
@@ -1078,6 +1191,15 @@ pub mod gen {
         pub nonce: Felt,
         pub signature: Signature,
         pub version: NumAsHex,
+    }
+
+    // object: 'CALL_TYPE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub enum CallType {
+        #[serde(rename = "CALL")]
+        Call,
+        #[serde(rename = "LIBRARY_CALL")]
+        LibraryCall,
     }
 
     // object: 'CHAIN_ID'
@@ -1224,6 +1346,17 @@ pub mod gen {
         Declare,
     }
 
+    // object: 'DECLARE_TXN_TRACE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnTrace {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub validate_invocation: Option<FunctionInvocation>,
+    }
+
     // object: 'DECLARE_TXN_V1'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct DeclareTxnV1 {
@@ -1300,6 +1433,20 @@ pub mod gen {
     pub enum DeployAccountTxnReceiptType {
         #[serde(rename = "DEPLOY_ACCOUNT")]
         DeployAccount,
+    }
+
+    // object: 'DEPLOY_ACCOUNT_TXN_TRACE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct DeployAccountTxnTrace {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub constructor_invocation: Option<FunctionInvocation>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub validate_invocation: Option<FunctionInvocation>,
     }
 
     // object: 'DEPLOY_TXN'
@@ -1391,6 +1538,17 @@ pub mod gen {
         #[serde(flatten)]
         pub event: Event,
         pub transaction_hash: TxnHash,
+    }
+
+    // object: 'ENTRY_POINT_TYPE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub enum EntryPointType {
+        #[serde(rename = "CONSTRUCTOR")]
+        Constructor,
+        #[serde(rename = "EXTERNAL")]
+        External,
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
     }
 
     // object: 'ETH_ADDRESS'
@@ -1594,6 +1752,37 @@ pub mod gen {
         pub entry_point_selector: Felt,
     }
 
+    // object: 'FUNCTION_INVOCATION'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct FunctionInvocation {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub call_type: Option<CallType>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub caller_address: Option<Felt>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub calls: Option<Vec<FunctionInvocation>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub code_address: Option<Felt>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub entry_point_type: Option<EntryPointType>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub events: Option<Vec<Event>>,
+        #[serde(flatten)]
+        pub function_call: FunctionCall,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub messages: Option<Vec<MsgToL1>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub result: Option<Vec<Felt>>,
+    }
+
     // object: 'INVOKE_TXN'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct InvokeTxn {
@@ -1627,6 +1816,20 @@ pub mod gen {
     pub enum InvokeTxnReceiptType {
         #[serde(rename = "INVOKE")]
         Invoke,
+    }
+
+    // object: 'INVOKE_TXN_TRACE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnTrace {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub execute_invocation: Option<FunctionInvocation>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub validate_invocation: Option<FunctionInvocation>,
     }
 
     // object: 'INVOKE_TXN_V0'
@@ -1679,6 +1882,14 @@ pub mod gen {
         L1Handler,
     }
 
+    // object: 'L1_HANDLER_TXN_TRACE'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct L1HandlerTxnTrace {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub function_invocation: Option<FunctionInvocation>,
+    }
+
     // object: 'L1_HANDLER_TXN_type'
     #[derive(Debug, Deserialize, Serialize)]
     pub enum L1HandlerTxnType {
@@ -1691,6 +1902,37 @@ pub mod gen {
     pub struct MsgToL1 {
         pub payload: Vec<Felt>,
         pub to_address: Felt,
+    }
+
+    // object: 'NESTED_CALL'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct NestedCall {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub call_type: Option<CallType>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub caller_address: Option<Felt>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub calls: Option<Vec<FunctionInvocation>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub code_address: Option<Felt>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub entry_point_type: Option<EntryPointType>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub events: Option<Vec<Event>>,
+        #[serde(flatten)]
+        pub function_call: FunctionCall,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub messages: Option<Vec<MsgToL1>>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub result: Option<Vec<Felt>>,
     }
 
     // object: 'NONCES_ITEM'
@@ -1850,6 +2092,26 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Signature(pub Vec<Felt>); // name == binding_name
 
+    // object: 'SIMULATED_TRANSACTION'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct SimulatedTransaction {
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub fee_estimation: Option<FeeEstimate>,
+        #[serde(default)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pub transaction_trace: Option<TransactionTrace>,
+    }
+
+    // object: 'SIMULATION_FLAG'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub enum SimulationFlag {
+        #[serde(rename = "SKIP_EXECUTE")]
+        SkipExecute,
+        #[serde(rename = "SKIP_VALIDATE")]
+        SkipValidate,
+    }
+
     // object: 'STATE_DIFF'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct StateDiff {
@@ -1967,6 +2229,16 @@ pub mod gen {
         pub highest_block_num: NumAsHex,
         pub starting_block_hash: BlockHash,
         pub starting_block_num: NumAsHex,
+    }
+
+    // object: 'TRANSACTION_TRACE'
+    #[derive(Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum TransactionTrace {
+        DeclareTxnTrace(DeclareTxnTrace),
+        DeployAccountTxnTrace(DeployAccountTxnTrace),
+        InvokeTxnTrace(InvokeTxnTrace),
+        L1HandlerTxnTrace(L1HandlerTxnTrace),
     }
 
     // object: 'TXN'
@@ -2213,6 +2485,14 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Request(pub Vec<BroadcastedTxn>); // name == binding_name
 
+    // object: 'simulateTransaction_simulated_transactions'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct SimulateTransactionSimulatedTransactions(pub Vec<SimulatedTransaction>); // name == binding_name
+
+    // object: 'simulation_flags'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct SimulationFlags(pub Vec<SimulationFlag>); // name == binding_name
+
     // object: 'syncing_syncing'
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
@@ -2220,6 +2500,24 @@ pub mod gen {
         Boolean(bool),
         SyncStatus(SyncStatus),
     }
+
+    // object: 'traceBlockTransactions_traces'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct TraceBlockTransactionsTraces(pub Vec<BlockTransactionTrace>); // name == binding_name
+
+    // object: 'traceTransaction_trace'
+    #[derive(Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum TraceTransactionTrace {
+        DeclareTxnTrace(DeclareTxnTrace),
+        DeployAccountTxnTrace(DeployAccountTxnTrace),
+        InvokeTxnTrace(InvokeTxnTrace),
+        L1HandlerTxnTrace(L1HandlerTxnTrace),
+    }
+
+    // object: 'transaction'
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct Transaction(pub Vec<BroadcastedTxn>); // name == binding_name
 
     pub trait Rpc {
         /// Method: 'starknet_getBlockWithTxHashes'
@@ -2423,6 +2721,35 @@ pub mod gen {
             &self,
             deploy_account_transaction: BroadcastedDeployAccountTxn,
         ) -> std::result::Result<AddDeployAccountTransactionResult, jsonrpc::Error>;
+
+        /// Method: 'starknet_traceTransaction'
+        /// Summary: For a given executed transaction, return the trace of its execution, including internal calls
+        /// Description: Returns the execution trace of the transaction designated by the input hash
+        ///
+        fn traceTransaction(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<TransactionTrace, jsonrpc::Error>;
+
+        /// Method: 'starknet_simulateTransaction'
+        /// Summary: simulate a given transaction on the requested state, and generate the execution trace
+        /// Description:
+        ///
+        fn simulateTransaction(
+            &self,
+            block_id: BlockId,
+            transaction: Transaction,
+            simulation_flags: SimulationFlags,
+        ) -> std::result::Result<SimulateTransactionSimulatedTransactions, jsonrpc::Error>;
+
+        /// Method: 'starknet_traceBlockTransactions'
+        /// Summary: Retrieve traces for all transactions in the given block
+        /// Description: Returns the execution traces of all transactions included in the given block
+        ///
+        fn traceBlockTransactions(
+            &self,
+            block_hash: BlockHash,
+        ) -> std::result::Result<TraceBlockTransactionsTraces, jsonrpc::Error>;
     }
 
     fn handle_starknet_getBlockWithTxHashes<RPC: Rpc>(
@@ -3130,6 +3457,118 @@ pub mod gen {
         }
     }
 
+    fn handle_starknet_traceTransaction<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(TxnHash);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            transaction_hash: TxnHash,
+        }
+
+        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
+                let ArgByPos(transaction_hash) = args_by_pos;
+                ArgByName { transaction_hash }
+            })
+        });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+        };
+
+        let ArgByName { transaction_hash } = args;
+
+        match rpc.traceTransaction(transaction_hash) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_starknet_simulateTransaction<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId, Transaction, SimulationFlags);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+            transaction: Transaction,
+            simulation_flags: SimulationFlags,
+        }
+
+        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
+                let ArgByPos(block_id, transaction, simulation_flags) = args_by_pos;
+                ArgByName {
+                    block_id,
+                    transaction,
+                    simulation_flags,
+                }
+            })
+        });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+        };
+
+        let ArgByName {
+            block_id,
+            transaction,
+            simulation_flags,
+        } = args;
+
+        match rpc.simulateTransaction(block_id, transaction, simulation_flags) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_starknet_traceBlockTransactions<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockHash);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_hash: BlockHash,
+        }
+
+        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
+                let ArgByPos(block_hash) = args_by_pos;
+                ArgByName { block_hash }
+            })
+        });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+        };
+
+        let ArgByName { block_hash } = args;
+
+        match rpc.traceBlockTransactions(block_hash) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
     pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
         let params = &req.params.clone().unwrap_or_default();
 
@@ -3163,6 +3602,11 @@ pub mod gen {
             "starknet_addDeployAccountTransaction" => {
                 handle_starknet_addDeployAccountTransaction(rpc, params)
             }
+            "starknet_traceTransaction" => handle_starknet_traceTransaction(rpc, params),
+            "starknet_simulateTransaction" => handle_starknet_simulateTransaction(rpc, params),
+            "starknet_traceBlockTransactions" => {
+                handle_starknet_traceBlockTransactions(rpc, params)
+            }
             _ => jsonrpc::Response::error(-32601, "Method not found"),
         };
 
@@ -3179,13 +3623,16 @@ pub mod gen {
         pub const CONTRACT_ERROR: Error = Error(40, "Contract error");
         pub const CONTRACT_NOT_FOUND: Error = Error(20, "Contract not found");
         pub const FAILED_TO_RECEIVE_TXN: Error = Error(1, "Failed to write transaction");
+        pub const INVALID_BLOCK_HASH: Error = Error(24, "Invalid block hash");
         pub const INVALID_CALL_DATA: Error = Error(22, "Invalid call data");
         pub const INVALID_CONTINUATION_TOKEN: Error =
             Error(33, "The supplied continuation token is invalid or unknown");
         pub const INVALID_CONTRACT_CLASS: Error = Error(50, "Invalid contract class");
         pub const INVALID_MESSAGE_SELECTOR: Error = Error(21, "Invalid message selector");
+        pub const INVALID_TXN_HASH: Error = Error(25, "Invalid transaction hash");
         pub const INVALID_TXN_INDEX: Error = Error(27, "Invalid transaction index in a block");
         pub const NO_BLOCKS: Error = Error(32, "There are no blocks");
+        pub const NO_TRACE_AVAILABLE: Error = Error(10, "No trace available for transaction");
         pub const PAGE_SIZE_TOO_BIG: Error = Error(31, "Requested page size is too big");
         pub const TOO_MANY_KEYS_IN_FILTER: Error = Error(34, "Too many keys provided in a filter");
         pub const TXN_HASH_NOT_FOUND: Error = Error(25, "Transaction hash not found");
@@ -4049,6 +4496,120 @@ pub mod gen {
                 if let Some(value) = res.result.take() {
                     let out: AddDeployAccountTransactionResult = serde_json::from_value(value)
                         .map_err(|e| {
+                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                        })?;
+                    Ok(out)
+                } else {
+                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                }
+            }
+
+            fn traceTransaction(
+                &self,
+                transaction_hash: TxnHash,
+            ) -> std::result::Result<TransactionTrace, jsonrpc::Error> {
+                let args = (transaction_hash,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                let req = jsonrpc::Request::new("starknet_traceTransaction".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                    })?;
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let out: TransactionTrace = serde_json::from_value(value).map_err(|e| {
+                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                    })?;
+                    Ok(out)
+                } else {
+                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                }
+            }
+
+            fn simulateTransaction(
+                &self,
+                block_id: BlockId,
+                transaction: Transaction,
+                simulation_flags: SimulationFlags,
+            ) -> std::result::Result<SimulateTransactionSimulatedTransactions, jsonrpc::Error>
+            {
+                let args = (block_id, transaction, simulation_flags);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                let req = jsonrpc::Request::new("starknet_simulateTransaction".to_string(), params)
+                    .with_id(jsonrpc::Id::Number(1));
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                    })?;
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let out: SimulateTransactionSimulatedTransactions =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                        })?;
+                    Ok(out)
+                } else {
+                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                }
+            }
+
+            fn traceBlockTransactions(
+                &self,
+                block_hash: BlockHash,
+            ) -> std::result::Result<TraceBlockTransactionsTraces, jsonrpc::Error> {
+                let args = (block_hash,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                let req =
+                    jsonrpc::Request::new("starknet_traceBlockTransactions".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                    })?;
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let out: TraceBlockTransactionsTraces =
+                        serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
                     Ok(out)

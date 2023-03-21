@@ -298,17 +298,17 @@ pub mod gen {
     #[derive(Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum Transaction {
-        TransactionSigned(TransactionSigned),
         Hash32(Hash32),
+        TransactionSigned(TransactionSigned),
     }
 
     // object: 'Transaction1559Signed'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Transaction1559Signed {
-        #[serde(flatten)]
-        pub transaction1559unsigned: Transaction1559Unsigned,
         pub r: Uint,
         pub s: Uint,
+        #[serde(flatten)]
+        pub transaction1559unsigned: Transaction1559Unsigned,
         #[serde(rename = "yParity")]
         pub yparity: Uint,
     }
@@ -338,10 +338,10 @@ pub mod gen {
     // object: 'Transaction2930Signed'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Transaction2930Signed {
-        #[serde(flatten)]
-        pub transaction2930unsigned: Transaction2930Unsigned,
         pub r: Uint,
         pub s: Uint,
+        #[serde(flatten)]
+        pub transaction2930unsigned: Transaction2930Unsigned,
         #[serde(rename = "yParity")]
         pub yparity: Uint,
     }
@@ -382,8 +382,6 @@ pub mod gen {
     // object: 'TransactionInfo'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct TransactionInfo {
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
         #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
         #[serde(rename = "blockNumber")]
@@ -392,15 +390,17 @@ pub mod gen {
         pub hash: Hash32,
         #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'TransactionLegacySigned'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct TransactionLegacySigned {
-        #[serde(flatten)]
-        pub transactionlegacyunsigned: TransactionLegacyUnsigned,
         pub r: Uint,
         pub s: Uint,
+        #[serde(flatten)]
+        pub transactionlegacyunsigned: TransactionLegacyUnsigned,
         pub v: Uint,
     }
 
@@ -1002,8 +1002,6 @@ pub mod gen {
     // object: 'eth_getTransactionByBlockHashAndIndex_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByBlockHashAndIndexTransactionInformation {
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
         #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
         #[serde(rename = "blockNumber")]
@@ -1012,13 +1010,13 @@ pub mod gen {
         pub hash: Hash32,
         #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'eth_getTransactionByBlockNumberAndIndex_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByBlockNumberAndIndexTransactionInformation {
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
         #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
         #[serde(rename = "blockNumber")]
@@ -1027,13 +1025,13 @@ pub mod gen {
         pub hash: Hash32,
         #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'eth_getTransactionByHash_Transaction information'
     #[derive(Debug, Deserialize, Serialize)]
     pub struct EthGetTransactionByHashTransactionInformation {
-        #[serde(flatten)]
-        pub transactionsigned: TransactionSigned,
         #[serde(rename = "blockHash")]
         pub blockhash: Hash32,
         #[serde(rename = "blockNumber")]
@@ -1042,6 +1040,8 @@ pub mod gen {
         pub hash: Hash32,
         #[serde(rename = "transactionIndex")]
         pub transactionindex: Uint,
+        #[serde(flatten)]
+        pub transactionsigned: TransactionSigned,
     }
 
     // object: 'eth_getTransactionCount_Transaction count'
