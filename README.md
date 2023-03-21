@@ -18,7 +18,7 @@ NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is nec
 ```
 # git restore examples/gen.rs
 # manually remove `mod gen` from the examples/gen.rs (generated code is commited now)
-cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json >> examples/gen.rs && cargo fmt
+cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json ./api/starknet_trace_api_openrpc.json >> examples/gen.rs && cargo fmt
 cargo run --example gen
 ```
 
