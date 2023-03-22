@@ -521,8 +521,9 @@ const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
 fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
     let req = jsonrpc::Request::new(
         "`method_name`".to_string(),
-        serde_json::Value::default(),
-    );
+        serde_json::Value::Array(vec![]),
+    )
+    .with_id(jsonrpc::Id::Number(1));
 
     let mut res: jsonrpc::Response = self
         .client
