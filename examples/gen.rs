@@ -512,8 +512,59 @@ fn main() {
                 "internal_calls": [],
                 "events": [],
                 "messages": []
+            },
+            {
+                "call_type": "CALL",
+                "calldata": [
+                    "0x1",
+                    "0x67162d776de4d50162cd2d02607cc15f3b54de48d66c0bf2994760049ce72ec",
+                    "0x362398bec32bc0ebb411203221a35a0301193a96f317ebe5e40be9f60d15320",
+                    "0x0",
+                    "0x1",
+                    "0x1",
+                    "0x4d2"
+                ],
+                "caller_address": "0x0",
+                "class_hash": "0x6f3ec04229f8f9663ee7d5bb9d2e06f213ba8c20eb34c58c25a54ef8fc591cb",
+                "contract_address": "0x325bf20d89b86fafa54be01c3571d3b1bd5562e7ba13e9021e2f4be86c605a1",
+                "entry_point_type": "EXTERNAL",
+                "entry_point_selector": "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
+                "events": [],
+                "execution_resources": {
+                    "builtin_instance_counter": {
+                        "range_check_builtin": 2
+                    },
+                    "n_memory_holes": 3,
+                    "n_steps": 206
+                },
+                "calls": [
+                    {
+                        "call_type": "CALL",
+                        "calldata": [
+                            "0x4d2"
+                        ],
+                        "caller_address": "0x325bf20d89b86fafa54be01c3571d3b1bd5562e7ba13e9021e2f4be86c605a1",
+                        "class_hash": "0x6142260d223bea37ba3be22f597c0fb2faf27cb66590ca5cbd89df5d6dfdd78",
+                        "contract_address": "0x67162d776de4d50162cd2d02607cc15f3b54de48d66c0bf2994760049ce72ec",
+                        "entry_point_type": "EXTERNAL",
+                        "entry_point_selector": "0x362398bec32bc0ebb411203221a35a0301193a96f317ebe5e40be9f60d15320",
+                        "events": [],
+                        "execution_resources": {
+                            "builtin_instance_counter": {},
+                            "n_memory_holes": 0,
+                            "n_steps": 65
+                        },
+                        "internal_calls": [],
+                        "messages": [],
+                        "result": []
+                    }
+                ],
+                "messages": [],
+                "result": []
             }
           ]"#;
+        // selector -> entry_point_selector
+        // internal_calls -> calls
         let tx: Vec<gen::FunctionInvocation> = serde_json::from_str(json).unwrap();
         println!("{tx:#?}");
     }
