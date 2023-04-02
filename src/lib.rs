@@ -82,8 +82,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     writeln!(target, "pub mod gen {{").unwrap();
     writeln!(target, "use serde::{{Deserialize, Serialize}};").unwrap();
     writeln!(target, "use serde_json::Value;").unwrap();
-    // TODO: Replace 'openrpc_stub_gen' with final crate name
-    writeln!(target, "\nuse openrpc_stub_gen::jsonrpc;").unwrap();
+    writeln!(target, "\nuse iamgroot::jsonrpc;").unwrap();
 
     let mut ordered = cache.data.iter().collect::<Vec<_>>();
     ordered.sort_by_key(|(name, _)| *name);
