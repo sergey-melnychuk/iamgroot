@@ -3730,6 +3730,8 @@ pub mod gen {
                     jsonrpc::Request::new("starknet_getBlockWithTxHashes".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3750,6 +3752,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3766,6 +3771,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getBlockWithTxs".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3787,6 +3794,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3803,6 +3813,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getStateUpdate".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3823,6 +3835,9 @@ pub mod gen {
                     let out: GetStateUpdateResult = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3841,6 +3856,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getStorageAt".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3861,6 +3878,9 @@ pub mod gen {
                     let out: Felt = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3878,6 +3898,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("starknet_getTransactionByHash".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3898,6 +3920,9 @@ pub mod gen {
                     let out: Txn = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3919,6 +3944,8 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3938,6 +3965,9 @@ pub mod gen {
                     let out: Txn = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3955,6 +3985,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("starknet_getTransactionReceipt".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3975,6 +4007,9 @@ pub mod gen {
                     let out: TxnReceipt = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3992,6 +4027,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getClass".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4012,6 +4049,9 @@ pub mod gen {
                     let out: GetClassResult = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4029,6 +4069,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getClassHashAt".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4049,6 +4091,9 @@ pub mod gen {
                     let out: Felt = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4066,6 +4111,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getClassAt".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4086,6 +4133,9 @@ pub mod gen {
                     let out: GetClassAtResult = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4103,6 +4153,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("starknet_getBlockTransactionCount".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4124,6 +4176,9 @@ pub mod gen {
                         .map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4141,6 +4196,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_call".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4161,6 +4218,9 @@ pub mod gen {
                     let out: CallResult = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4178,6 +4238,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_estimateFee".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4198,6 +4260,9 @@ pub mod gen {
                     let out: EstimateFeeResult = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4207,8 +4272,11 @@ pub mod gen {
             fn blockNumber(&self) -> std::result::Result<BlockNumber, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "starknet_blockNumber".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4229,6 +4297,9 @@ pub mod gen {
                     let out: BlockNumber = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4240,8 +4311,11 @@ pub mod gen {
             ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "starknet_blockHashAndNumber".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4263,6 +4337,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4272,8 +4349,11 @@ pub mod gen {
             fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "starknet_chainId".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4294,6 +4374,9 @@ pub mod gen {
                     let out: ChainId = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4305,8 +4388,11 @@ pub mod gen {
             ) -> std::result::Result<PendingTransactionsResult, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "starknet_pendingTransactions".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4328,6 +4414,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4337,8 +4426,11 @@ pub mod gen {
             fn syncing(&self) -> std::result::Result<SyncingSyncing, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "starknet_syncing".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4359,6 +4451,9 @@ pub mod gen {
                     let out: SyncingSyncing = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4375,6 +4470,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getEvents".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4395,6 +4492,9 @@ pub mod gen {
                     let out: EventsChunk = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4412,6 +4512,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_getNonce".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4432,6 +4534,9 @@ pub mod gen {
                     let out: Felt = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4449,6 +4554,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("starknet_addInvokeTransaction".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4470,6 +4577,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4487,6 +4597,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("starknet_addDeclareTransaction".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4508,6 +4620,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4529,6 +4644,8 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -4549,6 +4666,9 @@ pub mod gen {
                         .map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4565,6 +4685,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_traceTransaction".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4585,6 +4707,9 @@ pub mod gen {
                     let out: TransactionTrace = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4604,6 +4729,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("starknet_simulateTransaction".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4625,6 +4752,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4642,6 +4772,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("starknet_traceBlockTransactions".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4663,6 +4795,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))

@@ -492,7 +492,7 @@ fn `method_short_name`(
     let req = jsonrpc::Request::new("`method_name`".to_string(), params)
         .with_id(jsonrpc::Id::Number(1));
 
-    log::debug!(&req);
+    log::debug!("{req:#?}");
 
     let mut res: jsonrpc::Response = self
         .client
@@ -513,7 +513,7 @@ fn `method_short_name`(
                 jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
             })?;
 
-        log::debug!(&out);
+        log::debug!("{out:#?}");
 
         Ok(out)
     } else {
@@ -530,7 +530,7 @@ fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Err
     )
     .with_id(jsonrpc::Id::Number(1));
 
-    log::debug!(&req);
+    log::debug!("{req:#?}");
 
     let mut res: jsonrpc::Response = self
         .client
@@ -550,7 +550,7 @@ fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Err
             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
         })?;
 
-        log::debug!(&out);
+        log::debug!("{out:#?}");
 
         Ok(out)
     } else {
