@@ -1,15 +1,13 @@
-openrpc-stub-gen
-================
+I am groot
+==========
 
-!WIP!
+[Proof of Concept] Rust code generator from OpenRPC spec
 
 [OpenRPC spec](https://spec.open-rpc.org/)
 
 [JSON-RPC spec](https://www.jsonrpc.org/specification)
 
 [StarkNet OpenRPC spec](https://github.com/starkware-libs/starknet-specs)
-
-NOTE: The [fix](https://github.com/starkware-libs/starknet-specs/pull/56) is necessary to make existing spec a valid OpenRPC spec.
 
 ### Usage
 
