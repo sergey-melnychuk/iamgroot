@@ -2827,6 +2827,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("eth_getBlockByHash".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -2846,6 +2848,9 @@ pub mod gen {
                     let out: Block = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -2864,6 +2869,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("eth_getBlockByNumber".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -2883,6 +2890,9 @@ pub mod gen {
                     let out: Block = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -2900,6 +2910,8 @@ pub mod gen {
                 let req =
                     jsonrpc::Request::new("eth_getBlockTransactionCountByHash".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -2920,6 +2932,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -2940,6 +2955,8 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -2959,6 +2976,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -2976,6 +2996,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("eth_getUncleCountByBlockHash".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -2995,6 +3017,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3013,6 +3038,8 @@ pub mod gen {
                     jsonrpc::Request::new("eth_getUncleCountByBlockNumber".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3032,6 +3059,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3039,8 +3069,13 @@ pub mod gen {
             }
 
             fn eth_chainId(&self) -> std::result::Result<Uint, jsonrpc::Error> {
-                let req =
-                    jsonrpc::Request::new("eth_chainId".to_string(), serde_json::Value::default());
+                let req = jsonrpc::Request::new(
+                    "eth_chainId".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3061,6 +3096,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3068,8 +3106,13 @@ pub mod gen {
             }
 
             fn eth_syncing(&self) -> std::result::Result<SyncingStatus, jsonrpc::Error> {
-                let req =
-                    jsonrpc::Request::new("eth_syncing".to_string(), serde_json::Value::default());
+                let req = jsonrpc::Request::new(
+                    "eth_syncing".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3090,6 +3133,9 @@ pub mod gen {
                     let out: SyncingStatus = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3097,8 +3143,13 @@ pub mod gen {
             }
 
             fn eth_coinbase(&self) -> std::result::Result<Address, jsonrpc::Error> {
-                let req =
-                    jsonrpc::Request::new("eth_coinbase".to_string(), serde_json::Value::default());
+                let req = jsonrpc::Request::new(
+                    "eth_coinbase".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3119,6 +3170,9 @@ pub mod gen {
                     let out: Address = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3126,8 +3180,13 @@ pub mod gen {
             }
 
             fn eth_accounts(&self) -> std::result::Result<EthAccountsAccounts, jsonrpc::Error> {
-                let req =
-                    jsonrpc::Request::new("eth_accounts".to_string(), serde_json::Value::default());
+                let req = jsonrpc::Request::new(
+                    "eth_accounts".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3148,6 +3207,9 @@ pub mod gen {
                     let out: EthAccountsAccounts = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3157,8 +3219,11 @@ pub mod gen {
             fn eth_blockNumber(&self) -> std::result::Result<Uint, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_blockNumber".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3179,6 +3244,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3196,6 +3264,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_call".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3216,6 +3286,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3233,6 +3306,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_estimateGas".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3253,6 +3328,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3270,6 +3348,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_createAccessList".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3291,6 +3371,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3298,8 +3381,13 @@ pub mod gen {
             }
 
             fn eth_gasPrice(&self) -> std::result::Result<Uint, jsonrpc::Error> {
-                let req =
-                    jsonrpc::Request::new("eth_gasPrice".to_string(), serde_json::Value::default());
+                let req = jsonrpc::Request::new(
+                    "eth_gasPrice".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3320,6 +3408,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3329,8 +3420,11 @@ pub mod gen {
             fn eth_maxPriorityFeePerGas(&self) -> std::result::Result<Uint, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_maxPriorityFeePerGas".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3351,6 +3445,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3369,6 +3466,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_feeHistory".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3390,6 +3489,9 @@ pub mod gen {
                         .map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3399,8 +3501,11 @@ pub mod gen {
             fn eth_newBlockFilter(&self) -> std::result::Result<Uint, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_newBlockFilter".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3421,6 +3526,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3430,8 +3538,11 @@ pub mod gen {
             fn eth_newPendingTransactionFilter(&self) -> std::result::Result<Uint, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_newPendingTransactionFilter".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3452,6 +3563,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3468,6 +3582,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_uninstallFilter".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3488,6 +3604,9 @@ pub mod gen {
                     let out: bool = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3505,6 +3624,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_sign".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3525,6 +3646,9 @@ pub mod gen {
                     let out: Bytes65 = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3541,6 +3665,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_signTransaction".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3561,6 +3687,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3578,6 +3707,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_getBalance".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3598,6 +3729,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3617,6 +3751,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("eth_getStorageAt".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3636,6 +3772,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3653,6 +3792,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_getTransactionCount".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3673,6 +3814,9 @@ pub mod gen {
                     let out: Uint = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3690,6 +3834,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_getCode".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3710,6 +3856,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3728,6 +3877,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_getProof".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3748,6 +3899,9 @@ pub mod gen {
                     let out: AccountProof = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3765,6 +3919,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("eth_sendTransaction".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3784,6 +3940,9 @@ pub mod gen {
                     let out: Hash32 = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3801,6 +3960,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("eth_sendRawTransaction".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3820,6 +3981,9 @@ pub mod gen {
                     let out: Hash32 = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3836,6 +4000,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_getTransactionByHash".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3856,6 +4022,9 @@ pub mod gen {
                     let out: TransactionInfo = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3877,6 +4046,8 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3896,6 +4067,9 @@ pub mod gen {
                     let out: TransactionInfo = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3917,6 +4091,8 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -3936,6 +4112,9 @@ pub mod gen {
                     let out: TransactionInfo = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3952,6 +4131,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("eth_getTransactionReceipt".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -3972,6 +4153,9 @@ pub mod gen {
                     let out: ReceiptInfo = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -3989,6 +4173,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("debug_getRawHeader".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -4008,6 +4194,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4025,6 +4214,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("debug_getRawBlock".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -4044,6 +4235,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4061,6 +4255,8 @@ pub mod gen {
                 let req = jsonrpc::Request::new("debug_getRawTransaction".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
+                log::debug!("{req:#?}");
+
                 let mut res: jsonrpc::Response = self
                     .client
                     .post(&self.url)
@@ -4080,6 +4276,9 @@ pub mod gen {
                     let out: Bytes = serde_json::from_value(value).map_err(|e| {
                         jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                     })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4096,6 +4295,8 @@ pub mod gen {
                     .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
                 let req = jsonrpc::Request::new("debug_getRawReceipts".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4117,6 +4318,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
@@ -4128,8 +4332,11 @@ pub mod gen {
             ) -> std::result::Result<DebugGetBadBlocksBlocks, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "debug_getBadBlocks".to_string(),
-                    serde_json::Value::default(),
-                );
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("{req:#?}");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4151,6 +4358,9 @@ pub mod gen {
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
                         })?;
+
+                    log::debug!("{out:#?}");
+
                     Ok(out)
                 } else {
                     Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
