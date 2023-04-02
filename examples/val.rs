@@ -1,6 +1,6 @@
 mod private {
     use once_cell::sync::Lazy;
-    use openrpc_stub_gen::jsonrpc;
+    use iamgroot::jsonrpc;
     use regex::Regex;
     use serde::{Deserialize, Serialize};
 

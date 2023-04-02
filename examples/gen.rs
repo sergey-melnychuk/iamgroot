@@ -1,4 +1,4 @@
-use openrpc_stub_gen::jsonrpc;
+use iamgroot::jsonrpc;
 
 struct State;
 
@@ -1050,7 +1050,7 @@ pub mod gen {
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
 
-    use openrpc_stub_gen::jsonrpc;
+    use iamgroot::jsonrpc;
 
     // object: 'ADDRESS'
     #[derive(Debug, Deserialize, Serialize)]

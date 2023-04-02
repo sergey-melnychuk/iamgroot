@@ -1,7 +1,7 @@
 fn main() {
     {
         let json = include_str!("../api/0x10165f5.json");
-        let mut res: openrpc_stub_gen::jsonrpc::Response = serde_json::from_str(json).unwrap();
+        let mut res: iamgroot::jsonrpc::Response = serde_json::from_str(json).unwrap();
         let res: gen::Block = serde_json::from_value(res.result.take().unwrap()).unwrap();
         println!("{res:#?}");
     }
@@ -16,7 +16,7 @@ pub mod gen {
     use serde::{Deserialize, Serialize};
     use serde_json::Value;
 
-    use openrpc_stub_gen::jsonrpc;
+    use iamgroot::jsonrpc;
 
     // object: 'AccessList'
     #[derive(Debug, Deserialize, Serialize)]
