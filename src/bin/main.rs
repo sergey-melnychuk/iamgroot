@@ -1,4 +1,4 @@
-use openrpc_stub_gen::{gen_code, gen_json, gen_tree};
+use iamgroot::{gen_code, gen_json, gen_tree};
 
 fn main() {
     env_logger::init();
