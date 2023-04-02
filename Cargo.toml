@@ -1,7 +1,9 @@
 [package]
-name = "openrpc-stub-gen"
+name = "iamgroot"
 version = "0.1.0"
 edition = "2021"
+description = "Rust code generation from Open-RPC spec"
+license = "MIT"
 
 [dependencies]
 env_logger = "0.10.0"
