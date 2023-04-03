@@ -131,11 +131,13 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                 lines.push("#[serde(try_from = \"String\")]".to_string());
                 lines.push(format!("pub struct {name}({ty});"));
 
+                let pattern = rules.pattern.as_ref().unwrap().replace("\\", "\\\\");
+
                 let code = VALIDATION_IMPL
                     .replace("`type_name`", &name)
                     .replace("`type_name_uppercase`", &name.to_ascii_uppercase())
                     .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
-                    .replace("`pattern`", rules.pattern.as_ref().unwrap());
+                    .replace("`pattern`", &pattern);
                 lines.push(code);
             }
 
