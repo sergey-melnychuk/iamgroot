@@ -39,6 +39,11 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### TODO
 
+1. [ ] (eth) Handle "anonymous enums"
+   - params (#/components/contentDescriptors/Filter:address)
+   - result (#/methods{name='eth_syncing'}:syncing)
+   - try "title"? (make mandatory)
+1. [ ] (eth) Add module-wise `Null` constant? ((de)serialized as `null`)
 1. [ ] validation of `schema.{minimum, maximum}`
 1. [ ] `async` version of trait & handlers
    - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
