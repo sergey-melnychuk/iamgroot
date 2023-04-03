@@ -400,7 +400,7 @@ pub fn get_schema_binding(
         trace.pop().unwrap_or_default();
         return Binding::Basic(codegen::Basic::Boolean);
     }
-    if schema.has_type("array") {
+    if schema.has_type("array") || schema.items.is_some() {
         let schema = schema.items.as_ref().expect("schema");
         let binding = get_schema_binding(name.clone(), schema, spec, cache, trace);
         let item_type = Box::new(binding.get_type());
@@ -509,6 +509,12 @@ pub fn get_method_contract(
         .params
         .iter()
         .map(|param| {
+            let param = if let Some(key) = param._ref.as_ref() {
+                let id = key.split('/').last().unwrap();
+                spec.get_content(id).unwrap()
+            } else {
+                param
+            };
             let schema = param.schema.as_ref().unwrap();
             let name = param.name.clone().unwrap_or_default();
             let name = renders::normalize_prop_name(&name).expect("name");
@@ -536,6 +542,12 @@ pub fn get_method_contract(
         })
         .collect();
     let result = method.result.as_ref().map(|result| {
+        let result = if let Some(key) = result._ref.as_ref() {
+            let id = key.split('/').last().unwrap();
+            spec.get_content(id).unwrap()
+        } else {
+            &result
+        };
         let schema = result.schema.as_ref().unwrap();
         let name = result.name.clone().unwrap_or_default();
         let name = format!("{}_{name}", method.name);
