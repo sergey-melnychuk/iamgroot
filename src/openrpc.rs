@@ -20,6 +20,11 @@ impl OpenRpc {
         let components = self.components.as_ref()?;
         components.schemas.get(id)
     }
+
+    pub fn get_content(&self, id: &str) -> Option<&Content> {
+        let components = self.components.as_ref()?;
+        components.contentDescriptors.get(id)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -69,7 +74,7 @@ pub struct Method {
     pub errors: Option<Vec<Reference>>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Content {
     #[serde(rename = "$ref")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -138,8 +143,9 @@ impl Schema {
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Components {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub contentDescriptors: Option<Value>,
+    #[serde(default)]
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    pub contentDescriptors: HashMap<String, Content>,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub schemas: HashMap<String, Schema>,
     #[serde(default)]
