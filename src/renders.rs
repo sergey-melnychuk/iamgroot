@@ -99,8 +99,11 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         binding::Binding::Basic(basic) => {
             let ty = render_basic(basic);
             let name = normalize_type_name(name)?;
-            if ty != name {
-                // Keep type aliases just for the reference and debugging
+            if matches!(basic, codegen::Basic::Null) {
+                lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+                lines.push("pub struct Null;".to_string());
+            } else if ty != name {
+                // Keep type aliases just for the reference
                 lines.push(format!("// pub type {name} = {ty};"));
             }
         }

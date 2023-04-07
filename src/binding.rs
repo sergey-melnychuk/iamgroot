@@ -430,20 +430,27 @@ pub fn get_schema_binding(
                 } else {
                     codegen::Type::Option(Box::new(binding.get_type()))
                 };
-                let prop_type =
+                let prop_type = if !type_name.is_empty() {
                     if type_name == binding.get_name() || matches!(binding, Binding::Basic(_)) {
                         prop_type
                     } else if is_required {
                         codegen::Type::Named(type_name)
                     } else {
                         codegen::Type::Option(Box::new(codegen::Type::Named(type_name)))
-                    };
+                    }
+                } else {
+                    prop_type
+                };
                 codegen::Property::of(prop_name.to_string(), prop_type)
             })
             .flat_map(unfold_property)
             .collect();
         trace.pop().unwrap_or_default();
-        return Binding::Struct(codegen::Struct::of(name, properties));
+        let binding = Binding::Struct(codegen::Struct::of(name.clone(), properties));
+        if !name.is_empty() {
+            cache.insert(name, binding.clone());
+        }
+        return binding;
     }
     if let Some(all) = schema.allOf.as_ref() {
         let bindings = all
@@ -458,7 +465,10 @@ pub fn get_schema_binding(
     if let Some(one) = schema.oneOf.as_ref() {
         let bindings = one
             .iter()
-            .map(|schema| get_schema_binding(String::default(), schema, spec, cache, trace))
+            .map(|schema| {
+                let name = schema.title.clone().unwrap_or_default();
+                get_schema_binding(name.clone(), schema, spec, cache, trace)
+            })
             .collect::<Vec<_>>();
         let name = if !name.is_empty() {
             name
@@ -479,7 +489,7 @@ pub fn get_schema_binding(
         return get_schema_binding(name, schema, spec, cache, trace);
     }
     if schema.has_type("null") {
-        cache.insert("null".to_string(), Binding::Basic(codegen::Basic::Null));
+        cache.insert("Null".to_string(), Binding::Basic(codegen::Basic::Null));
         trace.pop().unwrap_or_default();
         return Binding::Basic(codegen::Basic::Null);
     }
