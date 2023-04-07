@@ -22,6 +22,7 @@ cargo run --example gen
 
 ```
 cargo run -- CODE ./api/eth.json >> examples/eth.rs && cargo fmt
+cargo run --example eth
 ```
 
 * Dump the AST (for debugging):
@@ -39,19 +40,19 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### TODO
 
-1. [ ] (eth) Handle "anonymous enums"
-   - params (#/components/contentDescriptors/Filter:address)
-   - result (#/methods{name='eth_syncing'}:syncing)
-   - try "title"? (make mandatory)
-1. [ ] (eth) Add module-wise `Null` constant? ((de)serialized as `null`)
 1. [ ] validation of `schema.{minimum, maximum}`
 1. [ ] `async` version of trait & handlers
-   - would require `async_trait` on stable rust: [`async_fn_in_trait`](https://blog.rust-lang.org/inside-rust/2022/11/17/async-fn-in-trait-nightly.html)
 1. [ ] Seamless inclusion into a build process
    - extract `-build` sub-crate for `[build-dependencies]`
 
 ### DONE
 
+* [x] (eth) Handle "anonymous enums"
+  - params (#/components/contentDescriptors/Filter:address)
+  - result (#/methods{name='eth_syncing'}:syncing)
+  - try "title"? (make mandatory)
+* [x] (eth) Add module-wise `Null` constant? 
+  - (de)serialized as `null`
 * [x] consistent ordering of generated structs
 * [x] validation (against `schema.pattern` to start with)
   - for primitive types: generate named value-object wrapper when validation is necessary
