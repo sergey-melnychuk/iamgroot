@@ -1,0 +1,3 @@
+## https://www.gitpod.io/docs/introduction/learn-gitpod/gitpod-yaml
+tasks:
+  - init: cargo build
