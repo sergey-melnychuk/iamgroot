@@ -1564,7 +1564,7 @@
 		  "title": "keccak",
 		  "type": "string",
 		  "description": "Hex representation of a Keccak 256 hash",
-		  "pattern": "^0x[a-fA-F\\d]{64}$"
+		  "pattern": "^0x[a-fA-F\\d]{1,64}$"
 		},
 		"Nonce": {
 		  "title": "nonce",
