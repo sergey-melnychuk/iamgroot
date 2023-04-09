@@ -40,7 +40,9 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### TODO
 
-1. [ ] `async` version of trait & handlers
+1. [ ] `async` version of the `Rpc` trait
+   - using [`async_trait`](https://docs.rs/async-trait/latest/async_trait/)
+   - async client as well
 1. [ ] Seamless inclusion into a build process
    - extract `-build` sub-crate for `[build-dependencies]`
 
