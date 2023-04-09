@@ -40,13 +40,13 @@ diff <(jq --sort-keys . ./api/test/input.openrpc) <(jq --sort-keys . debug.json)
 
 ### TODO
 
-1. [ ] validation of `schema.{minimum, maximum}`
 1. [ ] `async` version of trait & handlers
 1. [ ] Seamless inclusion into a build process
    - extract `-build` sub-crate for `[build-dependencies]`
 
 ### DONE
 
+* [x] validation of `schema.{minimum, maximum}`
 * [x] (eth) Handle "anonymous enums"
   - params (#/components/contentDescriptors/Filter:address)
   - result (#/methods{name='eth_syncing'}:syncing)
