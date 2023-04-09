@@ -381,13 +381,15 @@ pub fn get_schema_binding(
     }
     if schema.has_type("integer") || schema.has_type("number") {
         if !name.is_empty() {
-            if schema.minimum.is_some() || schema.maximum.is_some() {
-                // TODO: add range validation rules
-            }
+            let rules = codegen::Rules {
+                min: schema.minimum.clone(),
+                max: schema.maximum.clone(),
+                ..Default::default()
+            };
 
             let binding = Binding::Named(
                 name.clone(),
-                codegen::Type::Basic(codegen::Basic::Integer, codegen::Rules::default()),
+                codegen::Type::Basic(codegen::Basic::Integer, rules),
             );
             cache.insert(name, binding.clone());
             trace.pop().unwrap_or_default();

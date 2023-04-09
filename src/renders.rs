@@ -142,9 +142,22 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                     .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
                     .replace("`pattern`", &pattern);
                 lines.push(code);
-            }
+            } else if name == binding_name
+                && ty_is_basic
+                && (rules.min.is_some() || rules.max.is_some())
+            {
+                *lines.last_mut().unwrap() = format!("// {}", lines.last().unwrap());
 
-            // TODO: add validation impl for min/max
+                lines.push("#[serde(try_from = \"i64\")]".to_string());
+                lines.push(format!("pub struct {name}({ty});"));
+
+                let code = RANGE_VALIDATION_IMPL
+                    .replace("`type_name`", &name)
+                    .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
+                    .replace("`min`", &format!("{}", rules.min.unwrap_or(i64::MIN)))
+                    .replace("`max`", &format!("{}", rules.max.unwrap_or(i64::MAX)));
+                lines.push(code);
+            }
         }
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
@@ -255,6 +268,47 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
     lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
     lines.join("\n")
 }
+
+const RANGE_VALIDATION_IMPL: &str = r###"
+mod `type_name_lowercase` {
+    use super::jsonrpc;
+    use super::`type_name`;
+    
+    static MIN: i64 = `min`;
+    static MAX: i64 = `max`;
+
+    impl `type_name` {
+        pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+            if value < MIN {
+                return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: "`type_name` value is < min".to_string(),
+                });
+            }
+            if value > MAX {
+                return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: "`type_name` value is > max".to_string(),
+                });
+            }
+            Ok(Self(value))
+        }
+    }
+
+    impl TryFrom<i64> for `type_name` {
+        type Error = String;
+        fn try_from(value: i64) -> Result<Self, Self::Error> {
+            Self::try_new(value).map_err(|e| e.message)
+        }
+    }
+
+    impl AsRef<i64> for `type_name` {
+        fn as_ref(&self) -> &i64 {
+            &self.0
+        }
+    }
+}
+"###;
 
 const PATTERN_VALIDATION_IMPL: &str = r###"
 mod `type_name_lowercase` {
