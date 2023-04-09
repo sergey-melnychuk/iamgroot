@@ -601,7 +601,7 @@ impl gen::Rpc for State {
                 block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
                 timestamp: 1042,
                 sequencer_address: gen::Felt::try_new("0x2")?,
-                block_number: gen::BlockNumber(42),
+                block_number: gen::BlockNumber::try_new(42)?,
                 new_root: gen::Felt::try_new("0x3")?,
                 parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
             },
@@ -623,7 +623,7 @@ impl gen::Rpc for State {
                 block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
                 timestamp: 1042,
                 sequencer_address: gen::Felt::try_new("0x2")?,
-                block_number: gen::BlockNumber(42),
+                block_number: gen::BlockNumber::try_new(42)?,
                 new_root: gen::Felt::try_new("0x3")?,
                 parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
             },
@@ -789,7 +789,7 @@ impl gen::Rpc for State {
                 actual_fee: gen::Felt::try_new("0x1")?,
                 status: gen::TxnStatus::AcceptedOnL2,
                 block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
-                block_number: gen::BlockNumber(42),
+                block_number: gen::BlockNumber::try_new(42)?,
             },
             contract_address: gen::Felt::try_new("0x1")?,
             r#type: gen::DeployTxnReceiptType::Deploy,
@@ -872,7 +872,7 @@ impl gen::Rpc for State {
         &self,
         block_id: gen::BlockId,
     ) -> std::result::Result<gen::GetBlockTransactionCountResult, jsonrpc::Error> {
-        let result = gen::GetBlockTransactionCountResult(42);
+        let result = gen::GetBlockTransactionCountResult::try_new(42)?;
         println!("block_id={block_id:?}\nresult={result:#?}");
         Ok(result)
     }
@@ -902,14 +902,14 @@ impl gen::Rpc for State {
     }
 
     fn blockNumber(&self) -> std::result::Result<gen::BlockNumber, jsonrpc::Error> {
-        Ok(gen::BlockNumber(42))
+        Ok(gen::BlockNumber::try_new(42)?)
     }
 
     fn blockHashAndNumber(
         &self,
     ) -> std::result::Result<gen::BlockHashAndNumberResult, jsonrpc::Error> {
         Ok(gen::BlockHashAndNumberResult {
-            block_number: Some(gen::BlockNumber(42)),
+            block_number: Some(gen::BlockNumber::try_new(42)?),
             block_hash: Some(gen::BlockHash(gen::Felt::try_new("0xface")?)),
         })
     }
@@ -961,7 +961,7 @@ impl gen::Rpc for State {
                     },
                 },
                 block_hash: gen::BlockHash(gen::Felt::try_new("0x2")?),
-                block_number: gen::BlockNumber(42),
+                block_number: gen::BlockNumber::try_new(42)?,
                 transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
             }],
         };
@@ -1094,7 +1094,48 @@ pub mod gen {
 
     // object: 'BLOCK_NUMBER'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct BlockNumber(pub i64); // name == binding_name
+    // pub struct BlockNumber(pub i64); // name == binding_name
+    #[serde(try_from = "i64")]
+    pub struct BlockNumber(i64);
+
+    mod blocknumber {
+        use super::jsonrpc;
+        use super::BlockNumber;
+
+        static MIN: i64 = 0;
+        static MAX: i64 = 9223372036854775807;
+
+        impl BlockNumber {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: "BlockNumber value is < min".to_string(),
+                    });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: "BlockNumber value is > max".to_string(),
+                    });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for BlockNumber {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for BlockNumber {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
+    }
 
     // object: 'BLOCK_STATUS'
     #[derive(Debug, Deserialize, Serialize)]
@@ -2427,7 +2468,48 @@ pub mod gen {
 
     // object: 'getBlockTransactionCount_result'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct GetBlockTransactionCountResult(pub i64); // name == binding_name
+    // pub struct GetBlockTransactionCountResult(pub i64); // name == binding_name
+    #[serde(try_from = "i64")]
+    pub struct GetBlockTransactionCountResult(i64);
+
+    mod getblocktransactioncountresult {
+        use super::jsonrpc;
+        use super::GetBlockTransactionCountResult;
+
+        static MIN: i64 = 0;
+        static MAX: i64 = 9223372036854775807;
+
+        impl GetBlockTransactionCountResult {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: "GetBlockTransactionCountResult value is < min".to_string(),
+                    });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: "GetBlockTransactionCountResult value is > max".to_string(),
+                    });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for GetBlockTransactionCountResult {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for GetBlockTransactionCountResult {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
+    }
 
     // object: 'getBlockWithTxHashes_result'
     #[derive(Debug, Deserialize, Serialize)]
@@ -2526,7 +2608,48 @@ pub mod gen {
 
     // object: 'index'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct Index(pub i64); // name == binding_name
+    // pub struct Index(pub i64); // name == binding_name
+    #[serde(try_from = "i64")]
+    pub struct Index(i64);
+
+    mod index {
+        use super::jsonrpc;
+        use super::Index;
+
+        static MIN: i64 = 0;
+        static MAX: i64 = 9223372036854775807;
+
+        impl Index {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: "Index value is < min".to_string(),
+                    });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: "Index value is > max".to_string(),
+                    });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for Index {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for Index {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
+    }
 
     // object: 'pendingTransactions_result'
     #[derive(Debug, Deserialize, Serialize)]
