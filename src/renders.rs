@@ -136,7 +136,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
 
                 let pattern = rules.pattern.as_ref().unwrap().replace("\\", "\\\\");
 
-                let code = VALIDATION_IMPL
+                let code = PATTERN_VALIDATION_IMPL
                     .replace("`type_name`", &name)
                     .replace("`type_name_uppercase`", &name.to_ascii_uppercase())
                     .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
@@ -256,7 +256,7 @@ pub fn render_method(name: &str, contract: &binding::Contract) -> String {
     lines.join("\n")
 }
 
-const VALIDATION_IMPL: &str = r###"
+const PATTERN_VALIDATION_IMPL: &str = r###"
 mod `type_name_lowercase` {
     use super::jsonrpc;
     use super::`type_name`;
