@@ -563,6 +563,7 @@ fn `method_short_name`(
         .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
 
     if let Some(err) = res.error.take() {
+        log::error!("{err:#?}");
         return Err(err);
     }
 
