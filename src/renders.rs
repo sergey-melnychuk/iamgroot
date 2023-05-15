@@ -100,7 +100,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             let ty = render_basic(basic);
             let name = normalize_type_name(name)?;
             if matches!(basic, codegen::Basic::Null) {
-                lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+                lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
                 lines.push("pub struct Null;".to_string());
             } else if ty != name {
                 // Keep type aliases just for the reference
@@ -116,7 +116,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             };
             let ty_is_basic = matches!(ty, codegen::Type::Basic(_, _));
             let ty = normalize_type_name(&render_type(ty)?)?;
-            lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+            lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
             if name == binding_name {
                 lines.push(format!(
                     "pub struct {name}(pub {ty}); // name == binding_name"
@@ -161,7 +161,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         }
         binding::Binding::Enum(the_enum) => {
             let mut seen = HashSet::new();
-            lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+            lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
             let all_units = the_enum
                 .variants
                 .iter()
@@ -207,7 +207,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
         }
         binding::Binding::Struct(the_struct) => {
             let mut seen = HashSet::new();
-            lines.push("#[derive(Debug, Deserialize, Serialize)]".to_string());
+            lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
             lines.push(format!("pub struct {} {{", normalize_type_name(name)?));
 
             let mut ordered = the_struct.properties.iter().collect::<Vec<_>>();
