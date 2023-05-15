@@ -282,13 +282,13 @@ mod `type_name_lowercase` {
             if value < MIN {
                 return Err(jsonrpc::Error {
                     code: 1001,
-                    message: "`type_name` value is < min".to_string(),
+                    message: format!("`type_name` value {value} must be > {MIN}"),
                 });
             }
             if value > MAX {
                 return Err(jsonrpc::Error {
                     code: 1001,
-                    message: "`type_name` value is > max".to_string(),
+                    message: format!("`type_name` value {value} must be < {MAX}"),
                 });
             }
             Ok(Self(value))
@@ -322,12 +322,12 @@ mod `type_name_lowercase` {
 
     impl `type_name` {
         pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-            if `type_name_uppercase`_REGEX.is_match(&value) {
+            if `type_name_uppercase`_REGEX.is_match(value) {
                 Ok(Self(value.to_string()))
             } else {
                 Err(jsonrpc::Error {
                     code: 1001,
-                    message: "`type_name` value does not match regex".to_string(),
+                    message: format!("`type_name` value does not match regex: {value}"),
                 })
             }
         }
