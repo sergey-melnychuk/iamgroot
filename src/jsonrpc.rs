@@ -82,6 +82,13 @@ impl Error {
     }
 }
 
+#[cfg(feature = "anyhow")]
+impl From<Error> for anyhow::Error {
+    fn from(value: Error) -> Self {
+        anyhow::anyhow!(value)
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum Id {
