@@ -150,7 +150,17 @@ pub struct Components {
     pub schemas: HashMap<String, Schema>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub errors: HashMap<String, Error>,
+    pub errors: HashMap<String, ErrorOrRef>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(untagged)]
+pub enum ErrorOrRef {
+    Ref {
+        #[serde(rename = "$ref")]
+        key: String,
+    },
+    Err(Error),
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

@@ -1,16 +1,18 @@
 use std::collections::HashMap;
 
-use crate::binding;
+use crate::{binding, openrpc};
 
 #[derive(Debug, Clone)]
 pub struct Cache {
     pub data: HashMap<String, binding::Binding>,
+    pub errors: HashMap<String, openrpc::Error>,
 }
 
 impl Cache {
     pub fn new() -> Self {
         Self {
             data: HashMap::new(),
+            errors: HashMap::new(),
         }
     }
 
