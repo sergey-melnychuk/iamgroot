@@ -3,8 +3,8 @@ use crate::codegen;
 use crate::openrpc;
 use crate::renders;
 
-const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
-const ERROR_REF_PREFIX: &str = "#/components/errors/";
+pub const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
+pub const ERROR_REF_PREFIX: &str = "#/components/errors/";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Binding {
@@ -582,8 +582,17 @@ pub fn get_method_contract(
                 .as_ref()
                 .map(|components| &components.errors)
                 .and_then(|errors| errors.get(key))
+                .map(|error| match error {
+                    openrpc::ErrorOrRef::Err(error) => {
+                        cache.errors.insert(key.to_owned(), error.to_owned());
+                        error.to_owned()
+                    }
+                    openrpc::ErrorOrRef::Ref { key } => {
+                        let key = key.split(ERROR_REF_PREFIX).nth(1).unwrap();
+                        cache.errors.get(key).unwrap().to_owned()
+                    }
+                })
         })
-        .cloned()
         .collect();
     Some(Contract {
         name,

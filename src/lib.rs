@@ -2,6 +2,8 @@ use std::{collections::HashMap, fmt::Display, path::Path};
 
 use cache::Cache;
 
+use crate::openrpc::ErrorOrRef;
+
 pub(crate) mod binding;
 pub(crate) mod cache;
 pub(crate) mod codegen;
@@ -56,6 +58,11 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
 
     let specs = paths.iter().map(|path| parse(path)).collect::<Vec<_>>();
 
+    let contracts = specs
+        .iter()
+        .flat_map(|spec| binding::extract_contracts(spec, &mut cache, &mut trace))
+        .collect::<Vec<_>>();
+
     let errors = specs
         .iter()
         .flat_map(|spec| {
@@ -64,12 +71,15 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
                 .map(|comps| comps.errors.clone())
                 .unwrap_or_default()
         })
+        .map(|(key, error)| match error {
+            ErrorOrRef::Err(error) => (key, error),
+            ErrorOrRef::Ref { key } => {
+                let key = key.split(binding::ERROR_REF_PREFIX).nth(1).unwrap();
+                let err = cache.errors.get(key).unwrap();
+                (key.to_owned(), err.to_owned())
+            }
+        })
         .collect::<HashMap<_, _>>();
-
-    let contracts = specs
-        .iter()
-        .flat_map(|spec| binding::extract_contracts(spec, &mut cache, &mut trace))
-        .collect::<Vec<_>>();
 
     let mut target = String::new();
     use std::fmt::Write;
@@ -88,9 +98,11 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     ordered.sort_by_key(|(name, _)| *name);
 
     for (name, binding) in ordered {
+        if name.is_empty() {
+            continue;
+        }
         let code = renders::render_object(name, binding)
             .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed. {e}"));
-
         if !code.is_empty() {
             writeln!(target, "\n// object: '{name}'\n{code}").unwrap();
         }
