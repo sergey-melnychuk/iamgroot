@@ -590,6 +590,7 @@ fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
     println!("<<< {}", serde_json::to_string_pretty(&res).unwrap());
 }
 
+#[allow(non_snake_case)]
 impl gen::Rpc for State {
     fn getBlockWithTxHashes(
         &self,
