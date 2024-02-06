@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct OpenRpc {
+pub struct Spec {
     pub openrpc: String,
     pub info: Value,
     #[serde(default)]
@@ -15,7 +15,7 @@ pub struct OpenRpc {
     pub components: Option<Components>,
 }
 
-impl OpenRpc {
+impl Spec {
     pub fn get_schema(&self, id: &str) -> Option<&Schema> {
         let components = self.components.as_ref()?;
         components.schemas.get(id)
