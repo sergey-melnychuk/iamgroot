@@ -18,7 +18,13 @@ pub struct Spec {
 impl Spec {
     pub fn get_schema(&self, id: &str) -> Option<&Schema> {
         let components = self.components.as_ref()?;
-        components.schemas.get(id)
+        components
+            .schemas
+            .get(id)
+            .and_then(|schema_or_ref| match schema_or_ref {
+                SchemaOrRef::Schema(schema) => Some(schema),
+                _ => None,
+            })
     }
 
     pub fn get_content(&self, id: &str) -> Option<&Content> {
@@ -72,13 +78,17 @@ pub struct Method {
     pub result: Option<Content>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub errors: Option<Vec<Reference>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub examples: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub deprecated: Option<bool>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Content {
     #[serde(rename = "$ref")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub _ref: Option<String>,
+    pub r#ref: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -88,20 +98,43 @@ pub struct Content {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub required: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub schema: Option<Schema>,
+    pub schema: Option<SchemaOrRef>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub deprecated: Option<bool>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Type {
+    String,
+    Boolean,
+    Integer,
+    Array,
+    Object,
+    Null,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum SchemaOrRef {
+    Ref {
+        #[serde(rename = "$ref")]
+        r#ref: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        title: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        description: Option<String>,
+    },
+    Schema(Schema),
 }
 
 #[allow(non_snake_case)]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Schema {
-    #[serde(rename = "$ref")]
+    #[serde(rename = "type")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#ref: Option<String>,
-    // Supported types: string, boolean, integer, array, object
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub r#type: Option<String>,
+    pub r#type: Option<Type>,
+    #[serde(rename = "enum")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub r#enum: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -109,15 +142,15 @@ pub struct Schema {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub oneOf: Option<Vec<Schema>>,
+    pub oneOf: Option<Vec<SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub allOf: Option<Vec<Schema>>,
+    pub allOf: Option<Vec<SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub items: Option<Box<Schema>>,
+    pub items: Option<Box<SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub properties: Option<HashMap<String, Schema>>,
+    pub properties: Option<HashMap<String, SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub schema: Option<Box<Schema>>,
+    pub schema: Option<Box<SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub required: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -128,16 +161,9 @@ pub struct Schema {
     pub pattern: Option<String>,
     #[serde(rename = "$comment")]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub _comment: Option<String>,
-}
-
-impl Schema {
-    pub fn has_type(&self, expected: &str) -> bool {
-        self.r#type
-            .as_ref()
-            .map(|s| s.as_str() == expected)
-            .unwrap_or_default()
-    }
+    pub comment: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub not: Option<serde_json::Value>,
 }
 
 #[allow(non_snake_case)]
@@ -147,7 +173,7 @@ pub struct Components {
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub contentDescriptors: HashMap<String, Content>,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub schemas: HashMap<String, Schema>,
+    pub schemas: HashMap<String, SchemaOrRef>,
     #[serde(default)]
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub errors: HashMap<String, ErrorOrRef>,
@@ -158,7 +184,7 @@ pub struct Components {
 pub enum ErrorOrRef {
     Ref {
         #[serde(rename = "$ref")]
-        key: String,
+        r#ref: String,
     },
     Err(Error),
 }
@@ -167,4 +193,6 @@ pub enum ErrorOrRef {
 pub struct Error {
     pub code: i64,
     pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Schema>,
 }

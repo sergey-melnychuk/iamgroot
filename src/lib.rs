@@ -1,8 +1,4 @@
-use std::{collections::HashMap, fmt::Display, path::Path};
-
-use cache::Cache;
-
-use crate::openrpc::ErrorOrRef;
+use std::{fmt::Display, path::Path};
 
 pub(crate) mod binding;
 pub(crate) mod cache;
@@ -28,6 +24,7 @@ pub fn gen_json<P: AsPath>(path: &P) -> String {
 }
 
 pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
+    /*
     let mut cache = Cache::new();
     let mut trace = Vec::with_capacity(32);
 
@@ -50,9 +47,12 @@ pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
         .for_each(|contract| writeln!(target, "---\n{contract:#?}").unwrap());
 
     target
+    */
+    Default::default()
 }
 
 pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
+    /*
     let mut cache = Cache::new();
     let mut trace = Vec::with_capacity(32);
 
@@ -73,7 +73,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
         })
         .map(|(key, error)| match error {
             ErrorOrRef::Err(error) => (key, error),
-            ErrorOrRef::Ref { key } => {
+            ErrorOrRef::Ref { r#ref: key } => {
                 let key = key.split(binding::ERROR_REF_PREFIX).nth(1).unwrap();
                 let err = cache.errors.get(key).unwrap();
                 (key.to_owned(), err.to_owned())
@@ -131,4 +131,6 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
     writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^").unwrap();
 
     target
+    */
+    Default::default()
 }
