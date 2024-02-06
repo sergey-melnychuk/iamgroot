@@ -313,7 +313,7 @@ pub fn unfold_binding(binding: Binding) -> Vec<Binding> {
 pub fn get_schema_binding(
     name: String,
     schema: &openrpc::Schema,
-    spec: &openrpc::OpenRpc,
+    spec: &openrpc::Spec,
     cache: &mut Cache,
     trace: &mut Vec<String>,
 ) -> Binding {
@@ -512,7 +512,7 @@ pub struct Contract {
 
 pub fn get_method_contract(
     name: String,
-    spec: &openrpc::OpenRpc,
+    spec: &openrpc::Spec,
     cache: &mut Cache,
     trace: &mut Vec<String>,
 ) -> Option<Contract> {
@@ -605,7 +605,7 @@ pub fn get_method_contract(
 }
 
 pub fn extract_contracts(
-    spec: &openrpc::OpenRpc,
+    spec: &openrpc::Spec,
     cache: &mut Cache,
     trace: &mut Vec<String>,
 ) -> Vec<Contract> {

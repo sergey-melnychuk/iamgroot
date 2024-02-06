@@ -16,7 +16,7 @@ pub trait AsPath: AsRef<Path> + Display {}
 impl AsPath for String {}
 impl AsPath for &str {}
 
-fn parse<P: AsPath>(path: &P) -> openrpc::OpenRpc {
+fn parse<P: AsPath>(path: &P) -> openrpc::Spec {
     log::info!("Processing file: {path}");
     let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
     serde_json::from_str(&json).expect("json")
