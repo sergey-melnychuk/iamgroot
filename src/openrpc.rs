@@ -17,8 +17,8 @@ pub struct Spec {
 
 impl Spec {
     pub fn get_schema(&self, id: &str) -> Option<&Schema> {
-        let components = self.components.as_ref()?;
-        components
+        self.components
+            .as_ref()?
             .schemas
             .get(id)
             .and_then(|schema_or_ref| match schema_or_ref {
@@ -28,8 +28,10 @@ impl Spec {
     }
 
     pub fn get_content(&self, id: &str) -> Option<&Content> {
-        let components = self.components.as_ref()?;
-        components.contentDescriptors.get(id)
+        self.components
+            .as_ref()?
+            .contentDescriptors
+            .get(id)
     }
 }
 

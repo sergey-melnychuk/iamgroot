@@ -2,7 +2,6 @@ use crate::cache::Cache;
 use crate::codegen;
 use crate::openrpc;
 use crate::openrpc::SchemaOrRef;
-use crate::renders;
 
 pub const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
 pub const ERROR_REF_PREFIX: &str = "#/components/errors/";
