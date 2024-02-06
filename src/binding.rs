@@ -1,6 +1,7 @@
 use crate::cache::Cache;
 use crate::codegen;
 use crate::openrpc;
+use crate::openrpc::SchemaOrRef;
 use crate::renders;
 
 pub const SCHEMA_REF_PREFIX: &str = "#/components/schemas/";
@@ -315,8 +316,9 @@ pub fn get_schema_binding(
     schema: &openrpc::Schema,
     spec: &openrpc::Spec,
     cache: &mut Cache,
-    trace: &mut Vec<String>,
+    trace: &mut [String],
 ) -> Binding {
+    /*
     //println!("\n// name={name}\n// schema={schema:?}\n// trace={trace:?}");
     if let Some(binding) = cache.get(&name) {
         return binding.clone();
@@ -498,6 +500,8 @@ pub fn get_schema_binding(
     eprintln!("unreachable: name={name} schema={schema:#?}");
     trace.pop().unwrap_or_default();
     unreachable!()
+    */
+    Binding::Basic(codegen::Basic::Null)
 }
 
 #[derive(Debug, Clone)]
@@ -514,14 +518,15 @@ pub fn get_method_contract(
     name: String,
     spec: &openrpc::Spec,
     cache: &mut Cache,
-    trace: &mut Vec<String>,
+    trace: &mut [String],
 ) -> Option<Contract> {
+    /*
     let method = spec.methods.iter().find(|m| m.name == name)?;
     let params = method
         .params
         .iter()
         .map(|param| {
-            let param = if let Some(key) = param._ref.as_ref() {
+            let param = if let Some(key) = param.r#ref.as_ref() {
                 let id = key.split('/').last().unwrap();
                 spec.get_content(id).unwrap()
             } else {
@@ -554,7 +559,7 @@ pub fn get_method_contract(
         })
         .collect();
     let result = method.result.as_ref().map(|result| {
-        let result = if let Some(key) = result._ref.as_ref() {
+        let result = if let Some(key) = result.r#ref.as_ref() {
             let id = key.split('/').last().unwrap();
             spec.get_content(id).unwrap()
         } else {
@@ -587,7 +592,7 @@ pub fn get_method_contract(
                         cache.errors.insert(key.to_owned(), error.to_owned());
                         error.to_owned()
                     }
-                    openrpc::ErrorOrRef::Ref { key } => {
+                    openrpc::ErrorOrRef::Ref { r#ref: key } => {
                         let key = key.split(ERROR_REF_PREFIX).nth(1).unwrap();
                         cache.errors.get(key).unwrap().to_owned()
                     }
@@ -602,12 +607,14 @@ pub fn get_method_contract(
         summary: method.summary.clone().unwrap_or_default(),
         description: method.description.clone().unwrap_or_default(),
     })
+    */
+    None
 }
 
 pub fn extract_contracts(
     spec: &openrpc::Spec,
     cache: &mut Cache,
-    trace: &mut Vec<String>,
+    trace: &mut [String],
 ) -> Vec<Contract> {
     let bindings = spec
         .components
@@ -615,6 +622,10 @@ pub fn extract_contracts(
         .expect("components")
         .schemas
         .iter()
+        .filter_map(|(name, schema)| match schema {
+            SchemaOrRef::Ref { r#ref, .. } => None,
+            SchemaOrRef::Schema(schema) => Some((name, schema)),
+        })
         .map(|(name, schema)| {
             let binding = get_schema_binding(name.to_string(), schema, spec, cache, trace);
             cache.insert(name.clone(), binding.clone());

@@ -5,7 +5,6 @@
         "title": "StarkNet Node API",
         "license": {}
     },
-    "servers": [],
     "methods": [
         {
             "name": "starknet_specVersion",
@@ -854,7 +853,6 @@
         }
     ],
     "components": {
-        "contentDescriptors": {},
         "schemas": {
             "EVENTS_CHUNK": {
                 "title": "Events chunk",
@@ -1246,8 +1244,7 @@
                 "required": [
                     "old_root",
                     "state_diff"
-                ],
-                "additionalProperties": false
+                ]
             },
             "STATE_UPDATE": {
                 "title": "State update",
@@ -2744,7 +2741,6 @@
                     },
                     "revert_reason": {
                         "title": "Revert reason",
-                        "name": "revert reason",
                         "description": "the revert reason for the failed execution",
                         "type": "string"
                     },
@@ -3109,7 +3105,6 @@
                     },
                     "revert_reason": {
                         "title": "Revert reason",
-                        "name": "revert reason",
                         "description": "the revert reason for the failed execution",
                         "type": "string"
                     },
@@ -3139,8 +3134,7 @@
                     "finality_status",
                     "execution_status",
                     "execution_resources"
-                ],
-                "additionalProperties": false
+                ]
             },
             "MSG_TO_L1": {
                 "title": "Message to L1",
@@ -3913,7 +3907,9 @@
                             "type": "string"
                         }
                     },
-                    "required": "revert_error"
+                    "required": [
+                        "revert_error"
+                    ]
                 }
             },
             "TRANSACTION_EXECUTION_ERROR": {

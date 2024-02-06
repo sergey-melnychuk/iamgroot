@@ -1125,7 +1125,6 @@
 		},
 		"BlockNumber": {
 		  "title": "blockNumber",
-		  "type": "string",
 		  "description": "The hex representation of the block's height",
 		  "$ref": "#/components/schemas/Integer"
 		},
@@ -1545,7 +1544,6 @@
 		},
 		"TransactionHash": {
 		  "title": "transactionHash",
-		  "type": "string",
 		  "description": "Keccak 256 Hash of the RLP encoding of a transaction",
 		  "$ref": "#/components/schemas/Keccak"
 		},

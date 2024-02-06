@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
 
 use crate::binding;
 use crate::codegen;
@@ -95,7 +94,7 @@ pub fn render_type(ty: &codegen::Type) -> Result<String> {
 
 pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
     let mut lines: Vec<String> = Vec::new();
-    match binding {
+    /*match binding {
         binding::Binding::Basic(basic) => {
             let ty = render_basic(basic);
             let name = normalize_type_name(name)?;
@@ -187,7 +186,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
                     codegen::Type::Struct(props) => {
                         lines.push(format!("  {name}{{"));
                         for (prop_name, prop_type) in props {
-                            let prop_type = render_type(prop_type)?;
+                            let prop_type = render_type(&prop_type)?;
                             lines.push(format!("  {prop_name}: {prop_type},"));
                         }
                         lines.push("  },".to_string());
@@ -238,7 +237,7 @@ pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
             }
             lines.push("}".to_string());
         }
-    }
+    }*/
     Ok(lines.join("\n"))
 }
 

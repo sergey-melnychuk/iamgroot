@@ -5,7 +5,6 @@
         "title": "StarkNet Trace API",
         "license": {}
     },
-    "servers": [],
     "methods": [
         {
             "name": "starknet_traceTransaction",
@@ -145,144 +144,150 @@
         }
     ],
     "components": {
-        "contentDescriptors": {},
         "schemas": {
+            "INVOKE_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of an invoke transaction",
+                "properties": {
+                    "validate_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "execute_invocation": {
+                        "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "revert_reason": {
+                                        "description": "the revert reason for the failed execution",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "fee_transfer_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "state_diff": {
+                        "title": "state_diff",
+                        "description": "the state diffs induced by the transaction",
+                        "$ref": "#/components/schemas/STATE_DIFF"
+                    },
+                    "type": {
+                        "title": "Type",
+                        "type": "string",
+                        "enum": [
+                            "INVOKE"
+                        ]
+                    }
+                },
+                "required": [
+                    "type",
+                    "execute_invocation"
+                ]
+            },
+            "DECLARE_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of a declare transaction",
+                "properties": {
+                    "validate_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "fee_transfer_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "state_diff": {
+                        "title": "state_diff",
+                        "description": "the state diffs induced by the transaction",
+                        "$ref": "#/components/schemas/STATE_DIFF"
+                    },
+                    "type": {
+                        "title": "Type",
+                        "type": "string",
+                        "enum": [
+                            "DECLARE"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ]
+            },
+            "DEPLOY_ACCOUNT_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of a deploy account transaction",
+                "properties": {
+                    "validate_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "constructor_invocation": {
+                        "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "fee_transfer_invocation": {
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "state_diff": {
+                        "title": "state_diff",
+                        "description": "the state diffs induced by the transaction",
+                        "$ref": "#/components/schemas/STATE_DIFF"
+                    },
+                    "type": {
+                        "title": "Type",
+                        "type": "string",
+                        "enum": [
+                            "DEPLOY_ACCOUNT"
+                        ]
+                    }
+                },
+                "required": [
+                    "type",
+                    "constructor_invocation"
+                ]
+            },
+            "L1_HANDLER_TXN_TRACE": {
+                "type": "object",
+                "description": "the execution trace of an L1 handler transaction",
+                "properties": {
+                    "function_invocation": {
+                        "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
+                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
+                    },
+                    "state_diff": {
+                        "title": "state_diff",
+                        "description": "the state diffs induced by the transaction",
+                        "$ref": "#/components/schemas/STATE_DIFF"
+                    },
+                    "type": {
+                        "title": "Type",
+                        "type": "string",
+                        "enum": [
+                            "L1_HANDLER"
+                        ]
+                    }
+                },
+                "required": [
+                    "type",
+                    "function_invocation"
+                ]
+            },
             "TRANSACTION_TRACE": {
                 "oneOf": [
                     {
-                        "name": "INVOKE_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of an invoke transaction",
-                        "properties": {
-                            "validate_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "execute_invocation": {
-                                "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "revert_reason": {
-                                                "name": "revert reason",
-                                                "description": "the revert reason for the failed execution",
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                ]
-                            },
-                            "fee_transfer_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "state_diff": {
-                                "title": "state_diff",
-                                "description": "the state diffs induced by the transaction",
-                                "$ref": "#/components/schemas/STATE_DIFF"
-                            },
-                            "type": {
-                                "title": "Type",
-                                "type": "string",
-                                "enum": [
-                                    "INVOKE"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "execute_invocation"
-                        ]
+                        "$ref": "#/components/schemas/INVOKE_TXN_TRACE"
                     },
                     {
-                        "name": "DECLARE_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of a declare transaction",
-                        "properties": {
-                            "validate_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "fee_transfer_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "state_diff": {
-                                "title": "state_diff",
-                                "description": "the state diffs induced by the transaction",
-                                "$ref": "#/components/schemas/STATE_DIFF"
-                            },
-                            "type": {
-                                "title": "Type",
-                                "type": "string",
-                                "enum": [
-                                    "DECLARE"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "type"
-                        ]
+                        "$ref": "#/components/schemas/DECLARE_TXN_TRACE"
                     },
                     {
-                        "name": "DEPLOY_ACCOUNT_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of a deploy account transaction",
-                        "properties": {
-                            "validate_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "constructor_invocation": {
-                                "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "fee_transfer_invocation": {
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "state_diff": {
-                                "title": "state_diff",
-                                "description": "the state diffs induced by the transaction",
-                                "$ref": "#/components/schemas/STATE_DIFF"
-                            },
-                            "type": {
-                                "title": "Type",
-                                "type": "string",
-                                "enum": [
-                                    "DEPLOY_ACCOUNT"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "constructor_invocation"
-                        ]
+                        "$ref": "#/components/schemas/DEPLOY_ACCOUNT_TXN_TRACE"
                     },
                     {
-                        "name": "L1_HANDLER_TXN_TRACE",
-                        "type": "object",
-                        "description": "the execution trace of an L1 handler transaction",
-                        "properties": {
-                            "function_invocation": {
-                                "description": "the trace of the __execute__ call or constructor call, depending on the transaction type (none for declare transactions)",
-                                "$ref": "#/components/schemas/FUNCTION_INVOCATION"
-                            },
-                            "state_diff": {
-                                "title": "state_diff",
-                                "description": "the state diffs induced by the transaction",
-                                "$ref": "#/components/schemas/STATE_DIFF"
-                            },
-                            "type": {
-                                "title": "Type",
-                                "type": "string",
-                                "enum": [
-                                    "L1_HANDLER"
-                                ]
-                            }
-                        },
-                        "required": [
-                            "type",
-                            "function_invocation"
-                        ]
+                        "$ref": "#/components/schemas/L1_HANDLER_TXN_TRACE"
                     }
                 ]
             },
