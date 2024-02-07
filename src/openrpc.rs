@@ -102,7 +102,7 @@ pub struct Content {
     pub deprecated: Option<bool>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     String,
@@ -113,7 +113,7 @@ pub enum Type {
     Null,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(untagged)]
 pub enum SchemaOrRef {
     Ref {
@@ -127,8 +127,20 @@ pub enum SchemaOrRef {
     Schema(Schema),
 }
 
+impl SchemaOrRef {
+    pub fn get_ref(&self) -> Option<&str> {
+        match self {
+            Self::Schema(_) => None,
+            Self::Ref { r#ref, .. } => {
+                let name = r#ref.split('/').last()?;
+                Some(name)
+            }
+        }
+    }
+}
+
 #[allow(non_snake_case)]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct Schema {
     #[serde(rename = "type")]
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -186,6 +198,18 @@ pub enum ErrorOrRef {
         r#ref: String,
     },
     Err(Error),
+}
+
+impl ErrorOrRef {
+    pub fn get_ref(&self) -> Option<&str> {
+        match self {
+            ErrorOrRef::Err(_) => None,
+            ErrorOrRef::Ref { r#ref, .. } => {
+                let name = r#ref.split('/').last()?;
+                Some(name)
+            }
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
