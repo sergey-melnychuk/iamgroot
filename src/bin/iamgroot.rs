@@ -1,4 +1,4 @@
-use iamgroot::{gen_code, gen_json, gen_tree};
+use iamgroot::{gen_code, gen_json};
 
 fn main() {
     env_logger::init();
@@ -21,10 +21,8 @@ fn main() {
             return;
         }
         println!("{}", gen_json(&paths[0]));
-    } else if mode.as_str() == "TREE" {
-        println!("{}", gen_tree(&paths));
     } else if mode.as_str() == "CODE" {
-        println!("{}", gen_code(&paths));
+        println!("{}", gen_code(&paths).unwrap());
     } else {
         eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
     }
