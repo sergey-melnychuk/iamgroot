@@ -1,11 +1,16 @@
 use std::{collections::HashMap, fmt::Display, path::Path};
 
-use openrpc::{ErrorOrRef, SchemaOrRef};
+use codegen::{Object, Primitive, Property, Struct, Type};
+use openrpc::{ErrorOrRef, Schema, SchemaOrRef};
+
+use crate::codegen::Rule;
 
 pub(crate) mod codegen;
 pub mod jsonrpc;
 pub(crate) mod openrpc;
 pub(crate) mod renders;
+
+mod tests;
 
 pub trait AsPath: AsRef<Path> + Display {}
 
@@ -41,6 +46,103 @@ fn x(
     (objects, errors, methods)
 }
 
+fn resolve_schema<'a>(
+    name: &'a str,
+    schemas: &'a HashMap<String, SchemaOrRef>,
+) -> Option<&'a Schema> {
+    match schemas.get(name)? {
+        SchemaOrRef::Schema(schema) => Some(schema),
+        r @ SchemaOrRef::Ref { .. } => {
+            let r = r.get_ref()?;
+            match schemas.get(r) {
+                Some(SchemaOrRef::Schema(ret)) => Some(ret),
+                _ => None,
+            }
+        }
+    }
+}
+
+fn capitalize(name: &str) -> String {
+    let head = name.chars().next().unwrap();
+    let tail = name.chars().skip(1).collect::<String>();
+    format!("{}{}", head.to_ascii_uppercase(), tail.to_ascii_lowercase())
+}
+
+fn normalize(name: &str) -> String {
+    name.split(|c| c == '_')
+        .map(capitalize)
+        .collect::<Vec<_>>()
+        .join("")
+}
+
+fn bind_primitive(
+    name: &str,
+    ty: &openrpc::Type,
+    schema: &Schema,
+    schemas: &HashMap<String, SchemaOrRef>,
+) -> Option<Object> {
+    match ty {
+        openrpc::Type::String => {
+            let rules = if let Some(regex) = schema.pattern.as_ref() {
+                vec![Rule::Regex(regex.to_owned())]
+            } else {
+                vec![]
+            };
+            let object = Struct {
+                name: normalize(name),
+                properties: vec![Property::of(
+                    Default::default(),
+                    Type::Primitive(Primitive::String, rules),
+                )],
+                decorators: vec![],
+                visibility: codegen::Visibility::Public,
+            };
+            Some(Object::Struct(object))
+        }
+        openrpc::Type::Integer => {
+            let mut rules = Vec::with_capacity(2);
+            if let Some(min) = schema.minimum {
+                rules.push(Rule::Min(min));
+            }
+            if let Some(max) = schema.maximum {
+                rules.push(Rule::Max(max));
+            }
+            let object = Struct {
+                name: normalize(name),
+                properties: vec![Property::of(
+                    Default::default(),
+                    Type::Primitive(Primitive::Integer, rules),
+                )],
+                decorators: vec![],
+                visibility: codegen::Visibility::Public,
+            };
+            Some(Object::Struct(object))
+        }
+        openrpc::Type::Boolean => Some(Object::Struct(Struct {
+            name: normalize(name),
+            properties: vec![Property::of(
+                Default::default(),
+                codegen::Type::Primitive(Primitive::Boolean, vec![]),
+            )],
+            decorators: vec![],
+            visibility: codegen::Visibility::Public,
+        })),
+        openrpc::Type::Array => todo!(),
+        openrpc::Type::Object => todo!(),
+        openrpc::Type::Null => todo!(),
+    }
+}
+
+fn bind_schema(name: &str, schemas: &HashMap<String, SchemaOrRef>) -> Option<Object> {
+    let schema = resolve_schema(name, schemas)?;
+
+    if let Some(ty) = schema.r#type.as_ref() {
+        return bind_primitive(name, ty, schema, schemas);
+    }
+
+    None
+}
+
 pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
     let specs = paths.iter().map(parse).collect::<Vec<_>>();
 
@@ -49,7 +151,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         .flat_map(|spec| {
             spec.components
                 .as_ref()
-                .map(|components: &openrpc::Components| components.schemas.clone())
+                .map(|components| components.schemas.clone())
                 .unwrap_or_default()
         })
         .collect::<HashMap<_, _>>();
@@ -59,7 +161,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         .flat_map(|spec| {
             spec.components
                 .as_ref()
-                .map(|components: &openrpc::Components| components.errors.clone())
+                .map(|components| components.errors.clone())
                 .unwrap_or_default()
         })
         .collect::<HashMap<_, _>>();

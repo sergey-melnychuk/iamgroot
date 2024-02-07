@@ -7,7 +7,7 @@ pub enum Primitive {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Rules {
+pub enum Rule {
     Regex(String),
     Min(i64),
     Max(i64),
@@ -16,7 +16,7 @@ pub enum Rules {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
     Unit,
-    Primitive(Primitive, Vec<Rules>),
+    Primitive(Primitive, Vec<Rule>),
     Array(Box<Type>),
     Option(Box<Type>),
     Named(String),
