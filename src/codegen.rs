@@ -1,33 +1,24 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Basic {
+pub enum Primitive {
     String,
     Integer,
     Boolean,
     Null,
 }
 
-impl std::fmt::Display for Basic {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{self:?}")
-    }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Rules {
+    Regex(String),
+    Min(i64),
+    Max(i64),
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct Rules {
-    pub pattern: Option<String>,
-    pub min: Option<i64>,
-    pub max: Option<i64>,
-}
-
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Type {
-    #[default]
     Unit,
-    Basic(Basic, Rules),
+    Primitive(Primitive, Vec<Rules>),
     Array(Box<Type>),
     Option(Box<Type>),
-    Struct(Vec<(String, Type)>),
-    Enum(Vec<(String, Type)>),
     Named(String),
 }
 
@@ -37,7 +28,7 @@ pub enum Visibility {
     Public,
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Property {
     pub name: String,
     pub r#type: Type,
@@ -51,7 +42,9 @@ impl Property {
         Self {
             name,
             r#type,
-            ..Default::default()
+            visibility: Visibility::Public,
+            decorators: vec![],
+            flatten: false,
         }
     }
 }
@@ -93,10 +86,16 @@ impl Enum {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Variant {
     pub name: String,
     pub r#type: Type,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Object {
+    Struct(Struct),
+    Enum(Enum),
 }
 
 #[derive(Debug, Clone)]
@@ -107,9 +106,10 @@ pub struct Alias {
 
 #[derive(Debug, Clone)]
 pub struct Method {
+    pub doc: Option<String>,
     pub name: String,
     pub args: Vec<(String, Type)>,
-    pub out: Type,
+    pub ret: Type,
 }
 
 #[derive(Debug, Clone)]

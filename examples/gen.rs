@@ -1021,7 +1021,10 @@ impl gen::Rpc for State {
         &self,
         _transaction_hash: gen::TxnHash,
     ) -> std::result::Result<gen::TransactionTrace, jsonrpc::Error> {
-        todo!()
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "unimplemented".to_owned(),
+        })
     }
 
     fn simulateTransaction(
@@ -1030,14 +1033,20 @@ impl gen::Rpc for State {
         _transaction: gen::Transaction,
         _simulation_flags: gen::SimulationFlags,
     ) -> std::result::Result<gen::SimulateTransactionSimulatedTransactions, jsonrpc::Error> {
-        todo!()
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "unimplemented".to_owned(),
+        })
     }
 
     fn traceBlockTransactions(
         &self,
         _block_hash: gen::BlockHash,
     ) -> std::result::Result<gen::TraceBlockTransactionsTraces, jsonrpc::Error> {
-        todo!()
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "unimplemented".to_owned(),
+        })
     }
 }
 

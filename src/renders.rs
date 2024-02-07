@@ -1,31 +1,26 @@
 use std::collections::HashMap;
 
-use crate::binding;
 use crate::codegen;
 use crate::openrpc;
 
 #[derive(Clone, Debug)]
-pub enum Error {
-    Message(String),
-}
+pub struct Error(String);
 
 impl From<String> for Error {
     fn from(message: String) -> Self {
-        Self::Message(message)
+        Self(message)
     }
 }
 
 impl From<&str> for Error {
     fn from(message: &str) -> Self {
-        Self::Message(message.to_string())
+        Self(message.to_string())
     }
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Message(message) => write!(f, "Code renderer error: {message}."),
-        }
+        write!(f, "Code renderer error: {}.", self.0)
     }
 }
 
@@ -71,202 +66,42 @@ pub fn capitalize(s: &str) -> Result<String> {
     Ok(chars.into_iter().collect())
 }
 
-pub fn render_basic(basic: &codegen::Basic) -> String {
-    let ty = match basic {
-        codegen::Basic::String => "String",
-        codegen::Basic::Integer => "i64",
-        codegen::Basic::Boolean => "bool",
-        codegen::Basic::Null => "Null",
-    };
-    ty.to_string()
+pub fn render_primitive(basic: &codegen::Primitive) -> &str {
+    match basic {
+        codegen::Primitive::String => "String",
+        codegen::Primitive::Integer => "i64",
+        codegen::Primitive::Boolean => "bool",
+        codegen::Primitive::Null => "Null",
+    }
 }
 
 pub fn render_type(ty: &codegen::Type) -> Result<String> {
     match ty {
         codegen::Type::Named(name) => normalize_type_name(name),
-        codegen::Type::Basic(basic, _) => Ok(render_basic(basic)),
+        codegen::Type::Primitive(basic, _) => Ok(render_primitive(basic).to_string()),
         codegen::Type::Array(ty) => Ok(format!("Vec<{}>", render_type(ty)?)),
         codegen::Type::Option(ty) => Ok(format!("Option<{}>", render_type(ty)?)),
-        codegen::Type::Unit => Ok(String::default()),
-        unexpected => Err(format!("Unexpected enum variant type: {unexpected:?}").into()),
+        codegen::Type::Unit => Ok("()".to_string()),
     }
 }
 
-pub fn render_object(name: &str, binding: &binding::Binding) -> Result<String> {
-    /*
-    let mut lines: Vec<String> = Vec::new();
-    match binding {
-        binding::Binding::Basic(basic) => {
-            let ty = render_basic(basic);
-            let name = normalize_type_name(name)?;
-            if matches!(basic, codegen::Basic::Null) {
-                lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
-                lines.push("pub struct Null;".to_string());
-            } else if ty != name {
-                // Keep type aliases just for the reference
-                lines.push(format!("// pub type {name} = {ty};"));
-            }
-        }
-        binding::Binding::Named(binding_name, ty) => {
-            let name = normalize_type_name(name)?;
-            let binding_name = normalize_type_name(binding_name)?;
-            let rules = match ty {
-                codegen::Type::Basic(_, rules) => rules.clone(),
-                _ => Default::default(),
-            };
-            let ty_is_basic = matches!(ty, codegen::Type::Basic(_, _));
-            let ty = normalize_type_name(&render_type(ty)?)?;
-            lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
-            if name == binding_name {
-                lines.push(format!(
-                    "pub struct {name}(pub {ty}); // name == binding_name"
-                ));
-            } else {
-                lines.push(format!(
-                    "pub struct {name}(pub {binding_name}); // name != binding_name"
-                ));
-            }
-
-            // Add regex-based validation impl enclosed in a module
-            if name == binding_name && ty_is_basic && rules.pattern.is_some() {
-                *lines.last_mut().unwrap() = format!("// {}", lines.last().unwrap());
-
-                lines.push("#[serde(try_from = \"String\")]".to_string());
-                lines.push(format!("pub struct {name}({ty});"));
-
-                let pattern = rules.pattern.as_ref().unwrap().replace("\\", "\\\\");
-
-                let code = PATTERN_VALIDATION_IMPL
-                    .replace("`type_name`", &name)
-                    .replace("`type_name_uppercase`", &name.to_ascii_uppercase())
-                    .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
-                    .replace("`pattern`", &pattern);
-                lines.push(code);
-            } else if name == binding_name
-                && ty_is_basic
-                && (rules.min.is_some() || rules.max.is_some())
-            {
-                *lines.last_mut().unwrap() = format!("// {}", lines.last().unwrap());
-
-                lines.push("#[serde(try_from = \"i64\")]".to_string());
-                lines.push(format!("pub struct {name}({ty});"));
-
-                let code = RANGE_VALIDATION_IMPL
-                    .replace("`type_name`", &name)
-                    .replace("`type_name_lowercase`", &name.to_ascii_lowercase())
-                    .replace("`min`", &format!("{}", rules.min.unwrap_or(i64::MIN)))
-                    .replace("`max`", &format!("{}", rules.max.unwrap_or(i64::MAX)));
-                lines.push(code);
-            }
-        }
-        binding::Binding::Enum(the_enum) => {
-            let mut seen = HashSet::new();
-            lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
-            let all_units = the_enum
-                .variants
-                .iter()
-                .all(|variant| variant.r#type == codegen::Type::Unit);
-            if !all_units {
-                lines.push("#[serde(untagged)]".to_string());
-            }
-            lines.push(format!("pub enum {} {{", normalize_type_name(name)?));
-
-            let mut ordered = the_enum.variants.iter().collect::<Vec<_>>();
-            ordered.sort_by_key(|v| v.name.to_ascii_lowercase());
-
-            for variant in ordered {
-                let name = normalize_type_name(&variant.name)?;
-                if seen.contains(&name) {
-                    continue;
-                }
-                seen.insert(name.clone());
-                if all_units {
-                    lines.push(format!("#[serde(rename = \"{}\")]", variant.name));
-                }
-                match &variant.r#type {
-                    codegen::Type::Struct(props) => {
-                        lines.push(format!("  {name}{{"));
-                        for (prop_name, prop_type) in props {
-                            let prop_type = render_type(&prop_type)?;
-                            lines.push(format!("  {prop_name}: {prop_type},"));
-                        }
-                        lines.push("  },".to_string());
-                    }
-                    _ => {
-                        let ty = render_type(&variant.r#type)?;
-                        let suffix = if ty.is_empty() {
-                            "".to_string()
-                        } else {
-                            format!("({ty})")
-                        };
-                        lines.push(format!("  {name}{suffix},"));
-                    }
-                }
-            }
-            lines.push("}".to_string());
-        }
-        binding::Binding::Struct(the_struct) => {
-            let mut seen = HashSet::new();
-            lines.push("#[derive(Clone, Debug, Deserialize, Serialize)]".to_string());
-            lines.push(format!("pub struct {} {{", normalize_type_name(name)?));
-
-            let mut ordered = the_struct.properties.iter().collect::<Vec<_>>();
-            ordered.sort_by_key(|v| v.name.to_ascii_lowercase());
-
-            for property in ordered {
-                let name = normalize_prop_name(&property.name)?;
-                if seen.contains(&name) {
-                    continue;
-                }
-                seen.insert(name.clone());
-
-                if matches!(property.r#type, codegen::Type::Option(_)) {
-                    lines.push("  #[serde(default)]".to_string());
-                    lines.push("  #[serde(skip_serializing_if = \"Option::is_none\")]".to_string());
-                }
-                if property.flatten {
-                    lines.push("  #[serde(flatten)]".to_string());
-                }
-                if property.name != name && !property.flatten {
-                    lines.push(format!("  #[serde(rename = \"{}\")]", property.name));
-                }
-                lines.push(format!(
-                    "  pub {}: {},",
-                    name,
-                    render_type(&property.r#type)?
-                ));
-            }
-            lines.push("}".to_string());
-        }
-    }
-    Ok(lines.join("\n"))
-    */
-    Ok(Default::default())
-}
-
-pub fn render_method(name: &str, contract: &binding::Contract) -> String {
-    // TODO FIXME: starknet-specific processing (strip the common prefix)
-    let short_name = name.strip_prefix("starknet_").unwrap_or(name);
+pub fn render_method(method: &codegen::Method) -> String {
+    let short_name = method
+        .name
+        .strip_prefix("starknet_")
+        .unwrap_or(&method.name);
 
     let mut lines = vec![
-        format!("/// Method: '{name}'"),
-        format!("/// Summary: {}", &contract.summary),
-        format!("/// Description: {}", &contract.description),
-        format!("///"),
+        format!("/// {}", method.doc.clone().unwrap_or_default()),
         format!("fn {short_name}("),
         format!("    &self,"),
     ];
 
-    for (name, ty) in &contract.params {
+    for (name, ty) in &method.args {
         lines.push(format!("    {}: {},", name, render_type(ty).expect("type")));
     }
 
-    let ret = contract
-        .result
-        .as_ref()
-        .map(|binding| render_type(&binding.get_type()).unwrap_or_default())
-        .unwrap_or_else(|| "()".to_string());
-
+    let ret = render_type(&method.ret).expect("ret");
     lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
     lines.join("\n")
 }
@@ -443,32 +278,34 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Respon
 }
 "###;
 
-pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String {
-    // TODO FIXME: starknet-specific processing (strip the common prefix)
-    let short_name = name.strip_prefix("starknet_").unwrap_or(name);
+pub fn render_method_handler(method: &codegen::Method) -> String {
+    let short_name = method
+        .name
+        .strip_prefix("starknet_")
+        .unwrap_or(&method.name);
 
-    if contract.params.is_empty() {
+    if method.args.is_empty() {
         return METHOD_HANDLER_NO_ARGUMENTS
-            .replace("`method_name`", name)
+            .replace("`method_name`", &method.name)
             .replace("`method_short_name`", short_name);
     }
 
-    let params_names_only = contract
-        .params
+    let params_names_only = method
+        .args
         .iter()
         .map(|(name, _)| format!("{},", name))
         .collect::<Vec<_>>()
         .join("\n");
 
-    let params_types_only = contract
-        .params
+    let params_types_only = method
+        .args
         .iter()
         .map(|(_, ty)| format!("{},", render_type(ty).expect("type")))
         .collect::<Vec<_>>()
         .join("\n");
 
-    let params_names_with_types = contract
-        .params
+    let params_names_with_types = method
+        .args
         .iter()
         .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("type")))
         .collect::<Vec<_>>()
@@ -478,7 +315,7 @@ pub fn render_method_handler(name: &str, contract: &binding::Contract) -> String
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_types`", &params_types_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
-        .replace("`method_name`", name)
+        .replace("`method_name`", &method.name)
         .replace("`method_short_name`", short_name)
 }
 
@@ -499,8 +336,8 @@ pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response 
 }
 "###;
 
-pub fn render_handle_function(contracts: &[binding::Contract]) -> String {
-    let lines = contracts
+pub fn render_handle_function(methods: &[codegen::Method]) -> String {
+    let lines = methods
         .iter()
         .map(|contract| {
             format!(
@@ -621,8 +458,8 @@ fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Err
 }
 "###;
 
-pub fn render_client(contracts: &[binding::Contract]) -> String {
-    let methods = contracts
+pub fn render_client(methods: &[codegen::Method]) -> String {
+    let methods = methods
         .iter()
         .map(render_client_method)
         .collect::<Vec<_>>()
@@ -631,36 +468,30 @@ pub fn render_client(contracts: &[binding::Contract]) -> String {
     CLIENT_MOD_REQWEST_BLOCKING.replace("`client_methods`", &methods)
 }
 
-pub fn render_client_method(contract: &binding::Contract) -> String {
-    // TODO FIXME: starknet-specific processing (strip the common prefix)
-    let short_name = contract
+pub fn render_client_method(method: &codegen::Method) -> String {
+    let short_name = method
         .name
         .strip_prefix("starknet_")
-        .unwrap_or(&contract.name);
+        .unwrap_or(&method.name);
 
-    let return_type = contract
-        .result
-        .as_ref()
-        .map(|b| b.get_type())
-        .unwrap_or_default();
-    let return_type = render_type(&return_type).expect("return type");
+    let return_type = render_type(&method.ret).expect("ret");
 
-    if contract.params.is_empty() {
+    if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
-            .replace("`method_name`", &contract.name)
+            .replace("`method_name`", &method.name)
             .replace("`method_short_name`", short_name)
             .replace("`result_type`", &return_type);
     }
 
-    let params_names_only = contract
-        .params
+    let params_names_only = method
+        .args
         .iter()
         .map(|(name, _)| format!("{},", name))
         .collect::<Vec<_>>()
         .join("\n");
 
-    let params_names_with_types = contract
-        .params
+    let params_names_with_types = method
+        .args
         .iter()
         .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("type")))
         .collect::<Vec<_>>()
@@ -669,7 +500,7 @@ pub fn render_client_method(contract: &binding::Contract) -> String {
     CLIENT_METHOD_REQWEST_BLOCKING
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
-        .replace("`method_name`", &contract.name)
+        .replace("`method_name`", &method.name)
         .replace("`method_short_name`", short_name)
         .replace("`result_type`", &return_type)
 }

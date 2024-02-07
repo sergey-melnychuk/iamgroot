@@ -1,7 +1,7 @@
-use std::{fmt::Display, path::Path};
+use std::{collections::HashMap, fmt::Display, path::Path};
 
-pub(crate) mod binding;
-pub(crate) mod cache;
+use openrpc::{ErrorOrRef, SchemaOrRef};
+
 pub(crate) mod codegen;
 pub mod jsonrpc;
 pub(crate) mod openrpc;
@@ -14,7 +14,7 @@ impl AsPath for &str {}
 
 fn parse<P: AsPath>(path: &P) -> openrpc::Spec {
     log::info!("Processing file: {path}");
-    let json = std::fs::read_to_string(path).expect("JSON file exists and is readable.");
+    let json = std::fs::read_to_string(path).expect("file");
     serde_json::from_str(&json).expect("json")
 }
 
@@ -23,114 +23,86 @@ pub fn gen_json<P: AsPath>(path: &P) -> String {
     serde_json::to_string(&spec).expect("json")
 }
 
-pub fn gen_tree<P: AsPath>(paths: &[P]) -> String {
-    /*
-    let mut cache = Cache::new();
-    let mut trace = Vec::with_capacity(32);
+fn x(
+    schemas: &HashMap<String, SchemaOrRef>,
+    errors: &HashMap<String, ErrorOrRef>,
+    methods: Vec<openrpc::Method>,
+) -> (
+    Vec<codegen::Object>,
+    HashMap<String, openrpc::Error>,
+    Vec<codegen::Method>,
+) {
+    // TODO: impl
 
-    let contracts = paths
-        .iter()
-        .map(|path| parse(path))
-        .flat_map(|spec| binding::extract_contracts(&spec, &mut cache, &mut trace))
-        .collect::<Vec<_>>();
+    let objects = Vec::new();
+    let errors = HashMap::new();
+    let methods = Vec::new();
 
-    let mut target = String::new();
-    use std::fmt::Write;
-
-    cache
-        .data
-        .iter()
-        .for_each(|(name, binding)| writeln!(target, "---\n{name}: {binding:#?}").unwrap());
-
-    contracts
-        .iter()
-        .for_each(|contract| writeln!(target, "---\n{contract:#?}").unwrap());
-
-    target
-    */
-    Default::default()
+    (objects, errors, methods)
 }
 
-pub fn gen_code<P: AsPath>(paths: &[P]) -> String {
-    /*
-    let mut cache = Cache::new();
-    let mut trace = Vec::with_capacity(32);
+pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
+    let specs = paths.iter().map(parse).collect::<Vec<_>>();
 
-    let specs = paths.iter().map(|path| parse(path)).collect::<Vec<_>>();
-
-    let contracts = specs
+    let schemas = specs
         .iter()
-        .flat_map(|spec| binding::extract_contracts(spec, &mut cache, &mut trace))
-        .collect::<Vec<_>>();
+        .flat_map(|spec| {
+            spec.components
+                .as_ref()
+                .map(|components: &openrpc::Components| components.schemas.clone())
+                .unwrap_or_default()
+        })
+        .collect::<HashMap<_, _>>();
 
     let errors = specs
         .iter()
         .flat_map(|spec| {
             spec.components
                 .as_ref()
-                .map(|comps| comps.errors.clone())
+                .map(|components: &openrpc::Components| components.errors.clone())
                 .unwrap_or_default()
         })
-        .map(|(key, error)| match error {
-            ErrorOrRef::Err(error) => (key, error),
-            ErrorOrRef::Ref { r#ref: key } => {
-                let key = key.split(binding::ERROR_REF_PREFIX).nth(1).unwrap();
-                let err = cache.errors.get(key).unwrap();
-                (key.to_owned(), err.to_owned())
-            }
-        })
         .collect::<HashMap<_, _>>();
+
+    let methods = specs
+        .iter()
+        .flat_map(|spec| spec.methods.clone())
+        .collect::<Vec<_>>();
+
+    let (schemas, errors, methods) = x(&schemas, &errors, methods);
 
     let mut target = String::new();
     use std::fmt::Write;
 
-    writeln!(target, "// vvv GENERATED CODE BELOW vvv").unwrap();
-    writeln!(target, "#[allow(dead_code)]").unwrap();
-    writeln!(target, "#[allow(non_snake_case)]").unwrap();
-    writeln!(target, "#[allow(unused_variables)]").unwrap();
-    writeln!(target, "#[allow(clippy::enum_variant_names)]").unwrap();
-    writeln!(target, "pub mod gen {{").unwrap();
-    writeln!(target, "use serde::{{Deserialize, Serialize}};").unwrap();
-    writeln!(target, "use serde_json::Value;").unwrap();
-    writeln!(target, "\nuse iamgroot::jsonrpc;").unwrap();
+    writeln!(target, "// vvv GENERATED CODE BELOW vvv")?;
+    writeln!(target, "#[allow(dead_code)]")?;
+    writeln!(target, "#[allow(non_snake_case)]")?;
+    writeln!(target, "#[allow(unused_variables)]")?;
+    writeln!(target, "#[allow(clippy::enum_variant_names)]")?;
+    writeln!(target, "pub mod gen {{")?;
+    writeln!(target, "use serde::{{Deserialize, Serialize}};")?;
+    writeln!(target, "use serde_json::Value;")?;
+    writeln!(target, "\nuse iamgroot::jsonrpc;")?;
 
-    let mut ordered = cache.data.iter().collect::<Vec<_>>();
-    ordered.sort_by_key(|(name, _)| *name);
+    // TODO: render `schemas`
 
-    for (name, binding) in ordered {
-        if name.is_empty() {
-            continue;
-        }
-        let code = renders::render_object(name, binding)
-            .unwrap_or_else(|e| format!("// ERROR: Rendering object '{name}' failed. {e}"));
-        if !code.is_empty() {
-            writeln!(target, "\n// object: '{name}'\n{code}").unwrap();
-        }
+    writeln!(target, "\npub trait Rpc {{")?;
+    for method in &methods {
+        let code = renders::render_method(method);
+        writeln!(target, "\n{code}")?;
+    }
+    writeln!(target, "}}")?;
+
+    for contract in &methods {
+        let code = renders::render_method_handler(contract);
+        writeln!(target, "{code}")?;
     }
 
-    writeln!(target, "\npub trait Rpc {{").unwrap();
-    for contract in &contracts {
-        let code = renders::render_method(&contract.name, contract);
-        writeln!(target, "\n{code}").unwrap();
-    }
-    writeln!(target, "}}").unwrap();
+    writeln!(target, "{}", renders::render_handle_function(&methods))?;
+    writeln!(target, "{}", renders::render_errors(errors))?;
+    writeln!(target, "{}", renders::render_client(&methods))?;
 
-    for contract in &contracts {
-        let code = renders::render_method_handler(&contract.name, contract);
-        writeln!(target, "{code}").unwrap();
-    }
-
-    let handler = renders::render_handle_function(&contracts);
-    writeln!(target, "{handler}").unwrap();
-
-    writeln!(target, "{}", renders::render_errors(errors)).unwrap();
-
-    writeln!(target, "{}", renders::render_client(&contracts)).unwrap();
-
-    writeln!(target, "}}").unwrap();
-    writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^").unwrap();
-
-    target
-    */
-    Default::default()
+    writeln!(target, "}}")?;
+    writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^")?;
+    Ok(target)
 }

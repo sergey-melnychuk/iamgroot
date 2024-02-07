@@ -28,17 +28,14 @@ impl Spec {
     }
 
     pub fn get_content(&self, id: &str) -> Option<&Content> {
-        self.components
-            .as_ref()?
-            .contentDescriptors
-            .get(id)
+        self.components.as_ref()?.contentDescriptors.get(id)
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Contact {
-    pub name: String,
     pub url: String,
+    pub name: String,
     pub email: String,
 }
 
@@ -64,7 +61,7 @@ pub struct Reference {
 }
 
 #[allow(non_snake_case)]
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Method {
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -81,7 +78,7 @@ pub struct Method {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub errors: Option<Vec<Reference>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub examples: Option<serde_json::Value>,
+    pub examples: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub deprecated: Option<bool>,
 }
@@ -165,7 +162,7 @@ pub struct Schema {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub not: Option<serde_json::Value>,
+    pub not: Option<Value>,
 }
 
 #[allow(non_snake_case)]
