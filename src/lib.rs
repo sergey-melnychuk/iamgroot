@@ -1,7 +1,8 @@
-use std::{collections::HashMap, fmt::Display, path::Path};
+use std::{fmt::Display, path::Path};
+use std::collections::HashMap as Map;
 
 use codegen::{Object, Primitive, Property, Struct, Type};
-use openrpc::{ErrorOrRef, Schema, SchemaOrRef};
+use openrpc::{Error, ErrorOrRef, Schema, SchemaOrRef};
 
 use crate::codegen::Rule;
 
@@ -10,6 +11,7 @@ pub mod jsonrpc;
 pub(crate) mod openrpc;
 pub(crate) mod renders;
 
+#[cfg(test)]
 mod tests;
 
 pub trait AsPath: AsRef<Path> + Display {}
@@ -29,27 +31,54 @@ pub fn gen_json<P: AsPath>(path: &P) -> String {
 }
 
 fn x(
-    schemas: &HashMap<String, SchemaOrRef>,
-    errors: &HashMap<String, ErrorOrRef>,
+    schemas: &Map<String, SchemaOrRef>,
+    errors: &Map<String, ErrorOrRef>,
     methods: Vec<openrpc::Method>,
 ) -> (
     Vec<codegen::Object>,
-    HashMap<String, openrpc::Error>,
+    Map<String, openrpc::Error>,
     Vec<codegen::Method>,
 ) {
-    // TODO: impl
+    let objects = schemas.iter()
+        .filter_map(|(name, schema)| bind_object(name, schemas))
+        .collect();
 
-    let objects = Vec::new();
-    let errors = HashMap::new();
-    let methods = Vec::new();
+    let errors = bind_errors(errors);
+
+    let methods = methods.into_iter()
+        .map(bind_method)
+        .collect();
 
     (objects, errors, methods)
 }
 
-fn resolve_schema<'a>(
-    name: &'a str,
-    schemas: &'a HashMap<String, SchemaOrRef>,
-) -> Option<&'a Schema> {
+fn bind_method(method: openrpc::Method) -> codegen::Method {
+    codegen::Method {
+        doc: method.description,
+        name: method.name,
+        args: vec![], // TODO: bind argument type
+        ret: Type::Unit, // TODO: bind return type
+    }
+}
+
+fn get_error<'a>(name: &'a str, errors: &'a Map<String, ErrorOrRef>) -> Option<&'a Error> {
+    match errors.get(name)? {
+        ErrorOrRef::Err(e) => Some(e),
+        r @ ErrorOrRef::Ref { .. } => {
+            let r = r.get_ref()?;
+            match errors.get(r) {
+                Some(ErrorOrRef::Err(ret)) => Some(ret),
+                _ => None,
+            }
+        }
+    }
+}
+
+fn bind_errors(errors: &Map<String, ErrorOrRef>) -> Map<String, openrpc::Error> {
+    Default::default() // TODO
+}
+
+fn get_schema<'a>(name: &'a str, schemas: &'a Map<String, SchemaOrRef>) -> Option<&'a Schema> {
     match schemas.get(name)? {
         SchemaOrRef::Schema(schema) => Some(schema),
         r @ SchemaOrRef::Ref { .. } => {
@@ -63,6 +92,9 @@ fn resolve_schema<'a>(
 }
 
 fn capitalize(name: &str) -> String {
+    if name.is_empty() {
+        return name.to_owned();
+    }
     let head = name.chars().next().unwrap();
     let tail = name.chars().skip(1).collect::<String>();
     format!("{}{}", head.to_ascii_uppercase(), tail.to_ascii_lowercase())
@@ -75,27 +107,31 @@ fn normalize(name: &str) -> String {
         .join("")
 }
 
-fn bind_primitive(
-    name: &str,
-    ty: &openrpc::Type,
-    schema: &Schema,
-    schemas: &HashMap<String, SchemaOrRef>,
-) -> Option<Object> {
+fn bind_schema(schema: &Schema) -> Option<Object> {
+    if let Some(ty) = schema.r#type.as_ref() {
+        return bind_type(ty, schema);
+    }
+
+    // TODO: allOf (see BLOCK_BODY_WITH_TXS.transactions)
+
+    // TODO: array of arrays (see EVENT_FILTER.keys)
+
+    // TODO: enum
+    // TODO: oneOf
+
+    None
+}
+
+fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
     match ty {
         openrpc::Type::String => {
-            let rules = if let Some(regex) = schema.pattern.as_ref() {
-                vec![Rule::Regex(regex.to_owned())]
-            } else {
-                vec![]
+            let mut rules = Vec::with_capacity(1);
+            if let Some(regex) = schema.pattern.as_ref() {
+                rules.push(Rule::Regex(regex.to_owned()));
             };
             let object = Struct {
-                name: normalize(name),
-                properties: vec![Property::of(
-                    Default::default(),
-                    Type::Primitive(Primitive::String, rules),
-                )],
-                decorators: vec![],
-                visibility: codegen::Visibility::Public,
+                properties: vec![Property::unnamed(Type::Primitive(Primitive::String, rules))],
+                ..Default::default()
             };
             Some(Object::Struct(object))
         }
@@ -108,39 +144,90 @@ fn bind_primitive(
                 rules.push(Rule::Max(max));
             }
             let object = Struct {
-                name: normalize(name),
-                properties: vec![Property::of(
-                    Default::default(),
-                    Type::Primitive(Primitive::Integer, rules),
-                )],
-                decorators: vec![],
-                visibility: codegen::Visibility::Public,
+                properties: vec![Property::unnamed(Type::Primitive(
+                    Primitive::Integer,
+                    rules,
+                ))],
+                ..Default::default()
             };
             Some(Object::Struct(object))
         }
         openrpc::Type::Boolean => Some(Object::Struct(Struct {
-            name: normalize(name),
-            properties: vec![Property::of(
-                Default::default(),
-                codegen::Type::Primitive(Primitive::Boolean, vec![]),
-            )],
-            decorators: vec![],
-            visibility: codegen::Visibility::Public,
+            properties: vec![Property::unnamed(codegen::Type::Primitive(
+                Primitive::Boolean,
+                vec![],
+            ))],
+            ..Default::default()
         })),
-        openrpc::Type::Array => todo!(),
-        openrpc::Type::Object => todo!(),
-        openrpc::Type::Null => todo!(),
+        openrpc::Type::Null => Some(Object::Struct(Struct::default())),
+        openrpc::Type::Object => {
+            let properties = schema
+                .properties
+                .as_ref()
+                .map(|props| {
+                    props
+                        .iter()
+                        .filter_map(|(prop_name, prop_schema)| bind_prop(prop_name, prop_schema))
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default();
+            let object = Struct {
+                properties,
+                ..Default::default()
+            };
+            Some(Object::Struct(object))
+        }
+        openrpc::Type::Array => {
+            let items = schema.items.as_ref()?;
+            let ty = match &**items {
+                SchemaOrRef::Schema(param) => {
+                    eprintln!("anonymous array param type definition: {param:#?}");
+                    return None;
+                }
+                r @ SchemaOrRef::Ref { .. } => {
+                    let name = r.get_ref()?;
+                    let name = normalize(name);
+                    Type::Named(name)
+                }
+            };
+            Some(Object::Type(Type::Array(Box::new(ty))))
+        }
     }
 }
 
-fn bind_schema(name: &str, schemas: &HashMap<String, SchemaOrRef>) -> Option<Object> {
-    let schema = resolve_schema(name, schemas)?;
+fn bind_prop(prop_name: &str, schema: &SchemaOrRef) -> Option<Property> {
+    let ty = match schema {
+        r @ SchemaOrRef::Ref { .. } => {
+            let name = r.get_ref()?;
+            let name = normalize(name);
+            Type::Named(name)
+        }
+        SchemaOrRef::Schema(schema) => bind_schema(schema)?.get_type(),
+    };
+    Some(Property {
+        name: prop_name.to_owned(),
+        r#type: ty,
+        visibility: codegen::Visibility::Public,
+        decorators: vec![],
+        flatten: false,
+    })
+}
 
-    if let Some(ty) = schema.r#type.as_ref() {
-        return bind_primitive(name, ty, schema, schemas);
+fn bind_object(name: &str, schemas: &Map<String, SchemaOrRef>) -> Option<Object> {
+    match schemas.get(name)? {
+        SchemaOrRef::Schema(schema) => {
+            let object = bind_schema(schema)?;
+            Some(object.with_name(name))
+        }
+        r @ SchemaOrRef::Ref { .. } => {
+            let ty = Type::Named(normalize(r.get_ref()?));
+            Some(Object::Struct(Struct {
+                name: normalize(name),
+                properties: vec![Property::unnamed(ty)],
+                ..Default::default()
+            }))
+        }
     }
-
-    None
 }
 
 pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
@@ -154,7 +241,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
                 .map(|components| components.schemas.clone())
                 .unwrap_or_default()
         })
-        .collect::<HashMap<_, _>>();
+        .collect::<Map<_, _>>();
 
     let errors = specs
         .iter()
@@ -164,7 +251,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
                 .map(|components| components.errors.clone())
                 .unwrap_or_default()
         })
-        .collect::<HashMap<_, _>>();
+        .collect::<Map<_, _>>();
 
     let methods = specs
         .iter()
@@ -175,7 +262,6 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
 
     let mut target = String::new();
     use std::fmt::Write;
-
     writeln!(target, "// vvv GENERATED CODE BELOW vvv")?;
     writeln!(target, "#[allow(dead_code)]")?;
     writeln!(target, "#[allow(non_snake_case)]")?;
@@ -187,6 +273,10 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
     writeln!(target, "\nuse iamgroot::jsonrpc;")?;
 
     // TODO: render `schemas`
+    for object in schemas {
+        let code = renders::render_object(&object)?;
+        writeln!(target, "{code}")?;
+    }
 
     writeln!(target, "\npub trait Rpc {{")?;
     for method in &methods {
@@ -194,16 +284,13 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         writeln!(target, "\n{code}")?;
     }
     writeln!(target, "}}")?;
-
     for contract in &methods {
         let code = renders::render_method_handler(contract);
         writeln!(target, "{code}")?;
     }
-
     writeln!(target, "{}", renders::render_handle_function(&methods))?;
     writeln!(target, "{}", renders::render_errors(errors))?;
     writeln!(target, "{}", renders::render_client(&methods))?;
-
     writeln!(target, "}}")?;
     writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^")?;
     Ok(target)
