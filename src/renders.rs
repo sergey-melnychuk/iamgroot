@@ -24,6 +24,12 @@ impl std::fmt::Display for Error {
     }
 }
 
+impl From<Error> for std::fmt::Error {
+    fn from(e: Error) -> Self {
+        Error(e.to_string()).into()
+    }
+}
+
 type Result<T> = std::result::Result<T, Error>;
 
 pub fn normalize_prop_name(name: &str) -> Result<String> {
@@ -83,6 +89,24 @@ pub fn render_type(ty: &codegen::Type) -> Result<String> {
         codegen::Type::Option(ty) => Ok(format!("Option<{}>", render_type(ty)?)),
         codegen::Type::Unit => Ok("()".to_string()),
     }
+}
+
+pub fn render_object(object: &codegen::Object) -> Result<String> {
+    let mut lines: Vec<String> = Vec::new();
+    lines.push(format!("\n/*\nDEBUG:\n{:#?}\n*/", object));
+    match object {
+        codegen::Object::Type(ty) => (), // noop
+        codegen::Object::Alias(name, ty) => {
+            lines.push(format!("type {name} = {}",  render_type(&ty)?));
+        }
+        codegen::Object::Struct(r#struct) => {
+            // TODO
+        }
+        codegen::Object::Enum(r#enum) => {
+            // TODO
+        }
+    }
+    Ok(lines.join("\n"))
 }
 
 pub fn render_method(method: &codegen::Method) -> String {
