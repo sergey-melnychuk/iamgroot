@@ -5,7 +5,7 @@ fn main() {
 
     let (mode, paths) = {
         let mut args = std::env::args().skip(1);
-        let mode = args.next().expect("Output: [JSON, TREE, CODE].");
+        let mode = args.next().expect("Output: [JSON, CODE].");
         let paths = args.collect::<Vec<_>>();
         (mode, paths)
     };
