@@ -1125,6 +1125,57 @@
                 "type": "string",
                 "pattern": "^0x[a-fA-F0-9]+$"
             },
+            "DECLARED_CLASS": {
+                "title": "New classes",
+                "type": "object",
+                "description": "The declared class hash and compiled class hash",
+                "properties": {
+                    "class_hash": {
+                        "title": "Class hash",
+                        "description": "The hash of the declared class",
+                        "$ref": "#/components/schemas/FELT"
+                    },
+                    "compiled_class_hash": {
+                        "title": "Compiled class hash",
+                        "description": "The Cairo assembly hash corresponding to the declared class",
+                        "$ref": "#/components/schemas/FELT"
+                    }
+                }
+            },
+            "REPLACED_CLASS": {
+                "description": "The list of contracts whose class was replaced",
+                "title": "Replaced class",
+                "type": "object",
+                "properties": {
+                    "contract_address": {
+                        "title": "Contract address",
+                        "description": "The address of the contract whose class was replaced",
+                        "$ref": "#/components/schemas/ADDRESS"
+                    },
+                    "class_hash": {
+                        "title": "Class hash",
+                        "description": "The new class hash",
+                        "$ref": "#/components/schemas/FELT"
+                    }
+                }
+            },
+            "NONCE_UPDATE": {
+                "title": "Nonce update",
+                "description": "The updated nonce per contract address",
+                "type": "object",
+                "properties": {
+                    "contract_address": {
+                        "title": "Contract address",
+                        "description": "The address of the contract",
+                        "$ref": "#/components/schemas/ADDRESS"
+                    },
+                    "nonce": {
+                        "title": "Nonce",
+                        "description": "The nonce for the given address at the end of the block",
+                        "$ref": "#/components/schemas/FELT"
+                    }
+                }
+            },
             "STATE_DIFF": {
                 "description": "The change in state applied in this block, given as a mapping of addresses to the new values and/or new contracts",
                 "type": "object",
@@ -1149,21 +1200,7 @@
                         "title": "Declared classes",
                         "type": "array",
                         "items": {
-                            "title": "New classes",
-                            "type": "object",
-                            "description": "The declared class hash and compiled class hash",
-                            "properties": {
-                                "class_hash": {
-                                    "title": "Class hash",
-                                    "description": "The hash of the declared class",
-                                    "$ref": "#/components/schemas/FELT"
-                                },
-                                "compiled_class_hash": {
-                                    "title": "Compiled class hash",
-                                    "description": "The Cairo assembly hash corresponding to the declared class",
-                                    "$ref": "#/components/schemas/FELT"
-                                }
-                            }
+                            "$ref": "#/components/schemas/DECLARED_CLASS"
                         }
                     },
                     "deployed_contracts": {
@@ -1178,42 +1215,14 @@
                         "title": "Replaced classes",
                         "type": "array",
                         "items": {
-                            "description": "The list of contracts whose class was replaced",
-                            "title": "Replaced class",
-                            "type": "object",
-                            "properties": {
-                                "contract_address": {
-                                    "title": "Contract address",
-                                    "description": "The address of the contract whose class was replaced",
-                                    "$ref": "#/components/schemas/ADDRESS"
-                                },
-                                "class_hash": {
-                                    "title": "Class hash",
-                                    "description": "The new class hash",
-                                    "$ref": "#/components/schemas/FELT"
-                                }
-                            }
+                            "$ref": "#/components/schemas/REPLACED_CLASS"
                         }
                     },
                     "nonces": {
                         "title": "Nonces",
                         "type": "array",
                         "items": {
-                            "title": "Nonce update",
-                            "description": "The updated nonce per contract address",
-                            "type": "object",
-                            "properties": {
-                                "contract_address": {
-                                    "title": "Contract address",
-                                    "description": "The address of the contract",
-                                    "$ref": "#/components/schemas/ADDRESS"
-                                },
-                                "nonce": {
-                                    "title": "Nonce",
-                                    "description": "The nonce for the given address at the end of the block",
-                                    "$ref": "#/components/schemas/FELT"
-                                }
-                            }
+                            "$ref": "#/components/schemas/NONCE_UPDATE"
                         }
                     }
                 },
@@ -1573,6 +1582,22 @@
                     "class_hash"
                 ]
             },
+            "STORAGE_DIFF_ITEM": {
+                "title": "Storage diff item",
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "title": "Key",
+                        "description": "The key of the changed value",
+                        "$ref": "#/components/schemas/FELT"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "The new value applied to the given address",
+                        "$ref": "#/components/schemas/FELT"
+                    }
+                }
+            },
             "CONTRACT_STORAGE_DIFF_ITEM": {
                 "title": "Contract storage diff item",
                 "type": "object",
@@ -1587,20 +1612,7 @@
                         "description": "The changes in the storage of the contract",
                         "type": "array",
                         "items": {
-                            "title": "Storage diff item",
-                            "type": "object",
-                            "properties": {
-                                "key": {
-                                    "title": "Key",
-                                    "description": "The key of the changed value",
-                                    "$ref": "#/components/schemas/FELT"
-                                },
-                                "value": {
-                                    "title": "Value",
-                                    "description": "The new value applied to the given address",
-                                    "$ref": "#/components/schemas/FELT"
-                                }
-                            }
+                            "$ref": "#/components/schemas/STORAGE_DIFF_ITEM"
                         }
                     }
                 },
