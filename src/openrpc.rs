@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+// ensure deterministic ordering of entries
+use indexmap::IndexMap as Map;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -49,8 +50,8 @@ pub struct Server {
     pub summary: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub variables: HashMap<String, Value>,
+    #[serde(skip_serializing_if = "Map::is_empty")]
+    pub variables: Map<String, Value>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -102,7 +103,7 @@ pub struct Content {
     pub deprecated: Option<bool>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Type {
     String,
@@ -159,7 +160,7 @@ pub struct Schema {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub items: Option<Box<SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub properties: Option<HashMap<String, SchemaOrRef>>,
+    pub properties: Option<Map<String, SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema: Option<Box<SchemaOrRef>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -181,13 +182,13 @@ pub struct Schema {
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Components {
     #[serde(default)]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub contentDescriptors: HashMap<String, Content>,
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub schemas: HashMap<String, SchemaOrRef>,
+    #[serde(skip_serializing_if = "Map::is_empty")]
+    pub contentDescriptors: Map<String, Content>,
+    #[serde(skip_serializing_if = "Map::is_empty")]
+    pub schemas: Map<String, SchemaOrRef>,
     #[serde(default)]
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub errors: HashMap<String, ErrorOrRef>,
+    #[serde(skip_serializing_if = "Map::is_empty")]
+    pub errors: Map<String, ErrorOrRef>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
