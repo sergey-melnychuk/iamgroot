@@ -1,3 +1,5 @@
+use crate::normalize;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Primitive {
     String,
@@ -38,9 +40,18 @@ pub struct Property {
 }
 
 impl Property {
-    pub fn of(name: String, r#type: Type) -> Self {
+    pub fn named(name: String, r#type: Type) -> Self {
         Self {
             name,
+            r#type,
+            visibility: Visibility::Public,
+            decorators: vec![],
+            flatten: false,
+        }
+    }
+    pub fn unnamed(r#type: Type) -> Self {
+        Self {
+            name: Default::default(),
             r#type,
             visibility: Visibility::Public,
             decorators: vec![],
@@ -96,6 +107,33 @@ pub struct Variant {
 pub enum Object {
     Struct(Struct),
     Enum(Enum),
+    Type(Type),
+    Alias(String, Type),
+}
+
+impl Object {
+    pub fn get_type(&self) -> Type {
+        match self {
+            Self::Struct(s) => Type::Named(s.name.to_owned()),
+            Self::Enum(e) => Type::Named(e.name.to_owned()),
+            Self::Type(ty) => ty.clone(),
+            Self::Alias(_, ty) => ty.clone(),
+        }
+    }
+
+    pub fn with_name(self, name: &str) -> Self {
+        let name = normalize(name);
+        match self {
+            Self::Struct(this) => Self::Struct(Struct { name, ..this }),
+            Self::Enum(this) => Self::Enum(Enum { name, ..this }),
+
+            // alternative: extract value-object type wrapper
+            Self::Type(ty) => Self::Alias(name, ty),
+
+            // alternative: extract value-object type wrapper
+            Self::Alias(_, ty) => Self::Alias(name, ty),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
