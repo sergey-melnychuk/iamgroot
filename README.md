@@ -68,9 +68,9 @@ rm a.json b.json
 ```
 
 ```
-cargo run -- CODE ./api/eth/ethereum.json > eth.txt 2>&1
+cargo run -- CODE ./api/eth/ethereum.json > ethereum.txt 2>&1
 
-cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json ./api/starknet_trace_api_openrpc.json > out.txt 2>&1
+cargo run -- CODE ./api/starknet_api_openrpc.json ./api/starknet_write_api.json ./api/starknet_trace_api_openrpc.json > starknet.txt 2>&1
 ```
 
 ### TODO
