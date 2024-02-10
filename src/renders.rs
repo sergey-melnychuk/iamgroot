@@ -44,9 +44,13 @@ pub fn render_primitive(basic: &codegen::Primitive) -> &str {
 
 pub fn render_type(ty: &codegen::Type) -> String {
     match ty {
-        codegen::Type::Named(name) if name.is_empty() => "(/* TODO: empty */)".to_owned(),
+        codegen::Type::Named(name) if name.is_empty() => {
+            "(/* TODO: empty */)".to_owned()
+        }
         codegen::Type::Named(name) => name.to_owned(),
-        codegen::Type::Primitive(basic, _) => render_primitive(basic).to_string(),
+        codegen::Type::Primitive(basic, _) => {
+            render_primitive(basic).to_string()
+        }
         codegen::Type::Array(ty) => format!("Vec<{}>", render_type(ty)),
         codegen::Type::Option(ty) => format!("Option<{}>", render_type(ty)),
         codegen::Type::Unit => "()".to_string(),
@@ -289,7 +293,8 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Respon
 
 pub fn render_method_handler(method: &codegen::Method) -> String {
     if method.args.is_empty() {
-        return METHOD_HANDLER_NO_ARGUMENTS.replace("`method_name`", &method.name);
+        return METHOD_HANDLER_NO_ARGUMENTS
+            .replace("`method_name`", &method.name);
     }
 
     let params_names_only = method

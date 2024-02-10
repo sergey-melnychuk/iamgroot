@@ -1,7 +1,9 @@
 fn main() {
     let json = include_str!("../api/eth/0x10165f5.json");
-    let mut res: iamgroot::jsonrpc::Response = serde_json::from_str(json).unwrap();
-    let res: gen::Block = serde_json::from_value(res.result.take().unwrap()).unwrap();
+    let mut res: iamgroot::jsonrpc::Response =
+        serde_json::from_str(json).unwrap();
+    let res: gen::Block =
+        serde_json::from_value(res.result.take().unwrap()).unwrap();
     println!("{res:#?}");
 }
 
@@ -38,7 +40,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "Address value does not match regex".to_string(),
+                        message: "Address value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -164,7 +167,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "BlockHash value does not match regex".to_string(),
+                        message: "BlockHash value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -242,7 +246,8 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static BYTES_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new("^0x([a-fA-F0-9]?)+$").unwrap());
+        static BYTES_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x([a-fA-F0-9]?)+$").unwrap());
 
         impl Bytes {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -293,7 +298,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "DataWord value does not match regex".to_string(),
+                        message: "DataWord value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -337,7 +343,8 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static INTEGER_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+        static INTEGER_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
 
         impl Integer {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -346,7 +353,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "Integer value does not match regex".to_string(),
+                        message: "Integer value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -396,7 +404,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "Keccak value does not match regex".to_string(),
+                        message: "Keccak value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -503,7 +512,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "Position value does not match regex".to_string(),
+                        message: "Position value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -675,7 +685,8 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static DATA_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new("^0x[a-fA-F\\d]+$").unwrap());
+        static DATA_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F\\d]+$").unwrap());
 
         impl Data {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -738,7 +749,8 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "EthChainIdChainId value does not match regex".to_string(),
+                        message: "EthChainIdChainId value does not match regex"
+                            .to_string(),
                     })
                 }
             }
@@ -840,7 +852,9 @@ pub mod gen {
 
     // object: 'eth_getRawTransactionByBlockNumberAndIndex_rawTransaction'
     #[derive(Debug, Deserialize, Serialize)]
-    pub struct EthGetRawTransactionByBlockNumberAndIndexRawTransaction(pub Bytes); // name != binding_name
+    pub struct EthGetRawTransactionByBlockNumberAndIndexRawTransaction(
+        pub Bytes,
+    ); // name != binding_name
 
     // object: 'eth_getRawTransactionByHash_rawTransactionByHash'
     #[derive(Debug, Deserialize, Serialize)]
@@ -1022,7 +1036,9 @@ pub mod gen {
                 } else {
                     Err(jsonrpc::Error {
                         code: 1001,
-                        message: "NetVersionNetworkId value does not match regex".to_string(),
+                        message:
+                            "NetVersionNetworkId value does not match regex"
+                                .to_string(),
                     })
                 }
             }
@@ -1138,7 +1154,10 @@ pub mod gen {
         /// Summary: Hashes data
         /// Description: Hashes data using the Keccak-256 algorithm
         ///
-        fn web3_sha3(&self, data: Option<Data>) -> std::result::Result<Keccak, jsonrpc::Error>;
+        fn web3_sha3(
+            &self,
+            data: Option<Data>,
+        ) -> std::result::Result<Keccak, jsonrpc::Error>;
 
         /// Method: 'net_listening'
         /// Summary: returns listening status
@@ -1150,20 +1169,25 @@ pub mod gen {
         /// Summary: number of peers
         /// Description: Returns the number of peers currently connected to this client.
         ///
-        fn net_peerCount(&self) -> std::result::Result<NetPeerCountQuantity, jsonrpc::Error>;
+        fn net_peerCount(
+            &self,
+        ) -> std::result::Result<NetPeerCountQuantity, jsonrpc::Error>;
 
         /// Method: 'net_version'
         /// Summary: Network identifier associated with network
         /// Description: Returns the network ID associated with the current network.
         ///
-        fn net_version(&self) -> std::result::Result<NetVersionNetworkId, jsonrpc::Error>;
+        fn net_version(
+            &self,
+        ) -> std::result::Result<NetVersionNetworkId, jsonrpc::Error>;
 
         /// Method: 'eth_blockNumber'
         /// Summary: Returns the number of most recent block.
         /// Description:
         ///
-        fn eth_blockNumber(&self)
-            -> std::result::Result<EthBlockNumberBlockNumber, jsonrpc::Error>;
+        fn eth_blockNumber(
+            &self,
+        ) -> std::result::Result<EthBlockNumberBlockNumber, jsonrpc::Error>;
 
         /// Method: 'eth_call'
         /// Summary: Executes a new message call (locally) immediately without creating a transaction on the block chain.
@@ -1179,7 +1203,9 @@ pub mod gen {
         /// Summary: Returns the currently configured chain id
         /// Description: Returns the currently configured chain id, a value used in replay-protected transaction signing as introduced by [EIP-155](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md).
         ///
-        fn eth_chainId(&self) -> std::result::Result<EthChainIdChainId, jsonrpc::Error>;
+        fn eth_chainId(
+            &self,
+        ) -> std::result::Result<EthChainIdChainId, jsonrpc::Error>;
 
         /// Method: 'eth_coinbase'
         /// Summary: Returns the client coinbase address.
@@ -1360,7 +1386,10 @@ pub mod gen {
         fn eth_getTransactionByHash(
             &self,
             transactionhash: TransactionHash,
-        ) -> std::result::Result<EthGetTransactionByHashTransactionResult, jsonrpc::Error>;
+        ) -> std::result::Result<
+            EthGetTransactionByHashTransactionResult,
+            jsonrpc::Error,
+        >;
 
         /// Method: 'eth_getTransactionCount'
         /// Summary: Returns the number of transactions sent from an address
@@ -1370,7 +1399,10 @@ pub mod gen {
             &self,
             address: Address,
             blocknumber: Blocknumber,
-        ) -> std::result::Result<EthGetTransactionCountTransactionCount, jsonrpc::Error>;
+        ) -> std::result::Result<
+            EthGetTransactionCountTransactionCount,
+            jsonrpc::Error,
+        >;
 
         /// Method: 'eth_getTransactionReceipt'
         /// Summary: Returns the receipt information of a transaction by its hash.
@@ -1379,7 +1411,10 @@ pub mod gen {
         fn eth_getTransactionReceipt(
             &self,
             transactionhash: TransactionHash,
-        ) -> std::result::Result<EthGetTransactionReceiptTransactionReceiptResult, jsonrpc::Error>;
+        ) -> std::result::Result<
+            EthGetTransactionReceiptTransactionReceiptResult,
+            jsonrpc::Error,
+        >;
 
         /// Method: 'eth_getUncleByBlockHashAndIndex'
         /// Summary: Returns information about a uncle of a block by hash and uncle index position.
@@ -1434,7 +1469,9 @@ pub mod gen {
         /// Summary: Returns the hash of the current block, the seedHash, and the boundary condition to be met ('target').
         /// Description:
         ///
-        fn eth_getWork(&self) -> std::result::Result<EthGetWorkWork, jsonrpc::Error>;
+        fn eth_getWork(
+            &self,
+        ) -> std::result::Result<EthGetWorkWork, jsonrpc::Error>;
 
         /// Method: 'eth_hashrate'
         /// Summary: Returns the number of hashes per second that the node is mining with.
@@ -1452,31 +1489,42 @@ pub mod gen {
         /// Summary: Creates a filter in the node, to notify when a new block arrives. To check if the state has changed, call eth_getFilterChanges.
         /// Description:
         ///
-        fn eth_newBlockFilter(&self) -> std::result::Result<FilterId, jsonrpc::Error>;
+        fn eth_newBlockFilter(
+            &self,
+        ) -> std::result::Result<FilterId, jsonrpc::Error>;
 
         /// Method: 'eth_newFilter'
         /// Summary: Creates a filter object, based on filter options, to notify when the state changes (logs). To check if the state has changed, call eth_getFilterChanges.
         /// Description:
         ///
-        fn eth_newFilter(&self, filter: Filter) -> std::result::Result<Integer, jsonrpc::Error>;
+        fn eth_newFilter(
+            &self,
+            filter: Filter,
+        ) -> std::result::Result<Integer, jsonrpc::Error>;
 
         /// Method: 'eth_newPendingTransactionFilter'
         /// Summary: Creates a filter in the node, to notify when new pending transactions arrive. To check if the state has changed, call eth_getFilterChanges.
         /// Description:
         ///
-        fn eth_newPendingTransactionFilter(&self) -> std::result::Result<FilterId, jsonrpc::Error>;
+        fn eth_newPendingTransactionFilter(
+            &self,
+        ) -> std::result::Result<FilterId, jsonrpc::Error>;
 
         /// Method: 'eth_pendingTransactions'
         /// Summary: Returns the transactions that are pending in the transaction pool and have a from address that is one of the accounts this node manages.
         /// Description:
         ///
-        fn eth_pendingTransactions(&self) -> std::result::Result<Transactions, jsonrpc::Error>;
+        fn eth_pendingTransactions(
+            &self,
+        ) -> std::result::Result<Transactions, jsonrpc::Error>;
 
         /// Method: 'eth_protocolVersion'
         /// Summary: Returns the current ethereum protocol version.
         /// Description:
         ///
-        fn eth_protocolVersion(&self) -> std::result::Result<Integer, jsonrpc::Error>;
+        fn eth_protocolVersion(
+            &self,
+        ) -> std::result::Result<Integer, jsonrpc::Error>;
 
         /// Method: 'eth_sendRawTransaction'
         /// Summary: Creates new message call transaction or a contract creation for signed transactions.
@@ -1512,7 +1560,9 @@ pub mod gen {
         /// Summary: Returns an object with data about the sync status or false.
         /// Description:
         ///
-        fn eth_syncing(&self) -> std::result::Result<EthSyncingSyncing, jsonrpc::Error>;
+        fn eth_syncing(
+            &self,
+        ) -> std::result::Result<EthSyncingSyncing, jsonrpc::Error>;
 
         /// Method: 'eth_uninstallFilter'
         /// Summary: Uninstalls a filter with given id. Should always be called when watch is no longer needed. Additionally Filters timeout when they aren't requested with eth_getFilterChanges for a period of time.
@@ -1524,7 +1574,10 @@ pub mod gen {
         ) -> std::result::Result<bool, jsonrpc::Error>;
     }
 
-    fn handle_web3_clientVersion<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_web3_clientVersion<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.web3_clientVersion() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1534,7 +1587,10 @@ pub mod gen {
         }
     }
 
-    fn handle_web3_sha3<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_web3_sha3<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Option<Data>);
 
@@ -1543,16 +1599,21 @@ pub mod gen {
             data: Option<Data>,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(data) = args_by_pos;
-                ArgByName { data }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(data) = args_by_pos;
+                        ArgByName { data }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { data } = args;
@@ -1566,7 +1627,10 @@ pub mod gen {
         }
     }
 
-    fn handle_net_listening<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_net_listening<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.net_listening() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1576,7 +1640,10 @@ pub mod gen {
         }
     }
 
-    fn handle_net_peerCount<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_net_peerCount<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.net_peerCount() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1586,7 +1653,10 @@ pub mod gen {
         }
     }
 
-    fn handle_net_version<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_net_version<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.net_version() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1596,7 +1666,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_blockNumber<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_blockNumber<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_blockNumber() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1606,7 +1679,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_call<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_call<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Transaction, Blocknumber);
 
@@ -1616,19 +1692,24 @@ pub mod gen {
             blocknumber: Blocknumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(transaction, blocknumber) = args_by_pos;
-                ArgByName {
-                    transaction,
-                    blocknumber,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transaction, blocknumber) = args_by_pos;
+                        ArgByName {
+                            transaction,
+                            blocknumber,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -1645,7 +1726,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_chainId<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_chainId<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_chainId() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1655,7 +1739,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_coinbase<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_coinbase<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_coinbase() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1665,7 +1752,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_estimateGas<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_estimateGas<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Transaction);
 
@@ -1674,16 +1764,21 @@ pub mod gen {
             transaction: Transaction,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(transaction) = args_by_pos;
-                ArgByName { transaction }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transaction) = args_by_pos;
+                        ArgByName { transaction }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { transaction } = args;
@@ -1697,7 +1792,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_gasPrice<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_gasPrice<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_gasPrice() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -1707,7 +1805,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getBalance<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getBalance<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Address, BlockNumber);
 
@@ -1717,19 +1818,24 @@ pub mod gen {
             blocknumber: BlockNumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(address, blocknumber) = args_by_pos;
-                ArgByName {
-                    address,
-                    blocknumber,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(address, blocknumber) = args_by_pos;
+                        ArgByName {
+                            address,
+                            blocknumber,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -1746,7 +1852,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getBlockByHash<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getBlockByHash<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(BlockHash, bool);
 
@@ -1756,19 +1865,25 @@ pub mod gen {
             includetransactions: bool,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blockhash, includetransactions) = args_by_pos;
-                ArgByName {
-                    blockhash,
-                    includetransactions,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blockhash, includetransactions) =
+                            args_by_pos;
+                        ArgByName {
+                            blockhash,
+                            includetransactions,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -1785,7 +1900,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getBlockByNumber<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getBlockByNumber<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Blocknumber, bool);
 
@@ -1795,19 +1913,25 @@ pub mod gen {
             includetransactions: bool,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blocknumber, includetransactions) = args_by_pos;
-                ArgByName {
-                    blocknumber,
-                    includetransactions,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blocknumber, includetransactions) =
+                            args_by_pos;
+                        ArgByName {
+                            blocknumber,
+                            includetransactions,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -1836,16 +1960,21 @@ pub mod gen {
             blockhash: BlockHash,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blockhash) = args_by_pos;
-                ArgByName { blockhash }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blockhash) = args_by_pos;
+                        ArgByName { blockhash }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blockhash } = args;
@@ -1871,16 +2000,21 @@ pub mod gen {
             blocknumber: Blocknumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blocknumber) = args_by_pos;
-                ArgByName { blocknumber }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blocknumber) = args_by_pos;
+                        ArgByName { blocknumber }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blocknumber } = args;
@@ -1894,7 +2028,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getCode<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getCode<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Address, BlockNumber);
 
@@ -1904,19 +2041,24 @@ pub mod gen {
             blocknumber: BlockNumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(address, blocknumber) = args_by_pos;
-                ArgByName {
-                    address,
-                    blocknumber,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(address, blocknumber) = args_by_pos;
+                        ArgByName {
+                            address,
+                            blocknumber,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -1933,7 +2075,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getFilterChanges<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getFilterChanges<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(FilterId);
 
@@ -1942,16 +2087,21 @@ pub mod gen {
             filterid: FilterId,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(filterid) = args_by_pos;
-                ArgByName { filterid }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(filterid) = args_by_pos;
+                        ArgByName { filterid }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { filterid } = args;
@@ -1965,7 +2115,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getFilterLogs<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getFilterLogs<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(FilterId);
 
@@ -1974,16 +2127,21 @@ pub mod gen {
             filterid: FilterId,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(filterid) = args_by_pos;
-                ArgByName { filterid }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(filterid) = args_by_pos;
+                        ArgByName { filterid }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { filterid } = args;
@@ -2009,16 +2167,21 @@ pub mod gen {
             transactionhash: TransactionHash,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(transactionhash) = args_by_pos;
-                ArgByName { transactionhash }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transactionhash) = args_by_pos;
+                        ArgByName { transactionhash }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { transactionhash } = args;
@@ -2045,16 +2208,21 @@ pub mod gen {
             index: Integer,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blockhash, index) = args_by_pos;
-                ArgByName { blockhash, index }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blockhash, index) = args_by_pos;
+                        ArgByName { blockhash, index }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blockhash, index } = args;
@@ -2081,21 +2249,27 @@ pub mod gen {
             index: Integer,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blocknumber, index) = args_by_pos;
-                ArgByName { blocknumber, index }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blocknumber, index) = args_by_pos;
+                        ArgByName { blocknumber, index }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blocknumber, index } = args;
 
-        match rpc.eth_getRawTransactionByBlockNumberAndIndex(blocknumber, index) {
+        match rpc.eth_getRawTransactionByBlockNumberAndIndex(blocknumber, index)
+        {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(e) => jsonrpc::Response::error(-32603, "Internal error"),
@@ -2104,7 +2278,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getLogs<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getLogs<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Filter);
 
@@ -2113,16 +2290,21 @@ pub mod gen {
             filter: Filter,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(filter) = args_by_pos;
-                ArgByName { filter }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(filter) = args_by_pos;
+                        ArgByName { filter }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { filter } = args;
@@ -2136,7 +2318,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getStorageAt<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getStorageAt<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Address, Position, Blocknumber);
 
@@ -2147,20 +2332,25 @@ pub mod gen {
             blocknumber: Blocknumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(address, key, blocknumber) = args_by_pos;
-                ArgByName {
-                    address,
-                    key,
-                    blocknumber,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(address, key, blocknumber) = args_by_pos;
+                        ArgByName {
+                            address,
+                            key,
+                            blocknumber,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -2191,16 +2381,21 @@ pub mod gen {
             index: Integer,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blockhash, index) = args_by_pos;
-                ArgByName { blockhash, index }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blockhash, index) = args_by_pos;
+                        ArgByName { blockhash, index }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blockhash, index } = args;
@@ -2227,16 +2422,21 @@ pub mod gen {
             index: Integer,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blocknumber, index) = args_by_pos;
-                ArgByName { blocknumber, index }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blocknumber, index) = args_by_pos;
+                        ArgByName { blocknumber, index }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blocknumber, index } = args;
@@ -2250,7 +2450,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getTransactionByHash<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getTransactionByHash<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(TransactionHash);
 
@@ -2259,16 +2462,21 @@ pub mod gen {
             transactionhash: TransactionHash,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(transactionhash) = args_by_pos;
-                ArgByName { transactionhash }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transactionhash) = args_by_pos;
+                        ArgByName { transactionhash }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { transactionhash } = args;
@@ -2282,7 +2490,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getTransactionCount<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getTransactionCount<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Address, Blocknumber);
 
@@ -2292,19 +2503,24 @@ pub mod gen {
             blocknumber: Blocknumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(address, blocknumber) = args_by_pos;
-                ArgByName {
-                    address,
-                    blocknumber,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(address, blocknumber) = args_by_pos;
+                        ArgByName {
+                            address,
+                            blocknumber,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -2321,7 +2537,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getTransactionReceipt<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getTransactionReceipt<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(TransactionHash);
 
@@ -2330,16 +2549,21 @@ pub mod gen {
             transactionhash: TransactionHash,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(transactionhash) = args_by_pos;
-                ArgByName { transactionhash }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transactionhash) = args_by_pos;
+                        ArgByName { transactionhash }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { transactionhash } = args;
@@ -2366,16 +2590,21 @@ pub mod gen {
             index: Integer,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blockhash, index) = args_by_pos;
-                ArgByName { blockhash, index }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blockhash, index) = args_by_pos;
+                        ArgByName { blockhash, index }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blockhash, index } = args;
@@ -2402,19 +2631,24 @@ pub mod gen {
             index: Integer,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(uncleblocknumber, index) = args_by_pos;
-                ArgByName {
-                    uncleblocknumber,
-                    index,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(uncleblocknumber, index) = args_by_pos;
+                        ArgByName {
+                            uncleblocknumber,
+                            index,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -2443,16 +2677,21 @@ pub mod gen {
             blockhash: BlockHash,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blockhash) = args_by_pos;
-                ArgByName { blockhash }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blockhash) = args_by_pos;
+                        ArgByName { blockhash }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blockhash } = args;
@@ -2478,16 +2717,21 @@ pub mod gen {
             blocknumber: Blocknumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(blocknumber) = args_by_pos;
-                ArgByName { blocknumber }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(blocknumber) = args_by_pos;
+                        ArgByName { blocknumber }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { blocknumber } = args;
@@ -2501,7 +2745,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getProof<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getProof<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Address, Storagekeys, Blocknumber);
 
@@ -2512,20 +2759,26 @@ pub mod gen {
             blocknumber: Blocknumber,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(address, storagekeys, blocknumber) = args_by_pos;
-                ArgByName {
-                    address,
-                    storagekeys,
-                    blocknumber,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(address, storagekeys, blocknumber) =
+                            args_by_pos;
+                        ArgByName {
+                            address,
+                            storagekeys,
+                            blocknumber,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -2543,7 +2796,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_getWork<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_getWork<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_getWork() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2553,7 +2809,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_hashrate<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_hashrate<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_hashrate() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2563,7 +2822,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_mining<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_mining<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_mining() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2573,7 +2835,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_newBlockFilter<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_newBlockFilter<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_newBlockFilter() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2583,7 +2848,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_newFilter<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_newFilter<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Filter);
 
@@ -2592,16 +2860,21 @@ pub mod gen {
             filter: Filter,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(filter) = args_by_pos;
-                ArgByName { filter }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(filter) = args_by_pos;
+                        ArgByName { filter }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { filter } = args;
@@ -2628,7 +2901,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_pendingTransactions<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_pendingTransactions<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_pendingTransactions() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2638,7 +2914,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_protocolVersion<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_protocolVersion<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_protocolVersion() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2648,7 +2927,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_sendRawTransaction<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_sendRawTransaction<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Bytes);
 
@@ -2657,18 +2939,23 @@ pub mod gen {
             signedtransactiondata: Bytes,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(signedtransactiondata) = args_by_pos;
-                ArgByName {
-                    signedtransactiondata,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(signedtransactiondata) = args_by_pos;
+                        ArgByName {
+                            signedtransactiondata,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -2684,7 +2971,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_submitHashrate<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_submitHashrate<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(DataWord, DataWord);
 
@@ -2694,16 +2984,21 @@ pub mod gen {
             id: DataWord,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(hashrate, id) = args_by_pos;
-                ArgByName { hashrate, id }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(hashrate, id) = args_by_pos;
+                        ArgByName { hashrate, id }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { hashrate, id } = args;
@@ -2717,7 +3012,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_submitWork<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_submitWork<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(Nonce, PowHash, MixHash);
 
@@ -2728,20 +3026,25 @@ pub mod gen {
             mixhash: MixHash,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(nonce, powhash, mixhash) = args_by_pos;
-                ArgByName {
-                    nonce,
-                    powhash,
-                    mixhash,
-                }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(nonce, powhash, mixhash) = args_by_pos;
+                        ArgByName {
+                            nonce,
+                            powhash,
+                            mixhash,
+                        }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName {
@@ -2759,7 +3062,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_syncing<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    fn handle_eth_syncing<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
         match rpc.eth_syncing() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
@@ -2769,7 +3075,10 @@ pub mod gen {
         }
     }
 
-    fn handle_eth_uninstallFilter<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+    fn handle_eth_uninstallFilter<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
         struct ArgByPos(FilterId);
 
@@ -2778,16 +3087,21 @@ pub mod gen {
             filterid: FilterId,
         }
 
-        let args = serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-            serde_json::from_value::<ArgByPos>(params.clone()).map(|args_by_pos| {
-                let ArgByPos(filterid) = args_by_pos;
-                ArgByName { filterid }
-            })
-        });
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(filterid) = args_by_pos;
+                        ArgByName { filterid }
+                    },
+                )
+            });
 
         let args: ArgByName = match args {
             Ok(args) => args,
-            Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+            Err(e) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
         };
 
         let ArgByName { filterid } = args;
@@ -2801,7 +3115,10 @@ pub mod gen {
         }
     }
 
-    pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
+    pub fn handle<RPC: Rpc>(
+        rpc: &RPC,
+        req: &jsonrpc::Request,
+    ) -> jsonrpc::Response {
         let params = &req.params.clone().unwrap_or_default();
 
         let response = match req.method.as_str() {
@@ -2828,7 +3145,9 @@ pub mod gen {
             "eth_getCode" => handle_eth_getCode(rpc, params),
             "eth_getFilterChanges" => handle_eth_getFilterChanges(rpc, params),
             "eth_getFilterLogs" => handle_eth_getFilterLogs(rpc, params),
-            "eth_getRawTransactionByHash" => handle_eth_getRawTransactionByHash(rpc, params),
+            "eth_getRawTransactionByHash" => {
+                handle_eth_getRawTransactionByHash(rpc, params)
+            }
             "eth_getRawTransactionByBlockHashAndIndex" => {
                 handle_eth_getRawTransactionByBlockHashAndIndex(rpc, params)
             }
@@ -2843,17 +3162,27 @@ pub mod gen {
             "eth_getTransactionByBlockNumberAndIndex" => {
                 handle_eth_getTransactionByBlockNumberAndIndex(rpc, params)
             }
-            "eth_getTransactionByHash" => handle_eth_getTransactionByHash(rpc, params),
-            "eth_getTransactionCount" => handle_eth_getTransactionCount(rpc, params),
-            "eth_getTransactionReceipt" => handle_eth_getTransactionReceipt(rpc, params),
+            "eth_getTransactionByHash" => {
+                handle_eth_getTransactionByHash(rpc, params)
+            }
+            "eth_getTransactionCount" => {
+                handle_eth_getTransactionCount(rpc, params)
+            }
+            "eth_getTransactionReceipt" => {
+                handle_eth_getTransactionReceipt(rpc, params)
+            }
             "eth_getUncleByBlockHashAndIndex" => {
                 handle_eth_getUncleByBlockHashAndIndex(rpc, params)
             }
             "eth_getUncleByBlockNumberAndIndex" => {
                 handle_eth_getUncleByBlockNumberAndIndex(rpc, params)
             }
-            "eth_getUncleCountByBlockHash" => handle_eth_getUncleCountByBlockHash(rpc, params),
-            "eth_getUncleCountByBlockNumber" => handle_eth_getUncleCountByBlockNumber(rpc, params),
+            "eth_getUncleCountByBlockHash" => {
+                handle_eth_getUncleCountByBlockHash(rpc, params)
+            }
+            "eth_getUncleCountByBlockNumber" => {
+                handle_eth_getUncleCountByBlockNumber(rpc, params)
+            }
             "eth_getProof" => handle_eth_getProof(rpc, params),
             "eth_getWork" => handle_eth_getWork(rpc, params),
             "eth_hashrate" => handle_eth_hashrate(rpc, params),
@@ -2863,9 +3192,13 @@ pub mod gen {
             "eth_newPendingTransactionFilter" => {
                 handle_eth_newPendingTransactionFilter(rpc, params)
             }
-            "eth_pendingTransactions" => handle_eth_pendingTransactions(rpc, params),
+            "eth_pendingTransactions" => {
+                handle_eth_pendingTransactions(rpc, params)
+            }
             "eth_protocolVersion" => handle_eth_protocolVersion(rpc, params),
-            "eth_sendRawTransaction" => handle_eth_sendRawTransaction(rpc, params),
+            "eth_sendRawTransaction" => {
+                handle_eth_sendRawTransaction(rpc, params)
+            }
             "eth_submitHashrate" => handle_eth_submitHashrate(rpc, params),
             "eth_submitWork" => handle_eth_submitWork(rpc, params),
             "eth_syncing" => handle_eth_syncing(rpc, params),
@@ -2914,7 +3247,10 @@ pub mod gen {
         impl super::Rpc for Client {
             fn web3_clientVersion(
                 &self,
-            ) -> std::result::Result<Web3ClientVersionClientVersion, jsonrpc::Error> {
+            ) -> std::result::Result<
+                Web3ClientVersionClientVersion,
+                jsonrpc::Error,
+            > {
                 let req = jsonrpc::Request::new(
                     "web3_clientVersion".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -2928,10 +3264,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -2939,26 +3283,41 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Web3ClientVersionClientVersion = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                    let out: Web3ClientVersionClientVersion =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
                         })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn web3_sha3(&self, data: Option<Data>) -> std::result::Result<Keccak, jsonrpc::Error> {
+            fn web3_sha3(
+                &self,
+                data: Option<Data>,
+            ) -> std::result::Result<Keccak, jsonrpc::Error> {
                 let args = (data,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("web3_sha3".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("web3_sha3".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -2967,10 +3326,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -2978,19 +3345,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Keccak = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Keccak =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn net_listening(&self) -> std::result::Result<bool, jsonrpc::Error> {
+            fn net_listening(
+                &self,
+            ) -> std::result::Result<bool, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "net_listening".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3004,10 +3380,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3015,19 +3399,29 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: bool = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: bool =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn net_peerCount(&self) -> std::result::Result<NetPeerCountQuantity, jsonrpc::Error> {
+            fn net_peerCount(
+                &self,
+            ) -> std::result::Result<NetPeerCountQuantity, jsonrpc::Error>
+            {
                 let req = jsonrpc::Request::new(
                     "net_peerCount".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3041,10 +3435,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3052,19 +3454,29 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: NetPeerCountQuantity = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: NetPeerCountQuantity =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn net_version(&self) -> std::result::Result<NetVersionNetworkId, jsonrpc::Error> {
+            fn net_version(
+                &self,
+            ) -> std::result::Result<NetVersionNetworkId, jsonrpc::Error>
+            {
                 let req = jsonrpc::Request::new(
                     "net_version".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3078,10 +3490,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3089,21 +3509,29 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: NetVersionNetworkId = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: NetVersionNetworkId =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_blockNumber(
                 &self,
-            ) -> std::result::Result<EthBlockNumberBlockNumber, jsonrpc::Error> {
+            ) -> std::result::Result<EthBlockNumberBlockNumber, jsonrpc::Error>
+            {
                 let req = jsonrpc::Request::new(
                     "eth_blockNumber".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3117,10 +3545,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3130,14 +3566,20 @@ pub mod gen {
                 if let Some(value) = res.result.take() {
                     let out: EthBlockNumberBlockNumber =
                         serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
                         })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3149,7 +3591,12 @@ pub mod gen {
                 let args = (transaction, blocknumber);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new("eth_call".to_string(), params)
                     .with_id(jsonrpc::Id::Number(1));
 
@@ -3160,10 +3607,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3171,19 +3626,29 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Bytes = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Bytes =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_chainId(&self) -> std::result::Result<EthChainIdChainId, jsonrpc::Error> {
+            fn eth_chainId(
+                &self,
+            ) -> std::result::Result<EthChainIdChainId, jsonrpc::Error>
+            {
                 let req = jsonrpc::Request::new(
                     "eth_chainId".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3197,10 +3662,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3208,19 +3681,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthChainIdChainId = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: EthChainIdChainId = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_coinbase(&self) -> std::result::Result<Address, jsonrpc::Error> {
+            fn eth_coinbase(
+                &self,
+            ) -> std::result::Result<Address, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_coinbase".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3234,10 +3716,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3245,15 +3735,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Address = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Address =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3264,9 +3761,17 @@ pub mod gen {
                 let args = (transaction,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_estimateGas".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_estimateGas".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3275,10 +3780,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3286,19 +3799,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Integer = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Integer =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_gasPrice(&self) -> std::result::Result<Integer, jsonrpc::Error> {
+            fn eth_gasPrice(
+                &self,
+            ) -> std::result::Result<Integer, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_gasPrice".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -3312,10 +3834,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3323,15 +3853,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Integer = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Integer =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3339,13 +3876,20 @@ pub mod gen {
                 &self,
                 address: Address,
                 blocknumber: BlockNumber,
-            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error> {
+            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error>
+            {
                 let args = (address, blocknumber);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getBalance".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("eth_getBalance".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3354,10 +3898,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3365,15 +3917,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: IntegerOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: IntegerOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3385,9 +3944,17 @@ pub mod gen {
                 let args = (blockhash, includetransactions);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getBlockByHash".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getBlockByHash".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3396,10 +3963,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3407,15 +3982,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: BlockOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: BlockOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3427,9 +4009,17 @@ pub mod gen {
                 let args = (blocknumber, includetransactions);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getBlockByNumber".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getBlockByNumber".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3438,10 +4028,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3449,29 +4047,44 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: BlockOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: BlockOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getBlockTransactionCountByHash(
                 &self,
                 blockhash: BlockHash,
-            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error> {
+            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error>
+            {
                 let args = (blockhash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req =
-                    jsonrpc::Request::new("eth_getBlockTransactionCountByHash".to_string(), params)
-                        .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getBlockTransactionCountByHash".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3480,10 +4093,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3491,26 +4112,39 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: IntegerOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: IntegerOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getBlockTransactionCountByNumber(
                 &self,
                 blocknumber: Blocknumber,
-            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error> {
+            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error>
+            {
                 let args = (blocknumber,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
                     "eth_getBlockTransactionCountByNumber".to_string(),
                     params,
@@ -3524,10 +4158,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3535,15 +4177,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: IntegerOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: IntegerOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3555,9 +4204,15 @@ pub mod gen {
                 let args = (address, blocknumber);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getCode".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("eth_getCode".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3566,10 +4221,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3577,28 +4240,44 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Bytes = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Bytes =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getFilterChanges(
                 &self,
                 filterid: FilterId,
-            ) -> std::result::Result<EthGetFilterChangesLogResult, jsonrpc::Error> {
+            ) -> std::result::Result<EthGetFilterChangesLogResult, jsonrpc::Error>
+            {
                 let args = (filterid,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getFilterChanges".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getFilterChanges".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3607,10 +4286,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3620,27 +4307,42 @@ pub mod gen {
                 if let Some(value) = res.result.take() {
                     let out: EthGetFilterChangesLogResult =
                         serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
                         })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getFilterLogs(
                 &self,
                 filterid: FilterId,
-            ) -> std::result::Result<EthGetFilterLogsLogs, jsonrpc::Error> {
+            ) -> std::result::Result<EthGetFilterLogsLogs, jsonrpc::Error>
+            {
                 let args = (filterid,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getFilterLogs".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getFilterLogs".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3649,10 +4351,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3660,15 +4370,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthGetFilterLogsLogs = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: EthGetFilterLogsLogs =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3679,9 +4396,17 @@ pub mod gen {
                 let args = (transactionhash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getRawTransactionByHash".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getRawTransactionByHash".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3690,10 +4415,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3701,15 +4434,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Bytes = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Bytes =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3721,7 +4461,12 @@ pub mod gen {
                 let args = (blockhash, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
                     "eth_getRawTransactionByBlockHashAndIndex".to_string(),
                     params,
@@ -3735,10 +4480,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3746,15 +4499,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Bytes = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Bytes =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3766,7 +4526,12 @@ pub mod gen {
                 let args = (blocknumber, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
                     "eth_getRawTransactionByBlockNumberAndIndex".to_string(),
                     params,
@@ -3780,10 +4545,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3791,28 +4564,42 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Bytes = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Bytes =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getLogs(
                 &self,
                 filter: Filter,
-            ) -> std::result::Result<EthGetLogsLogs, jsonrpc::Error> {
+            ) -> std::result::Result<EthGetLogsLogs, jsonrpc::Error>
+            {
                 let args = (filter,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getLogs".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("eth_getLogs".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3821,10 +4608,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3832,15 +4627,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthGetLogsLogs = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: EthGetLogsLogs = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3853,9 +4655,17 @@ pub mod gen {
                 let args = (address, key, blocknumber);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getStorageAt".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getStorageAt".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -3864,10 +4674,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3875,15 +4693,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: DataWord = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: DataWord =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3898,7 +4723,12 @@ pub mod gen {
                 let args = (blockhash, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
                     "eth_getTransactionByBlockHashAndIndex".to_string(),
                     params,
@@ -3912,10 +4742,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3932,7 +4770,10 @@ pub mod gen {
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -3947,7 +4788,12 @@ pub mod gen {
                 let args = (blocknumber, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
                     "eth_getTransactionByBlockNumberAndIndex".to_string(),
                     params,
@@ -3961,10 +4807,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -3981,21 +4835,34 @@ pub mod gen {
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getTransactionByHash(
                 &self,
                 transactionhash: TransactionHash,
-            ) -> std::result::Result<EthGetTransactionByHashTransactionResult, jsonrpc::Error>
-            {
+            ) -> std::result::Result<
+                EthGetTransactionByHashTransactionResult,
+                jsonrpc::Error,
+            > {
                 let args = (transactionhash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getTransactionByHash".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getTransactionByHash".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4004,10 +4871,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4017,14 +4892,20 @@ pub mod gen {
                 if let Some(value) = res.result.take() {
                     let out: EthGetTransactionByHashTransactionResult =
                         serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
                         })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4032,14 +4913,24 @@ pub mod gen {
                 &self,
                 address: Address,
                 blocknumber: Blocknumber,
-            ) -> std::result::Result<EthGetTransactionCountTransactionCount, jsonrpc::Error>
-            {
+            ) -> std::result::Result<
+                EthGetTransactionCountTransactionCount,
+                jsonrpc::Error,
+            > {
                 let args = (address, blocknumber);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getTransactionCount".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getTransactionCount".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4048,10 +4939,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4059,30 +4958,46 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthGetTransactionCountTransactionCount = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                    let out: EthGetTransactionCountTransactionCount =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
                         })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getTransactionReceipt(
                 &self,
                 transactionhash: TransactionHash,
-            ) -> std::result::Result<EthGetTransactionReceiptTransactionReceiptResult, jsonrpc::Error>
-            {
+            ) -> std::result::Result<
+                EthGetTransactionReceiptTransactionReceiptResult,
+                jsonrpc::Error,
+            > {
                 let args = (transactionhash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getTransactionReceipt".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getTransactionReceipt".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4091,10 +5006,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4104,14 +5027,20 @@ pub mod gen {
                 if let Some(value) = res.result.take() {
                     let out: EthGetTransactionReceiptTransactionReceiptResult =
                         serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
                         })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4123,10 +5052,17 @@ pub mod gen {
                 let args = (blockhash, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req =
-                    jsonrpc::Request::new("eth_getUncleByBlockHashAndIndex".to_string(), params)
-                        .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getUncleByBlockHashAndIndex".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4135,10 +5071,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4146,15 +5090,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: BlockOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: BlockOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4166,10 +5117,17 @@ pub mod gen {
                 let args = (uncleblocknumber, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req =
-                    jsonrpc::Request::new("eth_getUncleByBlockNumberAndIndex".to_string(), params)
-                        .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getUncleByBlockNumberAndIndex".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4178,10 +5136,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4189,28 +5155,44 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: BlockOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: BlockOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getUncleCountByBlockHash(
                 &self,
                 blockhash: BlockHash,
-            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error> {
+            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error>
+            {
                 let args = (blockhash,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getUncleCountByBlockHash".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getUncleCountByBlockHash".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4219,10 +5201,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4230,29 +5220,44 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: IntegerOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: IntegerOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
             fn eth_getUncleCountByBlockNumber(
                 &self,
                 blocknumber: Blocknumber,
-            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error> {
+            ) -> std::result::Result<IntegerOrNull, jsonrpc::Error>
+            {
                 let args = (blocknumber,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req =
-                    jsonrpc::Request::new("eth_getUncleCountByBlockNumber".to_string(), params)
-                        .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_getUncleCountByBlockNumber".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4261,10 +5266,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4272,15 +5285,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: IntegerOrNull = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: IntegerOrNull = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4289,13 +5309,20 @@ pub mod gen {
                 address: Address,
                 storagekeys: Storagekeys,
                 blocknumber: Blocknumber,
-            ) -> std::result::Result<EthGetProofAccount, jsonrpc::Error> {
+            ) -> std::result::Result<EthGetProofAccount, jsonrpc::Error>
+            {
                 let args = (address, storagekeys, blocknumber);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_getProof".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("eth_getProof".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4304,10 +5331,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4315,19 +5350,29 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthGetProofAccount = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: EthGetProofAccount = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_getWork(&self) -> std::result::Result<EthGetWorkWork, jsonrpc::Error> {
+            fn eth_getWork(
+                &self,
+            ) -> std::result::Result<EthGetWorkWork, jsonrpc::Error>
+            {
                 let req = jsonrpc::Request::new(
                     "eth_getWork".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -4341,10 +5386,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4352,19 +5405,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthGetWorkWork = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: EthGetWorkWork = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_hashrate(&self) -> std::result::Result<Integer, jsonrpc::Error> {
+            fn eth_hashrate(
+                &self,
+            ) -> std::result::Result<Integer, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_hashrate".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -4378,10 +5440,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4389,15 +5459,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Integer = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Integer =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4415,10 +5492,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4426,19 +5511,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: bool = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: bool =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_newBlockFilter(&self) -> std::result::Result<FilterId, jsonrpc::Error> {
+            fn eth_newBlockFilter(
+                &self,
+            ) -> std::result::Result<FilterId, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_newBlockFilter".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -4452,10 +5546,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4463,15 +5565,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: FilterId = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: FilterId =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4482,9 +5591,15 @@ pub mod gen {
                 let args = (filter,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_newFilter".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("eth_newFilter".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4493,10 +5608,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4504,15 +5627,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Integer = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Integer =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4532,10 +5662,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4543,19 +5681,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: FilterId = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: FilterId =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_pendingTransactions(&self) -> std::result::Result<Transactions, jsonrpc::Error> {
+            fn eth_pendingTransactions(
+                &self,
+            ) -> std::result::Result<Transactions, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_pendingTransactions".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -4569,10 +5716,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4580,19 +5735,28 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Transactions = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Transactions = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_protocolVersion(&self) -> std::result::Result<Integer, jsonrpc::Error> {
+            fn eth_protocolVersion(
+                &self,
+            ) -> std::result::Result<Integer, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
                     "eth_protocolVersion".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -4606,10 +5770,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4617,15 +5789,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Integer = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Integer =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4636,9 +5815,17 @@ pub mod gen {
                 let args = (signedtransactiondata,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_sendRawTransaction".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_sendRawTransaction".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4647,10 +5834,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4658,15 +5853,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: Keccak = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: Keccak =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4678,9 +5880,17 @@ pub mod gen {
                 let args = (hashrate, id);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_submitHashrate".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_submitHashrate".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4689,10 +5899,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4700,15 +5918,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: bool = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: bool =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4721,9 +5946,15 @@ pub mod gen {
                 let args = (nonce, powhash, mixhash);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_submitWork".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req =
+                    jsonrpc::Request::new("eth_submitWork".to_string(), params)
+                        .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4732,10 +5963,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4743,19 +5982,29 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: bool = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: bool =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
-            fn eth_syncing(&self) -> std::result::Result<EthSyncingSyncing, jsonrpc::Error> {
+            fn eth_syncing(
+                &self,
+            ) -> std::result::Result<EthSyncingSyncing, jsonrpc::Error>
+            {
                 let req = jsonrpc::Request::new(
                     "eth_syncing".to_string(),
                     serde_json::Value::Array(vec![]),
@@ -4769,10 +6018,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4780,15 +6037,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: EthSyncingSyncing = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: EthSyncingSyncing = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
 
@@ -4799,9 +6063,17 @@ pub mod gen {
                 let args = (filterid,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-                let req = jsonrpc::Request::new("eth_uninstallFilter".to_string(), params)
-                    .with_id(jsonrpc::Id::Number(1));
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "eth_uninstallFilter".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
 
                 log::debug!("{req:#?}");
 
@@ -4810,10 +6082,18 @@ pub mod gen {
                     .post(&self.url)
                     .json(&req)
                     .send()
-                    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
                     .json()
                     .map_err(|e| {
-                        jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}."))
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
                     })?;
 
                 if let Some(err) = res.error.take() {
@@ -4821,15 +6101,22 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let out: bool = serde_json::from_value(value).map_err(|e| {
-                        jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-                    })?;
+                    let out: bool =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("{out:#?}");
 
                     Ok(out)
                 } else {
-                    Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
                 }
             }
         }
