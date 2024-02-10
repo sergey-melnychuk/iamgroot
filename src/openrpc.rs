@@ -16,23 +16,6 @@ pub struct Spec {
     pub components: Option<Components>,
 }
 
-impl Spec {
-    pub fn get_schema(&self, id: &str) -> Option<&Schema> {
-        self.components
-            .as_ref()?
-            .schemas
-            .get(id)
-            .and_then(|schema_or_ref| match schema_or_ref {
-                SchemaOrRef::Schema(schema) => Some(schema),
-                _ => None,
-            })
-    }
-
-    pub fn get_content(&self, id: &str) -> Option<&Content> {
-        self.components.as_ref()?.contentDescriptors.get(id)
-    }
-}
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Contact {
     pub url: String,
