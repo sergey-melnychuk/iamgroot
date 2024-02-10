@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::{
     bind_object,
-    codegen::{Object, Primitive, Property, Rule, Struct, Type},
+    codegen::{Enum, Object, Primitive, Property, Rule, Struct, Type, Variant},
     openrpc::SchemaOrRef,
 };
 
@@ -206,7 +206,38 @@ fn test_simple_object() {
     };
 
     let event_content = bind_object("EVENT_CONTENT", &schemas).unwrap();
-
-    // TODO FIXME: undeterministic property order (caused by `HashMap`)
     assert_eq!(event_content, Object::Struct(expected));
+}
+
+#[test]
+fn test_simple_enum() {
+    let json = json!({
+        "SIMULATION_FLAG": {
+            "type": "string",
+            "enum": [
+                "SKIP_VALIDATE",
+                "SKIP_FEE_CHARGE"
+            ],
+            "description": "lorep ipsum"
+        }
+    });
+    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+
+    let object = bind_object("SIMULATION_FLAG", &schemas).unwrap();
+    let expected = Object::Enum(Enum {
+        name: "SimulationFlag".to_owned(),
+        variants: vec![
+            Variant {
+                name: "SkipValidate".to_owned(),
+                value: "SKIP_VALIDATE".to_owned(),
+            },
+            Variant {
+                name: "SkipFeeCharge".to_owned(),
+                value: "SKIP_FEE_CHARGE".to_owned(),
+            },
+        ],
+        decorators: vec![],
+        visibility: crate::codegen::Visibility::Public,
+    });
+    assert_eq!(object, expected);
 }

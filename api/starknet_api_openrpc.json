@@ -3351,46 +3351,51 @@
                     "entry_points_by_type"
                 ]
             },
+            "PROGRAM": {
+                "type": "string",
+                "title": "Program",
+                "description": "A base64 representation of the compressed program code",
+                "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
+            },
+            "ENTRY_POINTS": {
+                "type": "object",
+                "title": "Deprecated entry points by type",
+                "properties": {
+                    "constructor": {
+                        "type": "array",
+                        "title": "Deprecated constructor",
+                        "items": {
+                            "$ref": "#/components/schemas/DEPRECATED_CAIRO_ENTRY_POINT"
+                        }
+                    },
+                    "external": {
+                        "type": "array",
+                        "title": "Deprecated external",
+                        "items": {
+                            "$ref": "#/components/schemas/DEPRECATED_CAIRO_ENTRY_POINT"
+                        }
+                    },
+                    "l1_handler": {
+                        "type": "array",
+                        "title": "Deprecated L1 handler",
+                        "items": {
+                            "$ref": "#/components/schemas/DEPRECATED_CAIRO_ENTRY_POINT"
+                        }
+                    }
+                }
+            },
             "DEPRECATED_CONTRACT_CLASS": {
                 "title": "Deprecated contract class",
                 "description": "The definition of a StarkNet contract class",
                 "type": "object",
                 "properties": {
                     "program": {
-                        "type": "string",
-                        "title": "Program",
-                        "description": "A base64 representation of the compressed program code",
-                        "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$"
+                        "$ref": "#/components/schemas/PROGRAM"
                     },
                     "entry_points_by_type": {
-                        "type": "object",
-                        "title": "Deprecated entry points by type",
-                        "properties": {
-                            "CONSTRUCTOR": {
-                                "type": "array",
-                                "title": "Deprecated constructor",
-                                "items": {
-                                    "$ref": "#/components/schemas/DEPRECATED_CAIRO_ENTRY_POINT"
-                                }
-                            },
-                            "EXTERNAL": {
-                                "type": "array",
-                                "title": "Deprecated external",
-                                "items": {
-                                    "$ref": "#/components/schemas/DEPRECATED_CAIRO_ENTRY_POINT"
-                                }
-                            },
-                            "L1_HANDLER": {
-                                "type": "array",
-                                "title": "Deprecated L1 handler",
-                                "items": {
-                                    "$ref": "#/components/schemas/DEPRECATED_CAIRO_ENTRY_POINT"
-                                }
-                            }
-                        }
+                        "$ref": "#/components/schemas/ENTRY_POINTS"
                     },
                     "abi": {
-                        "title": "Contract ABI",
                         "$ref": "#/components/schemas/CONTRACT_ABI"
                     }
                 },

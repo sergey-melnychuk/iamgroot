@@ -1,7 +1,7 @@
-use std::{fmt::Display, path::Path};
 use std::collections::HashMap as Map;
+use std::{fmt::Display, path::Path};
 
-use codegen::{Object, Primitive, Property, Struct, Type};
+use codegen::{Enum, Object, Primitive, Property, Struct, Type, Variant};
 use openrpc::{Error, ErrorOrRef, Schema, SchemaOrRef};
 
 use crate::codegen::Rule;
@@ -39,15 +39,14 @@ fn x(
     Map<String, openrpc::Error>,
     Vec<codegen::Method>,
 ) {
-    let objects = schemas.iter()
-        .filter_map(|(name, schema)| bind_object(name, schemas))
+    let objects = schemas
+        .iter()
+        .filter_map(|(name, _)| bind_object(name, schemas))
         .collect();
 
     let errors = bind_errors(errors);
 
-    let methods = methods.into_iter()
-        .map(bind_method)
-        .collect();
+    let methods = methods.into_iter().map(bind_method).collect();
 
     (objects, errors, methods)
 }
@@ -56,7 +55,7 @@ fn bind_method(method: openrpc::Method) -> codegen::Method {
     codegen::Method {
         doc: method.description,
         name: method.name,
-        args: vec![], // TODO: bind argument type
+        args: vec![],    // TODO: bind argument type
         ret: Type::Unit, // TODO: bind return type
     }
 }
@@ -74,7 +73,7 @@ fn get_error<'a>(name: &'a str, errors: &'a Map<String, ErrorOrRef>) -> Option<&
     }
 }
 
-fn bind_errors(errors: &Map<String, ErrorOrRef>) -> Map<String, openrpc::Error> {
+fn bind_errors(_errors: &Map<String, ErrorOrRef>) -> Map<String, openrpc::Error> {
     Default::default() // TODO
 }
 
@@ -108,6 +107,9 @@ fn normalize(name: &str) -> String {
 }
 
 fn bind_schema(schema: &Schema) -> Option<Object> {
+    if let Some(variants) = schema.r#enum.as_ref() {
+        return bind_enum(variants, schema);
+    }
     if let Some(ty) = schema.r#type.as_ref() {
         return bind_type(ty, schema);
     }
@@ -116,10 +118,22 @@ fn bind_schema(schema: &Schema) -> Option<Object> {
 
     // TODO: array of arrays (see EVENT_FILTER.keys)
 
-    // TODO: enum
-    // TODO: oneOf
+    // TODO: oneOf (see BLOCK_ID)
 
     None
+}
+
+fn bind_enum(variants: &[String], _schema: &Schema) -> Option<Object> {
+    Some(Object::Enum(Enum {
+        variants: variants
+            .iter()
+            .map(|value| Variant {
+                name: normalize(value),
+                value: value.to_owned(),
+            })
+            .collect(),
+        ..Default::default()
+    }))
 }
 
 fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
@@ -129,8 +143,11 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             if let Some(regex) = schema.pattern.as_ref() {
                 rules.push(Rule::Regex(regex.to_owned()));
             };
+            if rules.is_empty() {
+                return Some(Object::Type(Type::Primitive(Primitive::String, vec![])));
+            }
             let object = Struct {
-                properties: vec![Property::unnamed(Type::Primitive(Primitive::String, rules))],
+                properties: vec![Property::of(Type::Primitive(Primitive::String, rules))],
                 ..Default::default()
             };
             Some(Object::Struct(object))
@@ -143,8 +160,11 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             if let Some(max) = schema.maximum {
                 rules.push(Rule::Max(max));
             }
+            if rules.is_empty() {
+                return Some(Object::Type(Type::Primitive(Primitive::Integer, vec![])));
+            }
             let object = Struct {
-                properties: vec![Property::unnamed(Type::Primitive(
+                properties: vec![Property::of(Type::Primitive(
                     Primitive::Integer,
                     rules,
                 ))],
@@ -153,7 +173,7 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             Some(Object::Struct(object))
         }
         openrpc::Type::Boolean => Some(Object::Struct(Struct {
-            properties: vec![Property::unnamed(codegen::Type::Primitive(
+            properties: vec![Property::of(codegen::Type::Primitive(
                 Primitive::Boolean,
                 vec![],
             ))],
@@ -223,7 +243,7 @@ fn bind_object(name: &str, schemas: &Map<String, SchemaOrRef>) -> Option<Object>
             let ty = Type::Named(normalize(r.get_ref()?));
             Some(Object::Struct(Struct {
                 name: normalize(name),
-                properties: vec![Property::unnamed(ty)],
+                properties: vec![Property::of(ty)],
                 ..Default::default()
             }))
         }
@@ -241,6 +261,12 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
                 .map(|components| components.schemas.clone())
                 .unwrap_or_default()
         })
+        .filter(|(name, schema)| match schema {
+            SchemaOrRef::Schema(_) => true,
+            r @ SchemaOrRef::Ref { .. } => {
+                r.get_ref().map(|n| name != n).unwrap_or_default()
+            }
+        })
         .collect::<Map<_, _>>();
 
     let errors = specs
@@ -250,6 +276,12 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
                 .as_ref()
                 .map(|components| components.errors.clone())
                 .unwrap_or_default()
+        })
+        .filter(|(name, error)| match error {
+            ErrorOrRef::Err(_) => true,
+            r @ ErrorOrRef::Ref { .. } => {
+                r.get_ref().map(|n| name != n).unwrap_or_default()
+            }
         })
         .collect::<Map<_, _>>();
 
@@ -270,9 +302,8 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
     writeln!(target, "pub mod gen {{")?;
     writeln!(target, "use serde::{{Deserialize, Serialize}};")?;
     writeln!(target, "use serde_json::Value;")?;
-    writeln!(target, "\nuse iamgroot::jsonrpc;")?;
+    writeln!(target, "\nuse iamgroot::jsonrpc;\n")?;
 
-    // TODO: render `schemas`
     for object in schemas {
         let code = renders::render_object(&object)?;
         writeln!(target, "{code}")?;
