@@ -105,7 +105,7 @@ fn capitalize(name: &str) -> String {
 }
 
 fn normalize(name: &str) -> String {
-    name.split(|c| c == '_')
+    name.split(|c| c == '_' || c == ' ')
         .map(capitalize)
         .collect::<Vec<_>>()
         .join("")
@@ -118,13 +118,53 @@ fn bind_schema(schema: &Schema) -> Option<Object> {
     if let Some(ty) = schema.r#type.as_ref() {
         return bind_type(ty, schema);
     }
+    if let Some(one_of) = schema.oneOf.as_ref() {
+        return Some(bind_one_of(one_of));
+    }
+    if let Some(all_of) = schema.allOf.as_ref() {
+        return Some(bind_all_of(all_of));
+    }
+    panic!("schema binding failed: {schema:?}");
+}
 
-    // TODO: oneOf (see BLOCK_ID, TRANSACTION_TRACE)
-
+fn bind_all_of(all_of: &[SchemaOrRef]) -> Object {
     // TODO: allOf (see BLOCK_BODY_WITH_TXS.transactions)
-    // TODO: array of arrays (see EVENT_FILTER.keys)
+    unimplemented!()
+}
 
-    None
+fn bind_one_of(one_of: &[SchemaOrRef]) -> Object {
+    let variants = one_of
+        .iter()
+        .map(|schema| match schema {
+            r @ SchemaOrRef::Ref { .. } => {
+                let name = r.get_ref().unwrap();
+                let name = normalize(name);
+                let ty = Type::Named(name.clone());
+                Variant::Struct(Struct {
+                    name,
+                    properties: vec![Property {
+                        name: Default::default(),
+                        r#type: ty,
+                    }],
+                })
+            }
+            SchemaOrRef::Schema(schema) => match bind_schema(schema) {
+                Some(Object::Struct(mut s)) if !s.properties.is_empty() => {
+                    s.name = if let Some(name) = schema.title.as_ref() {
+                        normalize(name)
+                    } else {
+                        normalize(&s.properties[0].name)
+                    };
+                    Variant::Struct(s)
+                }
+                x => panic!("oneOf variant not matched to a struct: {x:?}"),
+            },
+        })
+        .collect();
+    Object::Enum(Enum {
+        name: Default::default(),
+        variants,
+    })
 }
 
 fn bind_enum(variants: &[String], _schema: &Schema) -> Option<Object> {
@@ -193,7 +233,7 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             ..Default::default()
         })),
         openrpc::Type::Null => Some(Object::Struct(Struct::default())),
-        openrpc::Type::Object => {
+        openrpc::Type::Object if schema.properties.is_some() => {
             let properties = schema
                 .properties
                 .as_ref()
@@ -222,16 +262,17 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             };
             Some(Object::Struct(object))
         }
+        openrpc::Type::Object if schema.allOf.is_some() => {
+            let all_of = schema.allOf.as_ref().unwrap();
+            Some(bind_all_of(all_of))
+        }
+        openrpc::Type::Object => {
+            panic!("object type binding failed: {schema:?}")
+        }
         openrpc::Type::Array => {
             let items = schema.items.as_ref()?;
             let ty = match &**items {
-                SchemaOrRef::Schema(param) => {
-                    bind_schema(param)?.get_type()
-                    // eprintln!(
-                    //     "anonymous array param type definition: {param:#?}"
-                    // );
-                    // return None;
-                }
+                SchemaOrRef::Schema(param) => bind_schema(param)?.get_type(),
                 r @ SchemaOrRef::Ref { .. } => {
                     let name = r.get_ref()?;
                     let name = normalize(name);

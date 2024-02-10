@@ -45,7 +45,7 @@ pub fn render_primitive(basic: &codegen::Primitive) -> &str {
 pub fn render_type(ty: &codegen::Type) -> String {
     match ty {
         codegen::Type::Named(name) if name.is_empty() => {
-            "(/* TODO: empty */)".to_owned()
+            "() /* TODO: empty */".to_owned()
         }
         codegen::Type::Named(name) => name.to_owned(),
         codegen::Type::Primitive(basic, _) => {
@@ -108,12 +108,36 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
                     lines.push(format!("    {},", name));
                 }
                 Variant::Struct(s) => {
-                    lines.push(format!("    {} {{", s.name));
+                    let nameless_properties =
+                        s.properties.iter().all(|p| p.name.is_empty());
+                    if nameless_properties {
+                        lines.push(format!("    {} (", s.name));
+                    } else {
+                        lines.push(format!("    {} {{", s.name));
+                    }
                     s.properties.iter().for_each(|p| {
                         let ty = render_type(&p.r#type);
-                        lines.push(format!("    pub {}: {},", p.name, ty));
+                        let optional = matches!(&p.r#type, Type::Option(_));
+                        if optional {
+                            lines.push(OPTION.to_owned());
+                        }
+                        if nameless_properties {
+                            lines.push(format!("    {},", ty));
+                        } else {
+                            if p.name.is_empty() {
+                                panic!(
+                                    "struct {} has nameless property",
+                                    s.name
+                                );
+                            }
+                            lines.push(format!("    {}: {},", p.name, ty));
+                        }
                     });
-                    lines.push("}".to_owned());
+                    if nameless_properties {
+                        lines.push("),".to_owned());
+                    } else {
+                        lines.push("},".to_owned());
+                    }
                 }
             });
             lines.push("}\n".to_owned());
