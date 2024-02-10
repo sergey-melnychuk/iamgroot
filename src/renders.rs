@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::codegen;
+use crate::codegen::Type;
 use crate::openrpc;
 
 #[derive(Clone, Debug)]
@@ -53,13 +54,15 @@ pub fn render_type(ty: &codegen::Type) -> String {
 
 pub fn render_object(object: &codegen::Object) -> Result<String> {
     static HEADER: &str = "#[derive(Clone, Debug, Deserialize, Serialize)]";
+    static OPTION: &str =
+        "    #[serde(skip_serializing_if = \"Option::is_none\")]\n    #[serde(default)]";
 
     let mut lines: Vec<String> = Vec::new();
-    //lines.push(format!("/*\nDEBUG:\n{:#?}\n*/", object));
+    // lines.push(format!("/*\nDEBUG:\n{:#?}\n*/", object));
     match object {
         codegen::Object::Type(_) => (), // noop
         codegen::Object::Alias(name, ty) => {
-            lines.push(format!("type {name} = {};\n", render_type(&ty)));
+            lines.push(format!("type {name} = {};\n", render_type(ty)));
         }
         codegen::Object::Struct(s) => {
             // TODO regex validation for String
@@ -67,26 +70,28 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
             lines.push(HEADER.to_owned());
             if s.properties.len() == 1 && s.properties[0].name.is_empty() {
                 let ty = render_type(&s.properties[0].r#type);
-                lines.push(format!("pub struct {}({});\n", s.name, ty));
+                lines.push(format!("pub struct {}(pub {});\n", s.name, ty));
             } else {
                 lines.push(format!("pub struct {} {{", s.name));
-                s.properties.iter()
-                    .for_each(|p| {
-                        let ty = render_type(&p.r#type);
-                        lines.push(format!("    {}: {},", p.name, ty));
-                    });
-                lines.push("}\n".to_owned());  
+                s.properties.iter().for_each(|p| {
+                    let ty = render_type(&p.r#type);
+                    let required = matches!(&p.r#type, Type::Option(_));
+                    if required {
+                        lines.push(OPTION.to_owned());
+                    }
+                    lines.push(format!("    pub {}: {},", p.name, ty));
+                });
+                lines.push("}\n".to_owned());
             }
         }
         codegen::Object::Enum(e) => {
             // TODO
             lines.push(HEADER.to_owned());
             lines.push(format!("pub enum {} {{", e.name));
-            e.variants.iter()
-                .for_each(|v| {
-                    lines.push(format!("    #[serde(rename = \"{}\")]", v.value));
-                    lines.push(format!("    {},", v.name));
-                });
+            e.variants.iter().for_each(|v| {
+                lines.push(format!("    #[serde(rename = \"{}\")]", v.value));
+                lines.push(format!("    {},", v.name));
+            });
             lines.push("}\n".to_owned());
         }
     }
