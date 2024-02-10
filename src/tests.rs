@@ -7,6 +7,8 @@ use crate::{
     openrpc::SchemaOrRef,
 };
 
+use pretty_assertions::assert_eq;
+
 #[test]
 fn test_simple_felt() {
     let json = json!({
@@ -318,17 +320,17 @@ fn test_one_of() {
         name: "BlockId".to_owned(),
         variants: vec![
             Variant::Struct(Struct {
-                name: "BlockNumber".to_owned(),
-                properties: vec![Property {
-                    name: "block_number".to_owned(),
-                    r#type: Type::Named("BlockNumber".to_owned()),
-                }],
-            }),
-            Variant::Struct(Struct {
                 name: "BlockHash".to_owned(),
                 properties: vec![Property {
                     name: "block_hash".to_owned(),
                     r#type: Type::Named("BlockHash".to_owned()),
+                }],
+            }),
+            Variant::Struct(Struct {
+                name: "BlockNumber".to_owned(),
+                properties: vec![Property {
+                    name: "block_number".to_owned(),
+                    r#type: Type::Named("BlockNumber".to_owned()),
                 }],
             }),
             Variant::Struct(Struct {
@@ -341,7 +343,7 @@ fn test_one_of() {
         ],
     });
 
-    assert_eq!(bind_object("BLOCK_ID", &schemas), Some(expected),);
+    assert_eq!(bind_object("BLOCK_ID", &schemas), Some(expected));
 }
 
 #[test]
@@ -379,5 +381,98 @@ fn test_nested_array() {
         ],
     });
 
-    assert_eq!(bind_object("EVENT_FILTER", &schemas), Some(expected),);
+    assert_eq!(bind_object("EVENT_FILTER", &schemas), Some(expected));
+}
+
+mod block_body {
+    pub fn json() -> serde_json::Value {
+        serde_json::json!({
+            "BLOCK_BODY_WITH_TXS": {
+                "title": "Block body with transactions",
+                "type": "object",
+                "properties": {
+                    "transactions": {
+                        "title": "Transactions",
+                        "description": "The transactions in this block",
+                        "type": "array",
+                        "items": {
+                            "title": "transactions in block",
+                            "type": "object",
+                            "allOf": [
+                                {
+                                    "title": "transaction",
+                                    "$ref": "#/components/schemas/TXN"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "transaction_hash": {
+                                            "title": "transaction hash",
+                                            "$ref": "#/components/schemas/TXN_HASH"
+                                        }
+                                    },
+                                    "required": [
+                                        "transaction_hash"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "transactions"
+                ]
+            },
+            "TXN": {
+                "title": "Transaction",
+                "description": "The transaction schema, as it appears inside a block",
+                "oneOf": [
+                    {
+                        "title": "Invoke transaction",
+                        "$ref": "#/components/schemas/INVOKE_TXN"
+                    },
+                    {
+                        "title": "L1 handler transaction",
+                        "$ref": "#/components/schemas/L1_HANDLER_TXN"
+                    },
+                    {
+                        "title": "Declare transaction",
+                        "$ref": "#/components/schemas/DECLARE_TXN"
+                    },
+                    {
+                        "title": "Deploy transaction",
+                        "$ref": "#/components/schemas/DEPLOY_TXN"
+                    },
+                    {
+                        "title": "Deploy account transaction",
+                        "$ref": "#/components/schemas/DEPLOY_ACCOUNT_TXN"
+                    }
+                ]
+            },
+            "TXN_HASH": {
+                "$ref": "#/components/schemas/FELT",
+                "description": "The transaction hash, as assigned in StarkNet",
+                "title": "Transaction hash"
+            },
+            "FELT": {
+                "type": "string",
+                "title": "Field element",
+                "description": "A field element. represented by at most 63 hex digits",
+                "pattern": "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$"
+            },
+        })
+    }
+}
+
+#[test]
+fn test_all_of() {
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(block_body::json()).unwrap();
+
+    let expected = Object::Struct(Struct {
+        name: "".to_owned(),
+        properties: vec![],
+    });
+
+    assert_eq!(bind_object("BLOCK_BODY_WITH_TXS", &schemas), Some(expected));
 }
