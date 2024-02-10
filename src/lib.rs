@@ -44,7 +44,13 @@ fn x(
         .filter_map(|(name, _)| bind_object(name, schemas))
         .collect();
 
-    let errors = bind_errors(errors);
+    let errors = errors
+        .iter()
+        .filter_map(|(name, e)| {
+            let error = get_error(name, errors)?;
+            Some((name.to_owned(), error.clone()))
+        })
+        .collect();
 
     let methods = methods.into_iter().filter_map(bind_method).collect();
 
@@ -78,28 +84,6 @@ fn get_error<'a>(
             let r = r.get_ref()?;
             match errors.get(r) {
                 Some(ErrorOrRef::Err(ret)) => Some(ret),
-                _ => None,
-            }
-        }
-    }
-}
-
-fn bind_errors(
-    _errors: &Map<String, ErrorOrRef>,
-) -> Map<String, openrpc::Error> {
-    Default::default() // TODO: errors
-}
-
-fn get_schema<'a>(
-    name: &'a str,
-    schemas: &'a Map<String, SchemaOrRef>,
-) -> Option<&'a Schema> {
-    match schemas.get(name)? {
-        SchemaOrRef::Schema(schema) => Some(schema),
-        r @ SchemaOrRef::Ref { .. } => {
-            let r = r.get_ref()?;
-            match schemas.get(r) {
-                Some(SchemaOrRef::Schema(ret)) => Some(ret),
                 _ => None,
             }
         }
