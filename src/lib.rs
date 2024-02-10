@@ -2,7 +2,7 @@ use std::collections::HashMap as Map;
 use std::{fmt::Display, path::Path};
 
 use codegen::{Enum, Object, Primitive, Property, Struct, Type, Variant};
-use openrpc::{Error, ErrorOrRef, Schema, SchemaOrRef};
+use openrpc::{Content, Error, ErrorOrRef, Schema, SchemaOrRef};
 
 use crate::codegen::Rule;
 
@@ -46,18 +46,26 @@ fn x(
 
     let errors = bind_errors(errors);
 
-    let methods = methods.into_iter().map(bind_method).collect();
+    let methods = methods.into_iter().filter_map(bind_method).collect();
 
     (objects, errors, methods)
 }
 
-fn bind_method(method: openrpc::Method) -> codegen::Method {
-    codegen::Method {
-        doc: method.description,
+fn bind_method(method: openrpc::Method) -> Option<codegen::Method> {
+    let ret = get_type(method.result.as_ref()?.schema.as_ref()?, true)?;
+    Some(codegen::Method {
+        doc: method.summary,
         name: method.name,
-        args: vec![],    // TODO: bind argument type
-        ret: Type::Unit, // TODO: bind return type
-    }
+        args: method.params.iter().flat_map(bind_param).collect(),
+        ret,
+    })
+}
+
+fn bind_param(param: &Content) -> Option<(String, Type)> {
+    let name = get_prop_name(param.name.as_ref()?);
+    let required = param.required.unwrap_or_default();
+    let ty = get_type(param.schema.as_ref()?, required)?;
+    Some((name, ty))
 }
 
 fn get_error<'a>(name: &'a str, errors: &'a Map<String, ErrorOrRef>) -> Option<&'a Error> {
@@ -74,7 +82,7 @@ fn get_error<'a>(name: &'a str, errors: &'a Map<String, ErrorOrRef>) -> Option<&
 }
 
 fn bind_errors(_errors: &Map<String, ErrorOrRef>) -> Map<String, openrpc::Error> {
-    Default::default() // TODO
+    Default::default() // TODO: errors
 }
 
 fn get_schema<'a>(name: &'a str, schemas: &'a Map<String, SchemaOrRef>) -> Option<&'a Schema> {
@@ -219,7 +227,26 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
     }
 }
 
+fn get_prop_name(name: &str) -> String {
+    if name == "enum" || name == "struct" || name == "type" {
+        format!("r#{}", name)
+    } else {
+        name.to_owned()
+    }
+}
+
 fn bind_prop(prop_name: &str, schema: &SchemaOrRef, required: bool) -> Option<Property> {
+    Some(Property {
+        name: get_prop_name(prop_name),
+        r#type: get_type(schema, required)?,
+        visibility: codegen::Visibility::Public,
+        decorators: vec![],
+        flatten: false,
+        required,
+    })
+}
+
+fn get_type(schema: &SchemaOrRef, required: bool) -> Option<Type> {
     let ty = match schema {
         r @ SchemaOrRef::Ref { .. } => {
             let name = r.get_ref()?;
@@ -228,19 +255,11 @@ fn bind_prop(prop_name: &str, schema: &SchemaOrRef, required: bool) -> Option<Pr
         }
         SchemaOrRef::Schema(schema) => bind_schema(schema)?.get_type(),
     };
-    let ty = if required {
-        ty
+    if required {
+        Some(ty)
     } else {
-        Type::Option(Box::new(ty))
-    };
-    Some(Property {
-        name: prop_name.to_owned(),
-        r#type: ty,
-        visibility: codegen::Visibility::Public,
-        decorators: vec![],
-        flatten: false,
-        required,
-    })
+        Some(Type::Option(Box::new(ty)))
+    }
 }
 
 fn bind_object(name: &str, schemas: &Map<String, SchemaOrRef>) -> Option<Object> {

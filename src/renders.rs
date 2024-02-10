@@ -44,6 +44,7 @@ pub fn render_primitive(basic: &codegen::Primitive) -> &str {
 
 pub fn render_type(ty: &codegen::Type) -> String {
     match ty {
+        codegen::Type::Named(name) if name.is_empty() => "(/* TODO: empty */)".to_owned(),
         codegen::Type::Named(name) => name.to_owned(),
         codegen::Type::Primitive(basic, _) => render_primitive(basic).to_string(),
         codegen::Type::Array(ty) => format!("Vec<{}>", render_type(ty)),
@@ -65,8 +66,8 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
             lines.push(format!("type {name} = {};\n", render_type(ty)));
         }
         codegen::Object::Struct(s) => {
-            // TODO regex validation for String
-            // TODO range validation for Integer
+            // TODO: regex validation for String
+            // TODO: range validation for Integer
             lines.push(HEADER.to_owned());
             if s.properties.len() == 1 && s.properties[0].name.is_empty() {
                 let ty = render_type(&s.properties[0].r#type);
@@ -85,7 +86,6 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
             }
         }
         codegen::Object::Enum(e) => {
-            // TODO
             lines.push(HEADER.to_owned());
             lines.push(format!("pub enum {} {{", e.name));
             e.variants.iter().for_each(|v| {
@@ -99,16 +99,12 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
 }
 
 pub fn render_method(method: &codegen::Method) -> String {
-    let short_name = method
-        .name
-        .strip_prefix("starknet_")
-        .unwrap_or(&method.name);
+    let mut lines = Vec::new();
 
-    let mut lines = vec![
-        format!("/// {}", method.doc.clone().unwrap_or_default()),
-        format!("fn {short_name}("),
-        format!("    &self,"),
-    ];
+    if let Some(doc) = method.doc.as_ref().map(|doc| format!("/// {}", doc)) {
+        lines.push(doc);
+    }
+    lines.push(format!("fn {}(\n    &self,", method.name));
 
     for (name, ty) in &method.args {
         lines.push(format!("    {}: {},", name, render_type(ty)));
@@ -267,7 +263,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 `arg_names` 
     } = args;
 
-    match rpc.`method_short_name`(
+    match rpc.`method_name`(
 `arg_names`
     ) {
         Ok(ret) => match serde_json::to_value(ret) {
@@ -281,7 +277,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 
 const METHOD_HANDLER_NO_ARGUMENTS: &str = r###"
 fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
-    match rpc.`method_short_name`() {
+    match rpc.`method_name`() {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
             Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
@@ -292,15 +288,8 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Respon
 "###;
 
 pub fn render_method_handler(method: &codegen::Method) -> String {
-    let short_name = method
-        .name
-        .strip_prefix("starknet_")
-        .unwrap_or(&method.name);
-
     if method.args.is_empty() {
-        return METHOD_HANDLER_NO_ARGUMENTS
-            .replace("`method_name`", &method.name)
-            .replace("`method_short_name`", short_name);
+        return METHOD_HANDLER_NO_ARGUMENTS.replace("`method_name`", &method.name);
     }
 
     let params_names_only = method
@@ -329,7 +318,6 @@ pub fn render_method_handler(method: &codegen::Method) -> String {
         .replace("`arg_types`", &params_types_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
         .replace("`method_name`", &method.name)
-        .replace("`method_short_name`", short_name)
 }
 
 const HANDLE_FUNCTION: &str = r###"
@@ -389,7 +377,7 @@ pub mod client {
 "###;
 
 const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
-fn `method_short_name`(
+fn `method_name`(
     &self,
 `arg_names_and_types`
 ) -> std::result::Result<`result_type`, jsonrpc::Error> {
@@ -399,8 +387,14 @@ fn `method_short_name`(
     );
 
     let params: serde_json::Value = serde_json::to_value(args)
-        .map_err(|e| jsonrpc::Error::new(4001, format!("Invalid params: {e}.")))?;
-    let req = jsonrpc::Request::new("`method_name`".to_string(), params)
+        .map_err(|e| jsonrpc::Error::new(
+            4001,
+            format!("Invalid params: {e}."),
+        ))?;
+    let req = jsonrpc::Request::new(
+            "`method_name`".to_string(), 
+            params,
+        )
         .with_id(jsonrpc::Id::Number(1));
 
     log::debug!("{req:#?}");
@@ -410,9 +404,15 @@ fn `method_short_name`(
         .post(&self.url)
         .json(&req)
         .send()
-        .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
+        .map_err(|e| jsonrpc::Error::new(
+            4002,
+            format!("Request failed: {e}."),
+        ))?
         .json()
-        .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
+        .map_err(|e| jsonrpc::Error::new(
+            5001,
+            format!("Invalid response JSON: {e}."),
+        ))?;
 
     if let Some(err) = res.error.take() {
         log::error!("{err:#?}");
@@ -422,7 +422,10 @@ fn `method_short_name`(
     if let Some(value) = res.result.take() {
         let out: `result_type` =
             serde_json::from_value(value).map_err(|e| {
-                jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
+                jsonrpc::Error::new(
+                    5002,
+                    format!("Invalid response object: {e}."),
+                )
             })?;
 
         log::debug!("{out:#?}");
@@ -435,7 +438,7 @@ fn `method_short_name`(
 "###;
 
 const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
-fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
+fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
     let req = jsonrpc::Request::new(
         "`method_name`".to_string(),
         serde_json::Value::Array(vec![]),
@@ -458,9 +461,13 @@ fn `method_short_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Err
     }
 
     if let Some(value) = res.result.take() {
-        let out: `result_type` = serde_json::from_value(value).map_err(|e| {
-            jsonrpc::Error::new(5002, format!("Invalid response object: {e}."))
-        })?;
+        let out: `result_type` = serde_json::from_value(value)
+            .map_err(|e| {
+                jsonrpc::Error::new(
+                    5002,
+                    format!("Invalid response object: {e}.")
+                )
+            })?;
 
         log::debug!("{out:#?}");
 
@@ -482,17 +489,11 @@ pub fn render_client(methods: &[codegen::Method]) -> String {
 }
 
 pub fn render_client_method(method: &codegen::Method) -> String {
-    let short_name = method
-        .name
-        .strip_prefix("starknet_")
-        .unwrap_or(&method.name);
-
     let return_type = render_type(&method.ret);
 
     if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
             .replace("`method_name`", &method.name)
-            .replace("`method_short_name`", short_name)
             .replace("`result_type`", &return_type);
     }
 
@@ -514,6 +515,5 @@ pub fn render_client_method(method: &codegen::Method) -> String {
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
         .replace("`method_name`", &method.name)
-        .replace("`method_short_name`", short_name)
         .replace("`result_type`", &return_type)
 }
