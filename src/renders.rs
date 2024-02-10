@@ -32,46 +32,6 @@ impl From<Error> for std::fmt::Error {
 
 type Result<T> = std::result::Result<T, Error>;
 
-pub fn normalize_prop_name(name: &str) -> Result<String> {
-    if "type" == name || "enum" == name || "struct" == name {
-        return Ok(format!("r#{name}"));
-    }
-    let name = name.replace([' ', '-'], "_");
-    Ok(name.to_ascii_lowercase())
-}
-
-pub fn normalize_type_name(name: &str) -> Result<String> {
-    if name == "i64" {
-        return Ok(name.to_owned());
-    }
-    let name = name.replace([' ', '-'], "_");
-    let chunks = name
-        .split(|c| c == '_')
-        .flat_map(capitalize)
-        .collect::<Vec<_>>();
-    Ok(chunks.join(""))
-}
-
-pub fn capitalize(s: &str) -> Result<String> {
-    if s.is_empty() {
-        return Err("cannot capitalize empty string".into());
-    }
-    if !s.is_ascii() {
-        return Err("cannot capitalize non-ASCII string".into());
-    }
-    let all_caps = s.chars().all(|c| c.is_uppercase());
-
-    let mut chars: Vec<char> = if all_caps {
-        s.to_ascii_lowercase().chars().collect()
-    } else {
-        s.chars().collect()
-    };
-    let head = chars[0].to_ascii_uppercase();
-    *chars.get_mut(0).unwrap() = head;
-
-    Ok(chars.into_iter().collect())
-}
-
 pub fn render_primitive(basic: &codegen::Primitive) -> &str {
     match basic {
         codegen::Primitive::String => "String",
@@ -81,29 +41,53 @@ pub fn render_primitive(basic: &codegen::Primitive) -> &str {
     }
 }
 
-pub fn render_type(ty: &codegen::Type) -> Result<String> {
+pub fn render_type(ty: &codegen::Type) -> String {
     match ty {
-        codegen::Type::Named(name) => normalize_type_name(name),
-        codegen::Type::Primitive(basic, _) => Ok(render_primitive(basic).to_string()),
-        codegen::Type::Array(ty) => Ok(format!("Vec<{}>", render_type(ty)?)),
-        codegen::Type::Option(ty) => Ok(format!("Option<{}>", render_type(ty)?)),
-        codegen::Type::Unit => Ok("()".to_string()),
+        codegen::Type::Named(name) => name.to_owned(),
+        codegen::Type::Primitive(basic, _) => render_primitive(basic).to_string(),
+        codegen::Type::Array(ty) => format!("Vec<{}>", render_type(ty)),
+        codegen::Type::Option(ty) => format!("Option<{}>", render_type(ty)),
+        codegen::Type::Unit => "()".to_string(),
     }
 }
 
 pub fn render_object(object: &codegen::Object) -> Result<String> {
+    static HEADER: &str = "#[derive(Clone, Debug, Deserialize, Serialize)]";
+
     let mut lines: Vec<String> = Vec::new();
-    lines.push(format!("\n/*\nDEBUG:\n{:#?}\n*/", object));
+    //lines.push(format!("/*\nDEBUG:\n{:#?}\n*/", object));
     match object {
-        codegen::Object::Type(ty) => (), // noop
+        codegen::Object::Type(_) => (), // noop
         codegen::Object::Alias(name, ty) => {
-            lines.push(format!("type {name} = {}",  render_type(&ty)?));
+            lines.push(format!("type {name} = {};\n", render_type(&ty)));
         }
-        codegen::Object::Struct(r#struct) => {
-            // TODO
+        codegen::Object::Struct(s) => {
+            // TODO regex validation for String
+            // TODO range validation for Integer
+            lines.push(HEADER.to_owned());
+            if s.properties.len() == 1 && s.properties[0].name.is_empty() {
+                let ty = render_type(&s.properties[0].r#type);
+                lines.push(format!("pub struct {}({});\n", s.name, ty));
+            } else {
+                lines.push(format!("pub struct {} {{", s.name));
+                s.properties.iter()
+                    .for_each(|p| {
+                        let ty = render_type(&p.r#type);
+                        lines.push(format!("    {}: {},", p.name, ty));
+                    });
+                lines.push("}\n".to_owned());  
+            }
         }
-        codegen::Object::Enum(r#enum) => {
+        codegen::Object::Enum(e) => {
             // TODO
+            lines.push(HEADER.to_owned());
+            lines.push(format!("pub enum {} {{", e.name));
+            e.variants.iter()
+                .for_each(|v| {
+                    lines.push(format!("    #[serde(rename = \"{}\")]", v.value));
+                    lines.push(format!("    {},", v.name));
+                });
+            lines.push("}\n".to_owned());
         }
     }
     Ok(lines.join("\n"))
@@ -122,10 +106,10 @@ pub fn render_method(method: &codegen::Method) -> String {
     ];
 
     for (name, ty) in &method.args {
-        lines.push(format!("    {}: {},", name, render_type(ty).expect("type")));
+        lines.push(format!("    {}: {},", name, render_type(ty)));
     }
 
-    let ret = render_type(&method.ret).expect("ret");
+    let ret = render_type(&method.ret);
     lines.push(format!(") -> std::result::Result<{ret}, jsonrpc::Error>;"));
     lines.join("\n")
 }
@@ -324,14 +308,14 @@ pub fn render_method_handler(method: &codegen::Method) -> String {
     let params_types_only = method
         .args
         .iter()
-        .map(|(_, ty)| format!("{},", render_type(ty).expect("type")))
+        .map(|(_, ty)| format!("{},", render_type(ty)))
         .collect::<Vec<_>>()
         .join("\n");
 
     let params_names_with_types = method
         .args
         .iter()
-        .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("type")))
+        .map(|(name, ty)| format!("{}: {},", name, render_type(ty)))
         .collect::<Vec<_>>()
         .join("\n");
 
@@ -498,7 +482,7 @@ pub fn render_client_method(method: &codegen::Method) -> String {
         .strip_prefix("starknet_")
         .unwrap_or(&method.name);
 
-    let return_type = render_type(&method.ret).expect("ret");
+    let return_type = render_type(&method.ret);
 
     if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
@@ -517,7 +501,7 @@ pub fn render_client_method(method: &codegen::Method) -> String {
     let params_names_with_types = method
         .args
         .iter()
-        .map(|(name, ty)| format!("{}: {},", name, render_type(ty).expect("type")))
+        .map(|(name, ty)| format!("{}: {},", name, render_type(ty)))
         .collect::<Vec<_>>()
         .join("\n");
 

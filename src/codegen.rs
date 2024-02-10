@@ -40,16 +40,7 @@ pub struct Property {
 }
 
 impl Property {
-    pub fn named(name: String, r#type: Type) -> Self {
-        Self {
-            name,
-            r#type,
-            visibility: Visibility::Public,
-            decorators: vec![],
-            flatten: false,
-        }
-    }
-    pub fn unnamed(r#type: Type) -> Self {
+    pub fn of(r#type: Type) -> Self {
         Self {
             name: Default::default(),
             r#type,
@@ -68,17 +59,6 @@ pub struct Struct {
     pub visibility: Visibility,
 }
 
-impl Struct {
-    pub fn of(name: String, properties: Vec<Property>) -> Self {
-        Self {
-            name,
-            properties,
-            visibility: Default::default(),
-            decorators: Default::default(),
-        }
-    }
-}
-
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Enum {
     pub name: String,
@@ -87,20 +67,10 @@ pub struct Enum {
     pub visibility: Visibility,
 }
 
-impl Enum {
-    pub fn of(name: String, variants: Vec<Variant>) -> Self {
-        Self {
-            name,
-            variants,
-            ..Default::default()
-        }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Variant {
     pub name: String,
-    pub r#type: Type,
+    pub value: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
