@@ -37,6 +37,7 @@ pub struct Property {
     pub visibility: Visibility,
     pub decorators: Vec<String>,
     pub flatten: bool,
+    pub required: bool,
 }
 
 impl Property {
@@ -47,6 +48,7 @@ impl Property {
             visibility: Visibility::Public,
             decorators: vec![],
             flatten: false,
+            required: false,
         }
     }
 }

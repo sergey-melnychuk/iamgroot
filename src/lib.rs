@@ -164,10 +164,7 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
                 return Some(Object::Type(Type::Primitive(Primitive::Integer, vec![])));
             }
             let object = Struct {
-                properties: vec![Property::of(Type::Primitive(
-                    Primitive::Integer,
-                    rules,
-                ))],
+                properties: vec![Property::of(Type::Primitive(Primitive::Integer, rules))],
                 ..Default::default()
             };
             Some(Object::Struct(object))
@@ -187,7 +184,14 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
                 .map(|props| {
                     props
                         .iter()
-                        .filter_map(|(prop_name, prop_schema)| bind_prop(prop_name, prop_schema))
+                        .filter_map(|(prop_name, prop_schema)| {
+                            let required = schema
+                                .required
+                                .as_ref()
+                                .map(|rs: &Vec<String>| rs.contains(prop_name))
+                                .unwrap_or_default();
+                            bind_prop(prop_name, prop_schema, required)
+                        })
                         .collect::<Vec<_>>()
                 })
                 .unwrap_or_default();
@@ -215,7 +219,7 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
     }
 }
 
-fn bind_prop(prop_name: &str, schema: &SchemaOrRef) -> Option<Property> {
+fn bind_prop(prop_name: &str, schema: &SchemaOrRef, required: bool) -> Option<Property> {
     let ty = match schema {
         r @ SchemaOrRef::Ref { .. } => {
             let name = r.get_ref()?;
@@ -224,12 +228,18 @@ fn bind_prop(prop_name: &str, schema: &SchemaOrRef) -> Option<Property> {
         }
         SchemaOrRef::Schema(schema) => bind_schema(schema)?.get_type(),
     };
+    let ty = if required {
+        ty
+    } else {
+        Type::Option(Box::new(ty))
+    };
     Some(Property {
         name: prop_name.to_owned(),
         r#type: ty,
         visibility: codegen::Visibility::Public,
         decorators: vec![],
         flatten: false,
+        required,
     })
 }
 
@@ -263,9 +273,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         })
         .filter(|(name, schema)| match schema {
             SchemaOrRef::Schema(_) => true,
-            r @ SchemaOrRef::Ref { .. } => {
-                r.get_ref().map(|n| name != n).unwrap_or_default()
-            }
+            r @ SchemaOrRef::Ref { .. } => r.get_ref().map(|n| name != n).unwrap_or_default(),
         })
         .collect::<Map<_, _>>();
 
@@ -279,9 +287,7 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         })
         .filter(|(name, error)| match error {
             ErrorOrRef::Err(_) => true,
-            r @ ErrorOrRef::Ref { .. } => {
-                r.get_ref().map(|n| name != n).unwrap_or_default()
-            }
+            r @ ErrorOrRef::Ref { .. } => r.get_ref().map(|n| name != n).unwrap_or_default(),
         })
         .collect::<Map<_, _>>();
 
