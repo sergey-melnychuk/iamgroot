@@ -34,10 +34,6 @@ pub enum Visibility {
 pub struct Property {
     pub name: String,
     pub r#type: Type,
-    pub visibility: Visibility,
-    pub decorators: Vec<String>,
-    pub flatten: bool,
-    pub required: bool,
 }
 
 impl Property {
@@ -45,10 +41,6 @@ impl Property {
         Self {
             name: Default::default(),
             r#type,
-            visibility: Visibility::Public,
-            decorators: vec![],
-            flatten: false,
-            required: false,
         }
     }
 }
@@ -57,22 +49,18 @@ impl Property {
 pub struct Struct {
     pub name: String,
     pub properties: Vec<Property>,
-    pub decorators: Vec<String>,
-    pub visibility: Visibility,
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Enum {
     pub name: String,
     pub variants: Vec<Variant>,
-    pub decorators: Vec<String>,
-    pub visibility: Visibility,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Variant {
-    pub name: String,
-    pub value: String,
+pub enum Variant {
+    Const { name: String, value: String },
+    Struct(Struct),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

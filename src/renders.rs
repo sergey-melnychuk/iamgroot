@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::codegen;
 use crate::codegen::Type;
+use crate::codegen::{self, Variant};
 use crate::openrpc;
 
 #[derive(Clone, Debug)]
@@ -78,23 +78,43 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
                 lines.push(format!("pub struct {}(pub {});\n", s.name, ty));
             } else {
                 lines.push(format!("pub struct {} {{", s.name));
+                let nameless_properties =
+                    s.properties.iter().all(|p| p.name.is_empty());
                 s.properties.iter().for_each(|p| {
                     let ty = render_type(&p.r#type);
-                    let required = matches!(&p.r#type, Type::Option(_));
-                    if required {
+                    let optional = matches!(&p.r#type, Type::Option(_));
+                    if optional {
                         lines.push(OPTION.to_owned());
                     }
-                    lines.push(format!("    pub {}: {},", p.name, ty));
+                    if nameless_properties {
+                        lines.push(format!("    pub {},", ty));
+                    } else {
+                        if p.name.is_empty() {
+                            panic!("struct {} has nameless property", s.name);
+                        }
+                        lines.push(format!("    pub {}: {},", p.name, ty));
+                    }
                 });
                 lines.push("}\n".to_owned());
             }
         }
         codegen::Object::Enum(e) => {
             lines.push(HEADER.to_owned());
+            lines.push("#[serde(untagged)]".to_owned());
             lines.push(format!("pub enum {} {{", e.name));
-            e.variants.iter().for_each(|v| {
-                lines.push(format!("    #[serde(rename = \"{}\")]", v.value));
-                lines.push(format!("    {},", v.name));
+            e.variants.iter().for_each(|v| match v {
+                Variant::Const { name, value } => {
+                    lines.push(format!("    #[serde(rename = \"{}\")]", value));
+                    lines.push(format!("    {},", name));
+                }
+                Variant::Struct(s) => {
+                    lines.push(format!("    {} {{", s.name));
+                    s.properties.iter().for_each(|p| {
+                        let ty = render_type(&p.r#type);
+                        lines.push(format!("    pub {}: {},", p.name, ty));
+                    });
+                    lines.push("}".to_owned());
+                }
             });
             lines.push("}\n".to_owned());
         }
