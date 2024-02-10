@@ -46,7 +46,7 @@ fn x(
 
     let errors = errors
         .iter()
-        .filter_map(|(name, e)| {
+        .filter_map(|(name, _)| {
             let error = get_error(name, errors)?;
             Some((name.to_owned(), error.clone()))
         })
@@ -58,7 +58,7 @@ fn x(
 }
 
 fn bind_method(method: openrpc::Method) -> Option<codegen::Method> {
-    let ret = get_type(method.result.as_ref()?.schema.as_ref()?, true)?;
+    let ret = get_type(method.result.as_ref()?.schema.as_ref()?)?;
     Some(codegen::Method {
         doc: method.summary,
         name: method.name,
@@ -70,7 +70,12 @@ fn bind_method(method: openrpc::Method) -> Option<codegen::Method> {
 fn bind_param(param: &Content) -> Option<(String, Type)> {
     let name = get_prop_name(param.name.as_ref()?);
     let required = param.required.unwrap_or_default();
-    let ty = get_type(param.schema.as_ref()?, required)?;
+    let ty = get_type(param.schema.as_ref()?)?;
+    let ty = if !required {
+        Type::Option(Box::new(ty))
+    } else {
+        ty
+    };
     Some((name, ty))
 }
 
@@ -114,11 +119,10 @@ fn bind_schema(schema: &Schema) -> Option<Object> {
         return bind_type(ty, schema);
     }
 
+    // TODO: oneOf (see BLOCK_ID, TRANSACTION_TRACE)
+
     // TODO: allOf (see BLOCK_BODY_WITH_TXS.transactions)
-
     // TODO: array of arrays (see EVENT_FILTER.keys)
-
-    // TODO: oneOf (see BLOCK_ID)
 
     None
 }
@@ -127,7 +131,7 @@ fn bind_enum(variants: &[String], _schema: &Schema) -> Option<Object> {
     Some(Object::Enum(Enum {
         variants: variants
             .iter()
-            .map(|value| Variant {
+            .map(|value| Variant::Const {
                 name: normalize(value),
                 value: value.to_owned(),
             })
@@ -202,7 +206,12 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
                                 .as_ref()
                                 .map(|rs: &Vec<String>| rs.contains(prop_name))
                                 .unwrap_or_default();
-                            bind_prop(prop_name, prop_schema, required)
+                            let mut prop = bind_prop(prop_name, prop_schema)?;
+                            if !required {
+                                let ty = Type::Option(Box::new(prop.r#type));
+                                prop.r#type = ty;
+                            }
+                            Some(prop)
                         })
                         .collect::<Vec<_>>()
                 })
@@ -217,10 +226,11 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             let items = schema.items.as_ref()?;
             let ty = match &**items {
                 SchemaOrRef::Schema(param) => {
-                    eprintln!(
-                        "anonymous array param type definition: {param:#?}"
-                    );
-                    return None;
+                    bind_schema(param)?.get_type()
+                    // eprintln!(
+                    //     "anonymous array param type definition: {param:#?}"
+                    // );
+                    // return None;
                 }
                 r @ SchemaOrRef::Ref { .. } => {
                     let name = r.get_ref()?;
@@ -241,34 +251,21 @@ fn get_prop_name(name: &str) -> String {
     }
 }
 
-fn bind_prop(
-    prop_name: &str,
-    schema: &SchemaOrRef,
-    required: bool,
-) -> Option<Property> {
+fn bind_prop(prop_name: &str, schema: &SchemaOrRef) -> Option<Property> {
     Some(Property {
         name: get_prop_name(prop_name),
-        r#type: get_type(schema, required)?,
-        visibility: codegen::Visibility::Public,
-        decorators: vec![],
-        flatten: false,
-        required,
+        r#type: get_type(schema)?,
     })
 }
 
-fn get_type(schema: &SchemaOrRef, required: bool) -> Option<Type> {
-    let ty = match schema {
+fn get_type(schema: &SchemaOrRef) -> Option<Type> {
+    match schema {
         r @ SchemaOrRef::Ref { .. } => {
             let name = r.get_ref()?;
             let name = normalize(name);
-            Type::Named(name)
+            Some(Type::Named(name))
         }
-        SchemaOrRef::Schema(schema) => bind_schema(schema)?.get_type(),
-    };
-    if required {
-        Some(ty)
-    } else {
-        Some(Type::Option(Box::new(ty)))
+        SchemaOrRef::Schema(schema) => Some(bind_schema(schema)?.get_type()),
     }
 }
 
@@ -286,7 +283,6 @@ fn bind_object(
             Some(Object::Struct(Struct {
                 name: normalize(name),
                 properties: vec![Property::of(ty)],
-                ..Default::default()
             }))
         }
     }
