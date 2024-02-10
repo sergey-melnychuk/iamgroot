@@ -68,7 +68,10 @@ fn bind_param(param: &Content) -> Option<(String, Type)> {
     Some((name, ty))
 }
 
-fn get_error<'a>(name: &'a str, errors: &'a Map<String, ErrorOrRef>) -> Option<&'a Error> {
+fn get_error<'a>(
+    name: &'a str,
+    errors: &'a Map<String, ErrorOrRef>,
+) -> Option<&'a Error> {
     match errors.get(name)? {
         ErrorOrRef::Err(e) => Some(e),
         r @ ErrorOrRef::Ref { .. } => {
@@ -81,11 +84,16 @@ fn get_error<'a>(name: &'a str, errors: &'a Map<String, ErrorOrRef>) -> Option<&
     }
 }
 
-fn bind_errors(_errors: &Map<String, ErrorOrRef>) -> Map<String, openrpc::Error> {
+fn bind_errors(
+    _errors: &Map<String, ErrorOrRef>,
+) -> Map<String, openrpc::Error> {
     Default::default() // TODO: errors
 }
 
-fn get_schema<'a>(name: &'a str, schemas: &'a Map<String, SchemaOrRef>) -> Option<&'a Schema> {
+fn get_schema<'a>(
+    name: &'a str,
+    schemas: &'a Map<String, SchemaOrRef>,
+) -> Option<&'a Schema> {
     match schemas.get(name)? {
         SchemaOrRef::Schema(schema) => Some(schema),
         r @ SchemaOrRef::Ref { .. } => {
@@ -152,10 +160,16 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
                 rules.push(Rule::Regex(regex.to_owned()));
             };
             if rules.is_empty() {
-                return Some(Object::Type(Type::Primitive(Primitive::String, vec![])));
+                return Some(Object::Type(Type::Primitive(
+                    Primitive::String,
+                    vec![],
+                )));
             }
             let object = Struct {
-                properties: vec![Property::of(Type::Primitive(Primitive::String, rules))],
+                properties: vec![Property::of(Type::Primitive(
+                    Primitive::String,
+                    rules,
+                ))],
                 ..Default::default()
             };
             Some(Object::Struct(object))
@@ -169,10 +183,16 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
                 rules.push(Rule::Max(max));
             }
             if rules.is_empty() {
-                return Some(Object::Type(Type::Primitive(Primitive::Integer, vec![])));
+                return Some(Object::Type(Type::Primitive(
+                    Primitive::Integer,
+                    vec![],
+                )));
             }
             let object = Struct {
-                properties: vec![Property::of(Type::Primitive(Primitive::Integer, rules))],
+                properties: vec![Property::of(Type::Primitive(
+                    Primitive::Integer,
+                    rules,
+                ))],
                 ..Default::default()
             };
             Some(Object::Struct(object))
@@ -213,7 +233,9 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
             let items = schema.items.as_ref()?;
             let ty = match &**items {
                 SchemaOrRef::Schema(param) => {
-                    eprintln!("anonymous array param type definition: {param:#?}");
+                    eprintln!(
+                        "anonymous array param type definition: {param:#?}"
+                    );
                     return None;
                 }
                 r @ SchemaOrRef::Ref { .. } => {
@@ -235,7 +257,11 @@ fn get_prop_name(name: &str) -> String {
     }
 }
 
-fn bind_prop(prop_name: &str, schema: &SchemaOrRef, required: bool) -> Option<Property> {
+fn bind_prop(
+    prop_name: &str,
+    schema: &SchemaOrRef,
+    required: bool,
+) -> Option<Property> {
     Some(Property {
         name: get_prop_name(prop_name),
         r#type: get_type(schema, required)?,
@@ -262,7 +288,10 @@ fn get_type(schema: &SchemaOrRef, required: bool) -> Option<Type> {
     }
 }
 
-fn bind_object(name: &str, schemas: &Map<String, SchemaOrRef>) -> Option<Object> {
+fn bind_object(
+    name: &str,
+    schemas: &Map<String, SchemaOrRef>,
+) -> Option<Object> {
     match schemas.get(name)? {
         SchemaOrRef::Schema(schema) => {
             let object = bind_schema(schema)?;
@@ -292,7 +321,9 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         })
         .filter(|(name, schema)| match schema {
             SchemaOrRef::Schema(_) => true,
-            r @ SchemaOrRef::Ref { .. } => r.get_ref().map(|n| name != n).unwrap_or_default(),
+            r @ SchemaOrRef::Ref { .. } => {
+                r.get_ref().map(|n| name != n).unwrap_or_default()
+            }
         })
         .collect::<Map<_, _>>();
 
@@ -306,7 +337,9 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         })
         .filter(|(name, error)| match error {
             ErrorOrRef::Err(_) => true,
-            r @ ErrorOrRef::Ref { .. } => r.get_ref().map(|n| name != n).unwrap_or_default(),
+            r @ ErrorOrRef::Ref { .. } => {
+                r.get_ref().map(|n| name != n).unwrap_or_default()
+            }
         })
         .collect::<Map<_, _>>();
 

@@ -12,8 +12,9 @@ mod private {
     #[serde(try_from = "String")]
     pub struct Felt(String);
 
-    static FELT_REGEX: Lazy<Regex> =
-        Lazy::new(|| Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$").unwrap());
+    static FELT_REGEX: Lazy<Regex> = Lazy::new(|| {
+        Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$").unwrap()
+    });
 
     impl Felt {
         pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -51,8 +52,9 @@ mod private {
 use private::{Envelope, Felt};
 
 fn check_json(value: &str) -> Result<(), String> {
-    let envelope: Envelope = serde_json::from_str(&format!("{{\"felt\":\"{}\"}}", value))
-        .map_err(|e| format!("{:?}", e))?;
+    let envelope: Envelope =
+        serde_json::from_str(&format!("{{\"felt\":\"{}\"}}", value))
+            .map_err(|e| format!("{:?}", e))?;
     assert_eq!(envelope.felt.as_ref(), value);
     Ok(())
 }
@@ -98,14 +100,19 @@ mod block {
         let parsed: BlockId = serde_json::from_str(json).unwrap();
         let line = format!("json={json} block={block:?}");
         match (block, parsed) {
-            (BlockId::BlockHash { block_hash: h1 }, BlockId::BlockHash { block_hash: h2 }) => {
+            (
+                BlockId::BlockHash { block_hash: h1 },
+                BlockId::BlockHash { block_hash: h2 },
+            ) => {
                 assert_eq!(h1.0.as_ref(), h2.0.as_ref())
             }
             (
                 BlockId::BlockNumber { block_number: n1 },
                 BlockId::BlockNumber { block_number: n2 },
             ) => assert_eq!(n1.0, n2.0),
-            (BlockId::BlockTag(t1), BlockId::BlockTag(t2)) => assert_eq!(t1, t2),
+            (BlockId::BlockTag(t1), BlockId::BlockTag(t2)) => {
+                assert_eq!(t1, t2)
+            }
             _ => panic!("mismatch"),
         }
         println!("{}: OK", line);
@@ -116,7 +123,9 @@ mod block {
             (
                 "{\"block_hash\": \"0xFACE\"}",
                 BlockId::BlockHash {
-                    block_hash: BlockHash(super::Felt::try_new("0xFACE").unwrap()),
+                    block_hash: BlockHash(
+                        super::Felt::try_new("0xFACE").unwrap(),
+                    ),
                 },
             ),
             (

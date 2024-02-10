@@ -17,7 +17,8 @@ fn test_simple_felt() {
             "pattern": "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$"
         }
     });
-    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
 
     let expected = Struct {
         name: "Felt".to_owned(),
@@ -52,7 +53,8 @@ fn test_simple_int() {
             "minimum": 0
         }
     });
-    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
 
     let expected = Struct {
         name: "BlockNumber".to_owned(),
@@ -86,7 +88,8 @@ fn test_wrapped_felt() {
             "pattern": "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$"
         }
     });
-    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
 
     let expected = Struct {
         name: "BlockHash".to_owned(),
@@ -122,7 +125,8 @@ fn test_array_felt() {
             "pattern": "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$"
         }
     });
-    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
 
     let expected = Object::Alias(
         "List".to_owned(),
@@ -184,7 +188,8 @@ fn test_simple_object() {
             "pattern": "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$"
         }
     });
-    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
 
     let expected = Struct {
         name: "EventContent".to_owned(),
@@ -226,7 +231,8 @@ fn test_simple_enum() {
             "description": "lorep ipsum"
         }
     });
-    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(json).unwrap();
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
 
     let object = bind_object("SIMULATION_FLAG", &schemas).unwrap();
     let expected = Object::Enum(Enum {
