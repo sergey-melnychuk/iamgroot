@@ -486,7 +486,7 @@ fn test_all_of() {
         name: "TxnWithHash".to_owned(),
         properties: vec![
             Property {
-                name: "Txn".to_owned(),
+                name: "txn".to_owned(),
                 r#type: Type::Named("Txn".to_owned()),
             },
             Property {
