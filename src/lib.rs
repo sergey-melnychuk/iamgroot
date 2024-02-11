@@ -136,9 +136,15 @@ fn bind_all_of(all_of: &[SchemaOrRef]) -> Object {
         .flat_map(|schema| match schema {
             r @ SchemaOrRef::Ref { .. } => {
                 let name = r.get_ref().unwrap();
-                let name = normalize(name);
-                let ty = Type::Named(name.clone());
-                vec![Property { name, r#type: ty }] // TODO: mark for flattening with serde?
+                let type_name = normalize(name);
+                let ty = Type::Named(type_name);
+                let prop_name = get_prop_name(name);
+
+                // TODO: mark for flattening with serde?
+                vec![Property {
+                    name: prop_name,
+                    r#type: ty,
+                }]
             }
             SchemaOrRef::Schema(schema) => match bind_schema(schema) {
                 Some(Object::Struct(s)) => s.properties,
@@ -306,9 +312,9 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
 
 fn get_prop_name(name: &str) -> String {
     if name == "enum" || name == "struct" || name == "type" {
-        format!("r#{}", name)
+        format!("r#{}", name).to_ascii_lowercase()
     } else {
-        name.to_owned()
+        name.to_ascii_lowercase()
     }
 }
 
@@ -330,7 +336,6 @@ fn get_type(schema: &SchemaOrRef) -> Option<Type> {
             match bind_schema(schema)? {
                 Object::Type(ty) => Some(ty),
                 object => {
-                    // this
                     // TODO: automatically extract and name anonymouse type definitions
                     eprintln!("cannot extract type from anonymous object: {object:#?}");
                     Some(object.get_type())
