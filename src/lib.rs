@@ -124,12 +124,34 @@ fn bind_schema(schema: &Schema) -> Option<Object> {
     if let Some(all_of) = schema.allOf.as_ref() {
         return Some(bind_all_of(all_of));
     }
-    panic!("schema binding failed: {schema:?}");
+    if let Some(nested) = schema.schema.as_deref() {
+        if let SchemaOrRef::Schema(schema) = nested {
+            return bind_schema(schema);
+        }
+    }
+    panic!("schema binding failed: {schema:#?}");
 }
 
 fn bind_all_of(all_of: &[SchemaOrRef]) -> Object {
-    // TODO: allOf (see BLOCK_BODY_WITH_TXS.transactions)
-    unimplemented!()
+    let properties = all_of
+        .iter()
+        .flat_map(|schema| match schema {
+            r @ SchemaOrRef::Ref { .. } => {
+                let name = r.get_ref().unwrap();
+                let name = normalize(name);
+                let ty = Type::Named(name.clone());
+                vec![Property { name, r#type: ty }] // TODO: mark for flattening with serde?
+            }
+            SchemaOrRef::Schema(schema) => match bind_schema(schema) {
+                Some(Object::Struct(s)) => s.properties,
+                x => panic!("allOf member not matched to a struct: {x:?}"),
+            },
+        })
+        .collect();
+    Object::Struct(Struct {
+        name: Default::default(),
+        properties,
+    })
 }
 
 fn bind_one_of(one_of: &[SchemaOrRef]) -> Object {
@@ -306,7 +328,16 @@ fn get_type(schema: &SchemaOrRef) -> Option<Type> {
             let name = normalize(name);
             Some(Type::Named(name))
         }
-        SchemaOrRef::Schema(schema) => Some(bind_schema(schema)?.get_type()),
+        SchemaOrRef::Schema(schema) => {
+            match bind_schema(schema)? {
+                Object::Type(ty) => Some(ty),
+                object => {
+                    // TODO: automatically extract and name anonymouse type definitions
+                    eprintln!("cannot extract type from anonymous object: {object:#?}");
+                    Some(object.get_type())
+                }
+            }
+        }
     }
 }
 
