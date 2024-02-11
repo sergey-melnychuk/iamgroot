@@ -1342,6 +1342,28 @@
                     "transactions"
                 ]
             },
+            "TXN_WITH_HASH": {
+                "title": "transactions in block",
+                "type": "object",
+                "allOf": [
+                    {
+                        "title": "transaction",
+                        "$ref": "#/components/schemas/TXN"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "transaction_hash": {
+                                "title": "transaction hash",
+                                "$ref": "#/components/schemas/TXN_HASH"
+                            }
+                        },
+                        "required": [
+                            "transaction_hash"
+                        ]
+                    }
+                ]
+            },
             "BLOCK_BODY_WITH_TXS": {
                 "title": "Block body with transactions",
                 "type": "object",
@@ -1351,26 +1373,7 @@
                         "description": "The transactions in this block",
                         "type": "array",
                         "items": {
-                            "title": "transactions in block",
-                            "type": "object",
-                            "allOf": [
-                                {
-                                    "title": "transaction",
-                                    "$ref": "#/components/schemas/TXN"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "transaction_hash": {
-                                            "title": "transaction hash",
-                                            "$ref": "#/components/schemas/TXN_HASH"
-                                        }
-                                    },
-                                    "required": [
-                                        "transaction_hash"
-                                    ]
-                                }
-                            ]
+                            "$ref": "#/components/schemas/TXN_WITH_HASH"
                         }
                     }
                 },
