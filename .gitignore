@@ -1,5 +1,7 @@
 /target
 
+examples/x.rs
+
 ethereum.txt
 starknet.txt
-examples/x.rs
+x.txt
