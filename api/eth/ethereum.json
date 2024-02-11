@@ -708,6 +708,7 @@
 			"schema": {
 			  "title": "storageKeys",
 			  "description": "A storage key is indexed from the solidity compiler by the order it is declared. For mappings it uses the keccak of the mapping key with its position (and recursively for X-dimensional mappings)",
+			  "type": "array",
 			  "items": {
 				"$ref": "#/components/schemas/StorageProofKey"
 			  }
