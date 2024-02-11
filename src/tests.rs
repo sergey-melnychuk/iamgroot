@@ -387,6 +387,27 @@ fn test_nested_array() {
 mod block_body {
     pub fn json() -> serde_json::Value {
         serde_json::json!({
+            "TXN_WITH_HASH": {
+                "type": "object",
+                "allOf": [
+                    {
+                        "title": "transaction",
+                        "$ref": "#/components/schemas/TXN"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "transaction_hash": {
+                                "title": "transaction hash",
+                                "$ref": "#/components/schemas/TXN_HASH"
+                            }
+                        },
+                        "required": [
+                            "transaction_hash"
+                        ]
+                    }
+                ]
+            },
             "BLOCK_BODY_WITH_TXS": {
                 "title": "Block body with transactions",
                 "type": "object",
@@ -396,26 +417,7 @@ mod block_body {
                         "description": "The transactions in this block",
                         "type": "array",
                         "items": {
-                            "title": "transactions in block",
-                            "type": "object",
-                            "allOf": [
-                                {
-                                    "title": "transaction",
-                                    "$ref": "#/components/schemas/TXN"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "transaction_hash": {
-                                            "title": "transaction hash",
-                                            "$ref": "#/components/schemas/TXN_HASH"
-                                        }
-                                    },
-                                    "required": [
-                                        "transaction_hash"
-                                    ]
-                                }
-                            ]
+                            "$ref": "#/components/schemas/TXN_WITH_HASH"
                         }
                     }
                 },
@@ -470,9 +472,28 @@ fn test_all_of() {
         serde_json::from_value(block_body::json()).unwrap();
 
     let expected = Object::Struct(Struct {
-        name: "".to_owned(),
-        properties: vec![],
+        name: "BlockBodyWithTxs".to_owned(),
+        properties: vec![Property {
+            name: "transactions".to_owned(),
+            r#type: Type::Array(Box::new(Type::Named(
+                "TxnWithHash".to_owned(),
+            ))),
+        }],
     });
-
     assert_eq!(bind_object("BLOCK_BODY_WITH_TXS", &schemas), Some(expected));
+
+    let expected = Object::Struct(Struct {
+        name: "TxnWithHash".to_owned(),
+        properties: vec![
+            Property {
+                name: "Txn".to_owned(),
+                r#type: Type::Named("Txn".to_owned()),
+            },
+            Property {
+                name: "transaction_hash".to_owned(),
+                r#type: Type::Named("TxnHash".to_owned()),
+            },
+        ],
+    });
+    assert_eq!(bind_object("TXN_WITH_HASH", &schemas), Some(expected));
 }
