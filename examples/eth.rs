@@ -1,5 +1,5 @@
 fn main() {
-    let json = include_str!("../api/eth/0x10165f5.json");
+    let json = include_str!("../api/eth/block/0x10165f5.json");
     let mut res: iamgroot::jsonrpc::Response =
         serde_json::from_str(json).unwrap();
     let res: gen::Block =
