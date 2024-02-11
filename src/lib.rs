@@ -124,10 +124,8 @@ fn bind_schema(schema: &Schema) -> Option<Object> {
     if let Some(all_of) = schema.allOf.as_ref() {
         return Some(bind_all_of(all_of));
     }
-    if let Some(nested) = schema.schema.as_deref() {
-        if let SchemaOrRef::Schema(schema) = nested {
-            return bind_schema(schema);
-        }
+    if let Some(SchemaOrRef::Schema(nested)) = schema.schema.as_deref() {
+        return bind_schema(nested);
     }
     panic!("schema binding failed: {schema:#?}");
 }
@@ -332,6 +330,7 @@ fn get_type(schema: &SchemaOrRef) -> Option<Type> {
             match bind_schema(schema)? {
                 Object::Type(ty) => Some(ty),
                 object => {
+                    // this
                     // TODO: automatically extract and name anonymouse type definitions
                     eprintln!("cannot extract type from anonymous object: {object:#?}");
                     Some(object.get_type())
