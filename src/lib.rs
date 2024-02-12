@@ -58,19 +58,46 @@ fn x(
 }
 
 fn bind_method(method: openrpc::Method) -> Option<codegen::Method> {
-    let ret = get_type(method.result.as_ref()?.schema.as_ref()?)?;
+    let name = unprefix(&method.name);
+    let object = bind_schema_ref(method.result.as_ref()?.schema.as_ref()?)?;
+    let ret = match object {
+        Object::Type(ty) => ty,
+        Object::Alias(name, _) => Type::Named(name),
+        object => {
+            let name = format!("{}Result", capitalize(&name));
+            let object = object.with_name(name.clone());
+            println!("/*\nanonymous object detected (ret): {object:#?}\n*/");
+            Type::Named(name)
+        }
+    };
     Some(codegen::Method {
-        doc: method.summary,
-        name: method.name,
-        args: method.params.iter().flat_map(bind_param).collect(),
+        name,
+        args: method
+            .params
+            .iter()
+            .flat_map(|param| bind_param(&method.name, param))
+            .collect(),
         ret,
+        doc: method.summary,
     })
 }
 
-fn bind_param(param: &Content) -> Option<(String, Type)> {
+fn bind_param(method_name: &str, param: &Content) -> Option<(String, Type)> {
     let name = get_prop_name(param.name.as_ref()?);
+    let object = bind_schema_ref(param.schema.as_ref()?)?;
+    let ty = match object {
+        Object::Type(ty) => ty,
+        Object::Alias(name, _) => Type::Named(name),
+        object => {
+            let name = capitalize(&name);
+            let name = format!("{}{name}", capitalize(&unprefix(method_name)));
+            let object = object.with_name(name.clone());
+            println!("/*\nanonymous object detected (param): {object:#?}\n*/",);
+            Type::Named(name)
+        }
+    };
+
     let required = param.required.unwrap_or_default();
-    let ty = get_type(param.schema.as_ref()?)?;
     let ty = if !required {
         Type::Option(Box::new(ty))
     } else {
@@ -95,20 +122,39 @@ fn get_error<'a>(
     }
 }
 
+fn unprefix(name: &str) -> String {
+    name.split('_')
+        .nth(1)
+        .map(|s| s.to_owned())
+        .unwrap_or_default()
+}
+
 fn capitalize(name: &str) -> String {
     if name.is_empty() {
         return name.to_owned();
     }
     let head = name.chars().next().unwrap();
     let tail = name.chars().skip(1).collect::<String>();
-    format!("{}{}", head.to_ascii_uppercase(), tail.to_ascii_lowercase())
+    format!("{}{}", head.to_ascii_uppercase(), tail)
 }
 
 fn normalize(name: &str) -> String {
-    name.split(|c| c == '_' || c == ' ')
+    name.to_ascii_lowercase()
+        .split(|c| c == '_' || c == ' ')
         .map(capitalize)
         .collect::<Vec<_>>()
         .join("")
+}
+
+fn bind_schema_ref(schama_or_ref: &SchemaOrRef) -> Option<Object> {
+    match schama_or_ref {
+        r @ SchemaOrRef::Ref { .. } => {
+            let name = r.get_ref()?;
+            let name = normalize(name);
+            Some(Object::Type(Type::Named(name)))
+        }
+        SchemaOrRef::Schema(schema) => bind_schema(schema),
+    }
 }
 
 fn bind_schema(schema: &Schema) -> Option<Object> {
@@ -193,13 +239,26 @@ fn bind_one_of(one_of: &[SchemaOrRef]) -> Object {
     })
 }
 
-fn bind_enum(variants: &[String], _schema: &Schema) -> Option<Object> {
+fn bind_enum(variants: &[String], schema: &Schema) -> Option<Object> {
     Some(Object::Enum(Enum {
         variants: variants
             .iter()
-            .map(|value| Variant::Const {
-                name: normalize(value),
-                value: value.to_owned(),
+            .map(|value| {
+                let name = normalize(value);
+                let name = if name.chars().next().unwrap().is_alphabetic() {
+                    name
+                } else {
+                    let head = schema
+                        .title
+                        .as_ref()
+                        .and_then(|title| title.chars().next())
+                        .unwrap_or('V');
+                    format!("{head}{name}")
+                };
+                Variant::Const {
+                    name,
+                    value: value.to_owned(),
+                }
             })
             .collect(),
         ..Default::default()
@@ -298,7 +357,19 @@ fn bind_type(ty: &openrpc::Type, schema: &Schema) -> Option<Object> {
         openrpc::Type::Array => {
             let items = schema.items.as_ref()?;
             let ty = match &**items {
-                SchemaOrRef::Schema(param) => bind_schema(param)?.get_type(),
+                SchemaOrRef::Schema(param) => {
+                    let object = bind_schema(param)?;
+                    match object {
+                        Object::Type(ty) => ty,
+                        Object::Alias(name, _) => Type::Named(name),
+                        object => {
+                            let name = param.title.clone().unwrap_or_default();
+                            let object = object.with_name(name.clone());
+                            println!("/*\nanonymous object detected (type): {object:#?}\n*/", );
+                            Type::Named(name)
+                        }
+                    }
+                }
                 r @ SchemaOrRef::Ref { .. } => {
                     let name = r.get_ref()?;
                     let name = normalize(name);
@@ -319,30 +390,20 @@ fn get_prop_name(name: &str) -> String {
 }
 
 fn bind_prop(prop_name: &str, schema: &SchemaOrRef) -> Option<Property> {
-    Some(Property {
-        name: get_prop_name(prop_name),
-        r#type: get_type(schema)?,
-    })
-}
-
-fn get_type(schema: &SchemaOrRef) -> Option<Type> {
-    match schema {
-        r @ SchemaOrRef::Ref { .. } => {
-            let name = r.get_ref()?;
-            let name = normalize(name);
-            Some(Type::Named(name))
+    let name = get_prop_name(prop_name);
+    let object = bind_schema_ref(schema)?;
+    let r#type = match object {
+        Object::Type(ty) => ty,
+        Object::Alias(name, _) => Type::Named(name),
+        object => {
+            let type_name = normalize(prop_name);
+            let object = object.with_name(type_name.clone());
+            // TODO: resolve conflicting names for extracted types
+            println!("/*\nanonymous object detected (prop): {object:#?}\n*/",);
+            Type::Named(type_name)
         }
-        SchemaOrRef::Schema(schema) => {
-            match bind_schema(schema)? {
-                Object::Type(ty) => Some(ty),
-                object => {
-                    // TODO: automatically extract and name anonymouse type definitions
-                    eprintln!("cannot extract type from anonymous object: {object:#?}");
-                    Some(object.get_type())
-                }
-            }
-        }
-    }
+    };
+    Some(Property { name, r#type })
 }
 
 fn bind_object(
@@ -352,7 +413,7 @@ fn bind_object(
     match schemas.get(name)? {
         SchemaOrRef::Schema(schema) => {
             let object = bind_schema(schema)?;
-            Some(object.with_name(name))
+            Some(object.with_name(normalize(name)))
         }
         r @ SchemaOrRef::Ref { .. } => {
             let ty = Type::Named(normalize(r.get_ref()?));
