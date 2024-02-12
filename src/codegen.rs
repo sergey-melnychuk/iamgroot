@@ -1,5 +1,3 @@
-use crate::normalize;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Primitive {
     String,
@@ -72,25 +70,11 @@ pub enum Object {
 }
 
 impl Object {
-    pub fn get_type(&self) -> Type {
-        match self {
-            Self::Struct(s) => Type::Named(s.name.to_owned()),
-            Self::Enum(e) => Type::Named(e.name.to_owned()),
-            Self::Type(ty) => ty.clone(),
-            Self::Alias(_, ty) => ty.clone(),
-        }
-    }
-
-    pub fn with_name(self, name: &str) -> Self {
-        let name = normalize(name);
+    pub fn with_name(self, name: String) -> Self {
         match self {
             Self::Struct(this) => Self::Struct(Struct { name, ..this }),
             Self::Enum(this) => Self::Enum(Enum { name, ..this }),
-
-            // alternative: extract value-object type wrapper
             Self::Type(ty) => Self::Alias(name, ty),
-
-            // alternative: extract value-object type wrapper
             Self::Alias(_, ty) => Self::Alias(name, ty),
         }
     }
