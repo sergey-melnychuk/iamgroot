@@ -220,6 +220,37 @@ fn test_simple_enum() {
     assert_eq!(object, expected);
 }
 
+#[test]
+fn test_tricky_enum() {
+    let json = json!({
+        "VERSION": {
+            "type": "string",
+            "enum": [
+                "0x1",
+                "0x100000000000000000000000000000001"
+            ]
+        }
+    });
+    let schemas: HashMap<String, SchemaOrRef> =
+        serde_json::from_value(json).unwrap();
+
+    let object = bind_object("VERSION", &schemas).unwrap();
+    let expected = Object::Enum(Enum {
+        name: "Version".to_owned(),
+        variants: vec![
+            Variant::Const {
+                name: "V0x1".to_owned(),
+                value: "0x1".to_owned(),
+            },
+            Variant::Const {
+                name: "V0x100000000000000000000000000000001".to_owned(),
+                value: "0x100000000000000000000000000000001".to_owned(),
+            },
+        ],
+    });
+    assert_eq!(object, expected);
+}
+
 mod event_filter {
     pub fn json() -> serde_json::Value {
         serde_json::json!({
