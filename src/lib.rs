@@ -80,7 +80,9 @@ impl Gen {
         let methods = self
             .methods
             .iter()
-            .filter_map(|method| bind_method(method, &mut objects))
+            .filter_map(|method| {
+                bind_method(/* parent_name */ "", method, &mut objects)
+            })
             .collect();
 
         (objects, errors, methods)
@@ -88,12 +90,16 @@ impl Gen {
 }
 
 fn bind_method(
+    parent_name: &str,
     method: &openrpc::Method,
     objects: &mut Vec<Object>,
 ) -> Option<codegen::Method> {
     let name = unprefix(&method.name);
-    let object =
-        bind_schema_ref(method.result.as_ref()?.schema.as_ref()?, objects)?;
+    let object = bind_schema_ref(
+        parent_name,
+        method.result.as_ref()?.schema.as_ref()?,
+        objects,
+    )?;
     let ret = match object {
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
@@ -110,7 +116,9 @@ fn bind_method(
         args: method
             .params
             .iter()
-            .flat_map(|param| bind_param(&method.name, param, objects))
+            .flat_map(|param| {
+                bind_param(parent_name, &method.name, param, objects)
+            })
             .collect(),
         ret,
         doc: method.summary.clone(),
@@ -118,12 +126,13 @@ fn bind_method(
 }
 
 fn bind_param(
+    parent_name: &str,
     method_name: &str,
     param: &Content,
     objects: &mut Vec<Object>,
 ) -> Option<(String, Type)> {
+    let object = bind_schema_ref(parent_name, param.schema.as_ref()?, objects)?;
     let name = get_prop_name(param.name.as_ref()?);
-    let object = bind_schema_ref(param.schema.as_ref()?, objects)?;
     let ty = match object {
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
@@ -187,6 +196,7 @@ fn normalize(name: &str) -> String {
 }
 
 fn bind_schema_ref(
+    parent_name: &str,
     schama_or_ref: &SchemaOrRef,
     objects: &mut Vec<Object>,
 ) -> Option<Object> {
@@ -196,30 +206,40 @@ fn bind_schema_ref(
             let name = normalize(name);
             Some(Object::Type(Type::Named(name)))
         }
-        SchemaOrRef::Schema(schema) => bind_schema(schema, objects),
+        SchemaOrRef::Schema(schema) => {
+            bind_schema(parent_name, schema, objects)
+        }
     }
 }
 
-fn bind_schema(schema: &Schema, objects: &mut Vec<Object>) -> Option<Object> {
+fn bind_schema(
+    name: &str,
+    schema: &Schema,
+    objects: &mut Vec<Object>,
+) -> Option<Object> {
     if let Some(variants) = schema.r#enum.as_ref() {
         return bind_enum(variants, schema);
     }
     if let Some(ty) = schema.r#type.as_ref() {
-        return bind_type(ty, schema, objects);
+        return bind_type(name, ty, schema, objects);
     }
     if let Some(one_of) = schema.oneOf.as_ref() {
-        return Some(bind_one_of(one_of, objects));
+        return Some(bind_one_of(name, one_of, objects));
     }
     if let Some(all_of) = schema.allOf.as_ref() {
-        return Some(bind_all_of(all_of, objects));
+        return Some(bind_all_of(name, all_of, objects));
     }
     if let Some(SchemaOrRef::Schema(nested)) = schema.schema.as_deref() {
-        return bind_schema(nested, objects);
+        return bind_schema(name, nested, objects);
     }
     panic!("schema binding failed: {schema:#?}");
 }
 
-fn bind_all_of(all_of: &[SchemaOrRef], objects: &mut Vec<Object>) -> Object {
+fn bind_all_of(
+    parent_name: &str,
+    all_of: &[SchemaOrRef],
+    objects: &mut Vec<Object>,
+) -> Object {
     let properties = all_of
         .iter()
         .flat_map(|schema| match schema {
@@ -235,10 +255,12 @@ fn bind_all_of(all_of: &[SchemaOrRef], objects: &mut Vec<Object>) -> Object {
                     r#type: ty,
                 }]
             }
-            SchemaOrRef::Schema(schema) => match bind_schema(schema, objects) {
-                Some(Object::Struct(s)) => s.properties,
-                x => panic!("allOf member not matched to a struct: {x:?}"),
-            },
+            SchemaOrRef::Schema(schema) => {
+                match bind_schema(parent_name, schema, objects) {
+                    Some(Object::Struct(s)) => s.properties,
+                    x => panic!("allOf member not matched to a struct: {x:?}"),
+                }
+            }
         })
         .collect();
     Object::Struct(Struct {
@@ -247,7 +269,11 @@ fn bind_all_of(all_of: &[SchemaOrRef], objects: &mut Vec<Object>) -> Object {
     })
 }
 
-fn bind_one_of(one_of: &[SchemaOrRef], objects: &mut Vec<Object>) -> Object {
+fn bind_one_of(
+    parent_name: &str,
+    one_of: &[SchemaOrRef],
+    objects: &mut Vec<Object>,
+) -> Object {
     let variants = one_of
         .iter()
         .map(|schema| match schema {
@@ -263,17 +289,19 @@ fn bind_one_of(one_of: &[SchemaOrRef], objects: &mut Vec<Object>) -> Object {
                     }],
                 })
             }
-            SchemaOrRef::Schema(schema) => match bind_schema(schema, objects) {
-                Some(Object::Struct(mut s)) if !s.properties.is_empty() => {
-                    s.name = if let Some(name) = schema.title.as_ref() {
-                        normalize(name)
-                    } else {
-                        normalize(&s.properties[0].name)
-                    };
-                    Variant::Struct(s)
+            SchemaOrRef::Schema(schema) => {
+                match bind_schema(parent_name, schema, objects) {
+                    Some(Object::Struct(mut s)) if !s.properties.is_empty() => {
+                        s.name = if let Some(name) = schema.title.as_ref() {
+                            normalize(name)
+                        } else {
+                            normalize(&s.properties[0].name)
+                        };
+                        Variant::Struct(s)
+                    }
+                    x => panic!("oneOf variant not matched to a struct: {x:?}"),
                 }
-                x => panic!("oneOf variant not matched to a struct: {x:?}"),
-            },
+            }
         })
         .collect();
     Object::Enum(Enum {
@@ -309,6 +337,7 @@ fn bind_enum(variants: &[String], schema: &Schema) -> Option<Object> {
 }
 
 fn bind_type(
+    parent_name: &str,
     ty: &openrpc::Type,
     schema: &Schema,
     objects: &mut Vec<Object>,
@@ -378,8 +407,12 @@ fn bind_type(
                                 .as_ref()
                                 .map(|rs: &Vec<String>| rs.contains(prop_name))
                                 .unwrap_or_default();
-                            let mut prop =
-                                bind_prop(prop_name, prop_schema, objects)?;
+                            let mut prop = bind_prop(
+                                parent_name,
+                                prop_name,
+                                prop_schema,
+                                objects,
+                            )?;
                             if !required {
                                 let ty = Type::Option(Box::new(prop.r#type));
                                 prop.r#type = ty;
@@ -397,7 +430,7 @@ fn bind_type(
         }
         openrpc::Type::Object if schema.allOf.is_some() => {
             let all_of = schema.allOf.as_ref().unwrap();
-            Some(bind_all_of(all_of, objects))
+            Some(bind_all_of(parent_name, all_of, objects))
         }
         openrpc::Type::Object => {
             panic!("object type binding failed: {schema:?}")
@@ -405,13 +438,13 @@ fn bind_type(
         openrpc::Type::Array => {
             let items = schema.items.as_ref()?;
             let ty = match &**items {
-                SchemaOrRef::Schema(param) => {
-                    let object = bind_schema(param, objects)?;
+                SchemaOrRef::Schema(schema) => {
+                    let object = bind_schema(parent_name, schema, objects)?;
                     match object {
                         Object::Type(ty) => ty,
                         Object::Alias(name, _) => Type::Named(name),
                         object => {
-                            let name = param.title.clone().unwrap_or_default();
+                            let name = schema.title.clone().unwrap_or_default();
                             let object = object.with_name(name.clone());
                             // println!("/*\nanonymous object detected (type): {object:#?}\n*/");
                             objects.push(object);
@@ -439,19 +472,20 @@ fn get_prop_name(name: &str) -> String {
 }
 
 fn bind_prop(
+    parent_name: &str,
     prop_name: &str,
     schema: &SchemaOrRef,
     objects: &mut Vec<Object>,
 ) -> Option<Property> {
+    let object = bind_schema_ref(parent_name, schema, objects)?;
     let name = get_prop_name(prop_name);
-    let object = bind_schema_ref(schema, objects)?;
     let r#type = match object {
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
         object => {
             let type_name = normalize(prop_name);
+            let type_name = format!("{}{type_name}", normalize(parent_name));
             let object = object.with_name(type_name.clone());
-            // TODO: fix conflicting names (add prefix maybe)
             // println!("/*\nanonymous object detected (prop): {object:#?}\n*/",);
             objects.push(object);
             Type::Named(type_name)
@@ -467,7 +501,7 @@ fn bind_object(
 ) -> Option<Object> {
     match schemas.get(name)? {
         SchemaOrRef::Schema(schema) => {
-            let object = bind_schema(schema, objects)?;
+            let object = bind_schema(name, schema, objects)?;
             Some(object.with_name(normalize(name)))
         }
         r @ SchemaOrRef::Ref { .. } => {

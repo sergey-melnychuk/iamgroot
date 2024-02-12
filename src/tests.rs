@@ -11,6 +11,8 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn test_simple_felt() {
+    let mut objects = vec![];
+
     let json = json!({
         "FELT": {
             "type": "string",
@@ -35,12 +37,14 @@ fn test_simple_felt() {
         }],
     };
 
-    let felt = bind_object("FELT", &schemas).unwrap();
+    let felt = bind_object("FELT", &schemas, &mut objects).unwrap();
     assert_eq!(felt, Object::Struct(expected));
 }
 
 #[test]
 fn test_simple_int() {
+    let mut objects = vec![];
+
     let json = json!({
         "BLOCK_NUMBER": {
             "title": "Block number",
@@ -60,12 +64,15 @@ fn test_simple_int() {
         }],
     };
 
-    let block_number = bind_object("BLOCK_NUMBER", &schemas).unwrap();
+    let block_number =
+        bind_object("BLOCK_NUMBER", &schemas, &mut objects).unwrap();
     assert_eq!(block_number, Object::Struct(expected));
 }
 
 #[test]
 fn test_wrapped_felt() {
+    let mut objects = vec![];
+
     let json = json!({
         "BLOCK_HASH": {
             "title": "Block hash",
@@ -89,12 +96,14 @@ fn test_wrapped_felt() {
         }],
     };
 
-    let block_hash = bind_object("BLOCK_HASH", &schemas).unwrap();
+    let block_hash = bind_object("BLOCK_HASH", &schemas, &mut objects).unwrap();
     assert_eq!(block_hash, Object::Struct(expected));
 }
 
 #[test]
 fn test_array_felt() {
+    let mut objects = vec![];
+
     let json = json!({
         "LIST": {
             "type": "array",
@@ -117,23 +126,14 @@ fn test_array_felt() {
         Type::Array(Box::new(Type::Named("Felt".to_owned()))),
     );
 
-    // alternative: value-object wrapper type (see `Object::with_name`).
-    /*
-    let expected = Object::Struct(Struct {
-        name: "List".to_owned(),
-        properties: vec![Property {
-            name: Default::default(),
-            r#type: Type::Array(Box::new(Type::Named("Felt".to_owned()))),
-        }],
-    });
-    */
-
-    let list = bind_object("LIST", &schemas).unwrap();
+    let list = bind_object("LIST", &schemas, &mut objects).unwrap();
     assert_eq!(list, expected);
 }
 
 #[test]
 fn test_simple_object() {
+    let mut objects = vec![];
+
     let json = json!({
         "EVENT_CONTENT": {
             "title": "Event content",
@@ -184,12 +184,15 @@ fn test_simple_object() {
         ],
     };
 
-    let event_content = bind_object("EVENT_CONTENT", &schemas).unwrap();
+    let event_content =
+        bind_object("EVENT_CONTENT", &schemas, &mut objects).unwrap();
     assert_eq!(event_content, Object::Struct(expected));
 }
 
 #[test]
 fn test_simple_enum() {
+    let mut objects = vec![];
+
     let json = json!({
         "SIMULATION_FLAG": {
             "type": "string",
@@ -203,7 +206,8 @@ fn test_simple_enum() {
     let schemas: HashMap<String, SchemaOrRef> =
         serde_json::from_value(json).unwrap();
 
-    let object = bind_object("SIMULATION_FLAG", &schemas).unwrap();
+    let object =
+        bind_object("SIMULATION_FLAG", &schemas, &mut objects).unwrap();
     let expected = Object::Enum(Enum {
         name: "SimulationFlag".to_owned(),
         variants: vec![
@@ -222,6 +226,8 @@ fn test_simple_enum() {
 
 #[test]
 fn test_tricky_enum() {
+    let mut objects = vec![];
+
     let json = json!({
         "VERSION": {
             "type": "string",
@@ -234,7 +240,7 @@ fn test_tricky_enum() {
     let schemas: HashMap<String, SchemaOrRef> =
         serde_json::from_value(json).unwrap();
 
-    let object = bind_object("VERSION", &schemas).unwrap();
+    let object = bind_object("VERSION", &schemas, &mut objects).unwrap();
     let expected = Object::Enum(Enum {
         name: "Version".to_owned(),
         variants: vec![
@@ -344,6 +350,8 @@ mod event_filter {
 
 #[test]
 fn test_one_of() {
+    let mut objects = vec![];
+
     let schemas: HashMap<String, SchemaOrRef> =
         serde_json::from_value(event_filter::json()).unwrap();
 
@@ -374,11 +382,16 @@ fn test_one_of() {
         ],
     });
 
-    assert_eq!(bind_object("BLOCK_ID", &schemas), Some(expected));
+    assert_eq!(
+        bind_object("BLOCK_ID", &schemas, &mut objects),
+        Some(expected)
+    );
 }
 
 #[test]
 fn test_nested_array() {
+    let mut objects = vec![];
+
     let schemas: HashMap<String, SchemaOrRef> =
         serde_json::from_value(event_filter::json()).unwrap();
 
@@ -412,7 +425,10 @@ fn test_nested_array() {
         ],
     });
 
-    assert_eq!(bind_object("EVENT_FILTER", &schemas), Some(expected));
+    assert_eq!(
+        bind_object("EVENT_FILTER", &schemas, &mut objects),
+        Some(expected)
+    );
 }
 
 mod block_body {
@@ -499,6 +515,8 @@ mod block_body {
 
 #[test]
 fn test_all_of() {
+    let mut objects = vec![];
+
     let schemas: HashMap<String, SchemaOrRef> =
         serde_json::from_value(block_body::json()).unwrap();
 
@@ -511,7 +529,10 @@ fn test_all_of() {
             ))),
         }],
     });
-    assert_eq!(bind_object("BLOCK_BODY_WITH_TXS", &schemas), Some(expected));
+    assert_eq!(
+        bind_object("BLOCK_BODY_WITH_TXS", &schemas, &mut objects),
+        Some(expected)
+    );
 
     let expected = Object::Struct(Struct {
         name: "TxnWithHash".to_owned(),
@@ -526,5 +547,8 @@ fn test_all_of() {
             },
         ],
     });
-    assert_eq!(bind_object("TXN_WITH_HASH", &schemas), Some(expected));
+    assert_eq!(
+        bind_object("TXN_WITH_HASH", &schemas, &mut objects),
+        Some(expected)
+    );
 }
