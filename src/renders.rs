@@ -45,7 +45,7 @@ pub fn render_primitive(basic: &codegen::Primitive) -> &str {
 pub fn render_type(ty: &codegen::Type) -> String {
     match ty {
         codegen::Type::Named(name) if name.is_empty() => {
-            "() /* TODO: empty */".to_owned()
+            panic!("anonymous type detected")
         }
         codegen::Type::Named(name) => name.to_owned(),
         codegen::Type::Primitive(basic, _) => {
