@@ -1014,183 +1014,9 @@ pub mod gen {
     use iamgroot::jsonrpc;
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV1Type {
+    pub enum DeclareTxnTraceType {
         #[serde(rename = "DECLARE")]
         Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum L1HandlerTxnType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnTraceType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployTxnReceiptType {
-        #[serde(rename = "DEPLOY")]
-        Deploy,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV3Type {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum L1HandlerTxnReceiptType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV0Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV0Version {
-        #[serde(rename = "0x0")]
-        V0x0,
-        #[serde(rename = "0x100000000000000000000000000000000")]
-        V0x100000000000000000000000000000000,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "i64")]
-    pub struct StructAbiEntrySize(i64);
-
-    mod structabientrysize {
-        use super::jsonrpc;
-        use super::StructAbiEntrySize;
-
-        static MIN: i64 = 1;
-        static MAX: i64 = 9223372036854775807;
-
-        impl StructAbiEntrySize {
-            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
-                if value < MIN {
-                    return Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "StructAbiEntrySize value {value} must be > {MIN}"
-                        ),
-                    });
-                }
-                if value > MAX {
-                    return Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "StructAbiEntrySize value {value} must be < {MAX}"
-                        ),
-                    });
-                }
-                Ok(Self(value))
-            }
-        }
-
-        impl TryFrom<i64> for StructAbiEntrySize {
-            type Error = String;
-            fn try_from(value: i64) -> Result<Self, Self::Error> {
-                Self::try_new(value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<i64> for StructAbiEntrySize {
-            fn as_ref(&self) -> &i64 {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV3Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ContractClassEntryPointsByType {
-        pub constructor: Vec<SierraEntryPoint>,
-        pub external: Vec<SierraEntryPoint>,
-        pub l1_handler: Vec<SierraEntryPoint>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnReceiptType {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnReceiptType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV3Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingInvokeTxnReceiptType {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV2Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV2Version {
-        #[serde(rename = "0x2")]
-        V0x2,
-        #[serde(rename = "0x100000000000000000000000000000002")]
-        V0x100000000000000000000000000000002,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1251,9 +1077,184 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV2Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV2Version {
+        #[serde(rename = "0x2")]
+        V0x2,
+        #[serde(rename = "0x100000000000000000000000000000002")]
+        V0x100000000000000000000000000000002,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV3Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnReceiptType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingInvokeTxnReceiptType {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum L1HandlerTxnTraceType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingDeployAccountTxnReceiptType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum L1HandlerTxnType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV3Type {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV1Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV1Type {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub enum PendingCommonReceiptPropertiesFinalityStatus {
         #[serde(rename = "ACCEPTED_ON_L2")]
         AcceptedOnL2,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV3Type {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV1Type {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "i64")]
+    pub struct StructAbiEntrySize(i64);
+
+    mod structabientrysize {
+        use super::jsonrpc;
+        use super::StructAbiEntrySize;
+
+        static MIN: i64 = 1;
+        static MAX: i64 = 9223372036854775807;
+
+        impl StructAbiEntrySize {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "StructAbiEntrySize value {value} must be > {MIN}"
+                        ),
+                    });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "StructAbiEntrySize value {value} must be < {MAX}"
+                        ),
+                    });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for StructAbiEntrySize {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for StructAbiEntrySize {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1268,6 +1269,57 @@ pub mod gen {
         V0x0,
         #[serde(rename = "0x100000000000000000000000000000000")]
         V0x100000000000000000000000000000000,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployTxnReceiptType {
+        #[serde(rename = "DEPLOY")]
+        Deploy,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingL1HandlerTxnReceiptType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV0Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV0Version {
+        #[serde(rename = "0x0")]
+        V0x0,
+        #[serde(rename = "0x100000000000000000000000000000000")]
+        V0x100000000000000000000000000000000,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingDeclareTxnReceiptType {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ContractClassEntryPointsByType {
+        pub constructor: Vec<SierraEntryPoint>,
+        pub external: Vec<SierraEntryPoint>,
+        pub l1_handler: Vec<SierraEntryPoint>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnReceiptType {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnReceiptType {
+        #[serde(rename = "DECLARE")]
+        Declare,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1288,124 +1340,9 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV1Type {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV1Type {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingDeclareTxnReceiptType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingDeployAccountTxnReceiptType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum L1HandlerTxnTraceType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnReceiptType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "i64")]
-    pub struct BlockHeaderTimestamp(i64);
-
-    mod blockheadertimestamp {
-        use super::jsonrpc;
-        use super::BlockHeaderTimestamp;
-
-        static MIN: i64 = 0;
-        static MAX: i64 = 9223372036854775807;
-
-        impl BlockHeaderTimestamp {
-            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
-                if value < MIN {
-                    return Err(jsonrpc::Error {
-                    code: 1001,
-                    message: format!("BlockHeaderTimestamp value {value} must be > {MIN}"),
-                });
-                }
-                if value > MAX {
-                    return Err(jsonrpc::Error {
-                    code: 1001,
-                    message: format!("BlockHeaderTimestamp value {value} must be < {MAX}"),
-                });
-                }
-                Ok(Self(value))
-            }
-        }
-
-        impl TryFrom<i64> for BlockHeaderTimestamp {
-            type Error = String;
-            fn try_from(value: i64) -> Result<Self, Self::Error> {
-                Self::try_new(value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<i64> for BlockHeaderTimestamp {
-            fn as_ref(&self) -> &i64 {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub enum DeployTxnType {
         #[serde(rename = "DEPLOY")]
         Deploy,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingL1HandlerTxnReceiptType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV3Type {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1452,9 +1389,46 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnTraceType {
-        #[serde(rename = "DECLARE")]
-        Declare,
+    #[serde(try_from = "i64")]
+    pub struct BlockHeaderTimestamp(i64);
+
+    mod blockheadertimestamp {
+        use super::jsonrpc;
+        use super::BlockHeaderTimestamp;
+
+        static MIN: i64 = 0;
+        static MAX: i64 = 9223372036854775807;
+
+        impl BlockHeaderTimestamp {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("BlockHeaderTimestamp value {value} must be > {MIN}"),
+                });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("BlockHeaderTimestamp value {value} must be < {MAX}"),
+                });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for BlockHeaderTimestamp {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for BlockHeaderTimestamp {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1472,64 +1446,161 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct NumAsHex(String);
+    pub enum L1HandlerTxnReceiptType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
 
-    mod numashex {
-        use super::jsonrpc;
-        use super::NumAsHex;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnTraceType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
 
-        static NUMASHEX_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV3Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
 
-        impl NumAsHex {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if NUMASHEX_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "NumAsHex value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
 
-        impl TryFrom<String> for NumAsHex {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventsChunk {
+        pub events: Vec<EmittedEvent>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub continuation_token: Option<String>,
+    }
 
-        impl AsRef<String> for NumAsHex {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EntryPoints {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnTrace {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub validate_invocation: Option<FunctionInvocation>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+        pub r#type: DeclareTxnTraceType,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum ContractAbiEntry {
-        FunctionAbiEntry(FunctionAbiEntry),
-        EventAbiEntry(EventAbiEntry),
-        StructAbiEntry(StructAbiEntry),
+    pub enum PendingTxnReceipt {
+        PendingInvokeTxnReceipt(PendingInvokeTxnReceipt),
+        PendingL1HandlerTxnReceipt(PendingL1HandlerTxnReceipt),
+        PendingDeclareTxnReceipt(PendingDeclareTxnReceipt),
+        PendingDeployAccountTxnReceipt(PendingDeployAccountTxnReceipt),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV1 {
-        pub r#type: DeclareTxnV1Type,
+    pub struct SyncStatus {
+        pub starting_block_hash: BlockHash,
+        pub starting_block_num: BlockNumber,
+        pub current_block_hash: BlockHash,
+        pub current_block_num: BlockNumber,
+        pub highest_block_hash: BlockHash,
+        pub highest_block_num: BlockNumber,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResultPageRequest {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub continuation_token: Option<String>,
+        pub chunk_size: ResultPageRequestChunkSize,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeclareTxnV2 {
+        pub r#type: BroadcastedDeclareTxnV2Type,
         pub sender_address: Address,
+        pub compiled_class_hash: Felt,
         pub max_fee: Felt,
-        pub version: DeclareTxnV1Version,
+        pub version: BroadcastedDeclareTxnV2Version,
+        pub signature: Signature,
+        pub nonce: Felt,
+        pub contract_class: ContractClass,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FeeEstimate {
+        pub gas_consumed: Felt,
+        pub gas_price: Felt,
+        pub overall_fee: Felt,
+        pub unit: PriceUnit,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct StateDiff {
+        pub storage_diffs: Vec<ContractStorageDiffItem>,
+        pub deprecated_declared_classes: Vec<Felt>,
+        pub declared_classes: Vec<DeclaredClass>,
+        pub deployed_contracts: Vec<DeployedContractItem>,
+        pub replaced_classes: Vec<ReplacedClass>,
+        pub nonces: Vec<NonceUpdate>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockBodyWithTxHashes {
+        pub transactions: Vec<TxnHash>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV2 {
+        pub r#type: DeclareTxnV2Type,
+        pub sender_address: Address,
+        pub compiled_class_hash: Felt,
+        pub max_fee: Felt,
+        pub version: DeclareTxnV2Version,
         pub signature: Signature,
         pub nonce: Felt,
         pub class_hash: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeclareTxnV3 {
+        pub r#type: BroadcastedDeclareTxnV3Type,
+        pub sender_address: Address,
+        pub compiled_class_hash: Felt,
+        pub version: BroadcastedDeclareTxnV3Version,
+        pub signature: Signature,
+        pub nonce: Felt,
+        pub contract_class: ContractClass,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub tip: U64,
+        pub paymaster_data: Vec<Felt>,
+        pub account_deployment_data: Vec<Felt>,
+        pub nonce_data_availability_mode: DaMode,
+        pub fee_data_availability_mode: DaMode,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeprecatedCairoEntryPoint {
+        pub offset: NumAsHex,
+        pub selector: Felt,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1549,123 +1620,65 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum DeclareTxn {
-        DeclareTxnV0(DeclareTxnV0),
-        DeclareTxnV1(DeclareTxnV1),
-        DeclareTxnV2(DeclareTxnV2),
-        DeclareTxnV3(DeclareTxnV3),
+    pub struct DeployedContractItem {
+        pub address: Felt,
+        pub class_hash: Felt,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct L1HandlerTxn {
-        pub version: Felt,
-        pub r#type: L1HandlerTxnType,
-        pub nonce: NumAsHex,
+    pub struct DeployAccountTxnReceipt {
         #[serde(flatten)]
-        pub function_call: FunctionCall,
+        pub common_receipt_properties: CommonReceiptProperties,
+        pub r#type: DeployAccountTxnReceiptType,
+        pub contract_address: Felt,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingBlockWithTxs {
+    pub struct Address(pub Felt);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingInvokeTxnReceipt {
+        pub r#type: PendingInvokeTxnReceiptType,
         #[serde(flatten)]
-        pub block_body_with_txs: BlockBodyWithTxs,
-        #[serde(flatten)]
-        pub pending_block_header: PendingBlockHeader,
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct U128(String);
-
-    mod u128 {
-        use super::jsonrpc;
-        use super::U128;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static U128_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,31})$").unwrap()
-        });
-
-        impl U128 {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if U128_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "U128 value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for U128 {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for U128 {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FunctionAbiEntry {
-        pub r#type: FunctionAbiType,
-        pub name: String,
-        pub inputs: Vec<TypedParameter>,
-        pub outputs: Vec<TypedParameter>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub statemutability: Option<FunctionStateMutability>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnTrace {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub validate_invocation: Option<FunctionInvocation>,
-        pub constructor_invocation: FunctionInvocation,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub fee_transfer_invocation: Option<FunctionInvocation>,
+    pub struct L1HandlerTxnTrace {
+        pub function_invocation: FunctionInvocation,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub state_diff: Option<StateDiff>,
-        pub r#type: DeployAccountTxnTraceType,
+        pub r#type: L1HandlerTxnTraceType,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FeeEstimate {
-        pub gas_consumed: Felt,
-        pub gas_price: Felt,
-        pub overall_fee: Felt,
-        pub unit: PriceUnit,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeprecatedContractClass {
-        pub program: Program,
-        pub entry_points_by_type: EntryPoints,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub abi: Option<ContractAbi>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployTxnReceipt {
+    pub struct PendingDeployAccountTxnReceipt {
         #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-        pub r#type: DeployTxnReceiptType,
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+        pub r#type: PendingDeployAccountTxnReceiptType,
         pub contract_address: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FunctionCall {
+        pub contract_address: Address,
+        pub entry_point_selector: Felt,
+        pub calldata: Vec<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum TxnType {
+        #[serde(rename = "DECLARE")]
+        Declare,
+        #[serde(rename = "DEPLOY")]
+        Deploy,
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+        #[serde(rename = "INVOKE")]
+        Invoke,
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1711,178 +1724,12 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeprecatedCairoEntryPoint {
-        pub offset: NumAsHex,
-        pub selector: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct Address(pub Felt);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BlockStatus {
-        #[serde(rename = "PENDING")]
-        Pending,
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-        #[serde(rename = "ACCEPTED_ON_L1")]
-        AcceptedOnL1,
-        #[serde(rename = "REJECTED")]
-        Rejected,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResourceBounds {
-        pub max_amount: U64,
-        pub max_price_per_unit: U128,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ExecutionResources {
-        pub steps: i64,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub memory_holes: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub range_check_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub pedersen_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub poseidon_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub ec_op_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub ecdsa_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub bitwise_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub keccak_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub segment_arena_builtin: Option<i64>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct OrderedMessage {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub order: Option<i64>,
+    pub struct L1HandlerTxn {
+        pub version: Felt,
+        pub r#type: L1HandlerTxnType,
+        pub nonce: NumAsHex,
         #[serde(flatten)]
-        pub msg_to_l1: MsgToL1,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockBodyWithTxHashes {
-        pub transactions: Vec<TxnHash>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct ChainId(String);
-
-    mod chainid {
-        use super::jsonrpc;
-        use super::ChainId;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static CHAINID_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
-
-        impl ChainId {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if CHAINID_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "ChainId value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for ChainId {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for ChainId {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum PendingTxnReceipt {
-        PendingInvokeTxnReceipt(PendingInvokeTxnReceipt),
-        PendingL1HandlerTxnReceipt(PendingL1HandlerTxnReceipt),
-        PendingDeclareTxnReceipt(PendingDeclareTxnReceipt),
-        PendingDeployAccountTxnReceipt(PendingDeployAccountTxnReceipt),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ReplacedClass {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub contract_address: Option<Address>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub class_hash: Option<Felt>,
-    }
-
-    type ContractAbi = Vec<ContractAbiEntry>;
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EmittedEvent {
-        #[serde(flatten)]
-        pub event: Event,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub block_hash: Option<BlockHash>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub block_number: Option<BlockNumber>,
-        pub transaction_hash: TxnHash,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingBlockWithTxHashes {
-        #[serde(flatten)]
-        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
-        #[serde(flatten)]
-        pub pending_block_header: PendingBlockHeader,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StorageDiffItem {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub key: Option<Felt>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub value: Option<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum BroadcastedDeclareTxn {
-        BroadcastedDeclareTxnV1(BroadcastedDeclareTxnV1),
-        BroadcastedDeclareTxnV2(BroadcastedDeclareTxnV2),
-        BroadcastedDeclareTxnV3(BroadcastedDeclareTxnV3),
+        pub function_call: FunctionCall,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1902,24 +1749,56 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeployAccountTxn(pub DeployAccountTxn);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct NonceUpdate {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub contract_address: Option<Address>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub nonce: Option<Felt>,
+    pub struct DeclareTxnV1 {
+        pub r#type: DeclareTxnV1Type,
+        pub sender_address: Address,
+        pub max_fee: Felt,
+        pub version: DeclareTxnV1Version,
+        pub signature: Signature,
+        pub nonce: Felt,
+        pub class_hash: Felt,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct L1HandlerTxnReceipt {
-        pub r#type: L1HandlerTxnReceiptType,
-        pub message_hash: NumAsHex,
+    pub struct PendingBlockWithTxHashes {
         #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
+        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
+        #[serde(flatten)]
+        pub pending_block_header: PendingBlockHeader,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResourcePrice {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub price_in_fri: Option<Felt>,
+        pub price_in_wei: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventAbiEntry {
+        pub r#type: EventAbiType,
+        pub name: String,
+        pub keys: Vec<TypedParameter>,
+        pub data: Vec<TypedParameter>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclaredClass {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub class_hash: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub compiled_class_hash: Option<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum BlockId {
+        BlockHash { block_hash: BlockHash },
+        BlockNumber { block_number: BlockNumber },
+        BlockTag(BlockTag),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1932,166 +1811,25 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockWithTxHashes {
-        pub status: BlockStatus,
-        #[serde(flatten)]
-        pub block_header: BlockHeader,
-        #[serde(flatten)]
-        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployedContractItem {
-        pub address: Felt,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct NestedCall(pub FunctionInvocation);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-        #[serde(rename = "DEPLOY")]
-        Deploy,
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-        #[serde(rename = "INVOKE")]
-        Invoke,
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct Program(String);
-
-    mod program {
-        use super::jsonrpc;
-        use super::Program;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static PROGRAM_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").unwrap()
-        });
-
-        impl Program {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if PROGRAM_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "Program value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for Program {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for Program {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockBodyWithTxs {
-        pub transactions: Vec<TxnWithHash>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV0 {
-        pub r#type: DeclareTxnV0Type,
-        pub sender_address: Address,
+    pub struct DeployAccountTxnV1 {
+        pub r#type: DeployAccountTxnV1Type,
         pub max_fee: Felt,
-        pub version: DeclareTxnV0Version,
-        pub signature: Signature,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct U64(String);
-
-    mod u64 {
-        use super::jsonrpc;
-        use super::U64;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static U64_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,15})$").unwrap()
-        });
-
-        impl U64 {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if U64_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "U64 value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for U64 {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for U64 {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    type Signature = Vec<Felt>;
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StructAbiEntry {
-        pub r#type: StructAbiType,
-        pub name: String,
-        pub size: StructAbiEntrySize,
-        pub members: Vec<StructMember>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TxnHash(pub Felt);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeclareTxnV3 {
-        pub r#type: BroadcastedDeclareTxnV3Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub version: BroadcastedDeclareTxnV3Version,
+        pub version: DeployAccountTxnV1Version,
         pub signature: Signature,
         pub nonce: Felt,
-        pub contract_class: ContractClass,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub account_deployment_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
+        pub contract_address_salt: Felt,
+        pub constructor_calldata: Vec<Felt>,
+        pub class_hash: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum TxnReceipt {
+        InvokeTxnReceipt(InvokeTxnReceipt),
+        L1HandlerTxnReceipt(L1HandlerTxnReceipt),
+        DeclareTxnReceipt(DeclareTxnReceipt),
+        DeployTxnReceipt(DeployTxnReceipt),
+        DeployAccountTxnReceipt(DeployAccountTxnReceipt),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2143,224 +1881,18 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum Txn {
-        InvokeTxn(InvokeTxn),
-        L1HandlerTxn(L1HandlerTxn),
-        DeclareTxn(DeclareTxn),
-        DeployTxn(DeployTxn),
-        DeployAccountTxn(DeployAccountTxn),
+    pub enum BroadcastedDeclareTxn {
+        BroadcastedDeclareTxnV1(BroadcastedDeclareTxnV1),
+        BroadcastedDeclareTxnV2(BroadcastedDeclareTxnV2),
+        BroadcastedDeclareTxnV3(BroadcastedDeclareTxnV3),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnStatus {
-        #[serde(rename = "RECEIVED")]
-        Received,
-        #[serde(rename = "REJECTED")]
-        Rejected,
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-        #[serde(rename = "ACCEPTED_ON_L1")]
-        AcceptedOnL1,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum StructAbiType {
-        #[serde(rename = "struct")]
-        Struct,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum InvokeTxn {
-        InvokeTxnV0(InvokeTxnV0),
-        InvokeTxnV1(InvokeTxnV1),
-        InvokeTxnV3(InvokeTxnV3),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FunctionCall {
-        pub contract_address: Address,
-        pub entry_point_selector: Felt,
-        pub calldata: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockWithTxs {
-        pub status: BlockStatus,
-        #[serde(flatten)]
-        pub block_header: BlockHeader,
-        #[serde(flatten)]
-        pub block_body_with_txs: BlockBodyWithTxs,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ContractClass {
-        pub sierra_program: Vec<Felt>,
-        pub contract_class_version: String,
-        pub entry_points_by_type: ContractClassEntryPointsByType,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub abi: Option<String>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PriceUnit {
-        #[serde(rename = "WEI")]
-        Wei,
-        #[serde(rename = "FRI")]
-        Fri,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnReceipt {
-        pub r#type: InvokeTxnReceiptType,
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StructMember {
-        #[serde(flatten)]
-        pub typed_parameter: TypedParameter,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub offset: Option<i64>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct MsgToL1 {
-        pub from_address: Felt,
-        pub to_address: Felt,
-        pub payload: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResourceBoundsMapping {
-        pub l1_gas: ResourceBounds,
-        pub l2_gas: ResourceBounds,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnReceipt {
-        pub r#type: DeclareTxnReceiptType,
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TxnWithHash {
-        #[serde(flatten)]
-        pub txn: Txn,
-        pub transaction_hash: TxnHash,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV3 {
-        pub r#type: DeclareTxnV3Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub version: DeclareTxnV3Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub class_hash: Felt,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub account_deployment_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingInvokeTxnReceipt {
-        pub r#type: PendingInvokeTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum EventAbiType {
-        #[serde(rename = "event")]
-        Event,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct MsgFromL1 {
-        pub from_address: EthAddress,
-        pub to_address: Address,
-        pub entry_point_selector: Felt,
-        pub payload: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EntryPoints {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct SyncStatus {
-        pub starting_block_hash: BlockHash,
-        pub starting_block_num: BlockNumber,
-        pub current_block_hash: BlockHash,
-        pub current_block_num: BlockNumber,
-        pub highest_block_hash: BlockHash,
-        pub highest_block_num: BlockNumber,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV2 {
-        pub r#type: DeclareTxnV2Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub max_fee: Felt,
-        pub version: DeclareTxnV2Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FeePayment {
-        pub amount: Felt,
-        pub unit: PriceUnit,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResultPageRequest {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub continuation_token: Option<String>,
-        pub chunk_size: ResultPageRequestChunkSize,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeclareTxnV2 {
-        pub r#type: BroadcastedDeclareTxnV2Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub max_fee: Felt,
-        pub version: BroadcastedDeclareTxnV2Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub contract_class: ContractClass,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum FunctionAbiType {
-        #[serde(rename = "function")]
-        Function,
-        #[serde(rename = "l1_handler")]
-        L1Handler,
-        #[serde(rename = "constructor")]
-        Constructor,
+    pub struct StateUpdate {
+        pub block_hash: BlockHash,
+        pub old_root: Felt,
+        pub new_root: Felt,
+        pub state_diff: StateDiff,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2378,78 +1910,68 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum SimulationFlagForEstimateFee {
-        #[serde(rename = "SKIP_VALIDATE")]
-        SkipValidate,
+    pub struct PendingStateUpdate {
+        pub old_root: Felt,
+        pub state_diff: StateDiff,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TypedParameter {
-        pub name: String,
-        pub r#type: String,
+    pub struct StructMember {
+        #[serde(flatten)]
+        pub typed_parameter: TypedParameter,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub offset: Option<i64>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnV0 {
-        pub r#type: InvokeTxnV0Type,
-        pub max_fee: Felt,
-        pub version: InvokeTxnV0Version,
-        pub signature: Signature,
-        pub contract_address: Address,
-        pub entry_point_selector: Felt,
+    pub enum PriceUnit {
+        #[serde(rename = "WEI")]
+        Wei,
+        #[serde(rename = "FRI")]
+        Fri,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnV3 {
+        pub r#type: InvokeTxnV3Type,
+        pub sender_address: Address,
         pub calldata: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum TransactionTrace {
-        InvokeTxnTrace(InvokeTxnTrace),
-        DeclareTxnTrace(DeclareTxnTrace),
-        DeployAccountTxnTrace(DeployAccountTxnTrace),
-        L1HandlerTxnTrace(L1HandlerTxnTrace),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnTrace {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub validate_invocation: Option<FunctionInvocation>,
-        pub execute_invocation: InvokeTxnTraceExecuteInvocation,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub fee_transfer_invocation: Option<FunctionInvocation>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: InvokeTxnTraceType,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResourcePrice {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub price_in_fri: Option<Felt>,
-        pub price_in_wei: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnV1 {
-        pub r#type: DeployAccountTxnV1Type,
-        pub max_fee: Felt,
-        pub version: DeployAccountTxnV1Version,
+        pub version: InvokeTxnV3Version,
         pub signature: Signature,
         pub nonce: Felt,
-        pub contract_address_salt: Felt,
-        pub constructor_calldata: Vec<Felt>,
-        pub class_hash: Felt,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub tip: U64,
+        pub paymaster_data: Vec<Felt>,
+        pub account_deployment_data: Vec<Felt>,
+        pub nonce_data_availability_mode: DaMode,
+        pub fee_data_availability_mode: DaMode,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum BroadcastedTxn {
-        BroadcastedInvokeTxn(BroadcastedInvokeTxn),
-        BroadcastedDeclareTxn(BroadcastedDeclareTxn),
-        BroadcastedDeployAccountTxn(BroadcastedDeployAccountTxn),
+    pub enum FunctionAbiType {
+        #[serde(rename = "function")]
+        Function,
+        #[serde(rename = "l1_handler")]
+        L1Handler,
+        #[serde(rename = "constructor")]
+        Constructor,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum EntryPointType {
+        #[serde(rename = "EXTERNAL")]
+        External,
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+        #[serde(rename = "CONSTRUCTOR")]
+        Constructor,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventContent {
+        pub keys: Vec<Felt>,
+        pub data: Vec<Felt>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2464,184 +1986,38 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DaMode {
-        #[serde(rename = "L1")]
-        L1,
-        #[serde(rename = "L2")]
-        L2,
+    pub struct StructAbiEntry {
+        pub r#type: StructAbiType,
+        pub name: String,
+        pub size: StructAbiEntrySize,
+        pub members: Vec<StructMember>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingDeclareTxnReceipt {
-        pub r#type: PendingDeclareTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+    pub struct InvokeTxnV0 {
+        pub r#type: InvokeTxnV0Type,
+        pub max_fee: Felt,
+        pub version: InvokeTxnV0Version,
+        pub signature: Signature,
+        pub contract_address: Address,
+        pub entry_point_selector: Felt,
+        pub calldata: Vec<Felt>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingDeployAccountTxnReceipt {
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-        pub r#type: PendingDeployAccountTxnReceiptType,
-        pub contract_address: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnFinalityStatus {
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-        #[serde(rename = "ACCEPTED_ON_L1")]
-        AcceptedOnL1,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct L1HandlerTxnTrace {
-        pub function_invocation: FunctionInvocation,
+    pub struct DeprecatedContractClass {
+        pub program: Program,
+        pub entry_points_by_type: EntryPoints,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: L1HandlerTxnTraceType,
+        pub abi: Option<ContractAbi>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnReceipt {
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-        pub r#type: DeployAccountTxnReceiptType,
-        pub contract_address: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct StorageKey(String);
-
-    mod storagekey {
-        use super::jsonrpc;
-        use super::StorageKey;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static STORAGEKEY_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x0[0-7]{1}[a-fA-F0-9]{0,62}$").unwrap());
-
-        impl StorageKey {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if STORAGEKEY_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "StorageKey value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for StorageKey {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for StorageKey {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedInvokeTxn(pub InvokeTxn);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum EntryPointType {
-        #[serde(rename = "EXTERNAL")]
-        External,
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-        #[serde(rename = "CONSTRUCTOR")]
-        Constructor,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct Event(pub EventContent);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventsChunk {
-        pub events: Vec<EmittedEvent>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub continuation_token: Option<String>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StateUpdate {
-        pub block_hash: BlockHash,
-        pub old_root: Felt,
-        pub new_root: Felt,
-        pub state_diff: StateDiff,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventContent {
-        pub keys: Vec<Felt>,
-        pub data: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BlockTag {
-        #[serde(rename = "latest")]
-        Latest,
-        #[serde(rename = "pending")]
-        Pending,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockHeader {
-        pub block_hash: BlockHash,
-        pub parent_hash: BlockHash,
-        pub block_number: BlockNumber,
-        pub new_root: Felt,
-        pub timestamp: BlockHeaderTimestamp,
-        pub sequencer_address: Felt,
-        pub l1_gas_price: ResourcePrice,
-        pub starknet_version: String,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum SimulationFlag {
-        #[serde(rename = "SKIP_VALIDATE")]
-        SkipValidate,
-        #[serde(rename = "SKIP_FEE_CHARGE")]
-        SkipFeeCharge,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployTxn {
-        pub version: Felt,
-        pub r#type: DeployTxnType,
-        pub contract_address_salt: Felt,
-        pub constructor_calldata: Vec<Felt>,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclaredClass {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub class_hash: Option<Felt>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub compiled_class_hash: Option<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingStateUpdate {
-        pub old_root: Felt,
-        pub state_diff: StateDiff,
+    #[serde(untagged)]
+    pub enum DeployAccountTxn {
+        DeployAccountTxnV1(DeployAccountTxnV1),
+        DeployAccountTxnV3(DeployAccountTxnV3),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2661,38 +2037,35 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ContractStorageDiffItem {
-        pub address: Felt,
-        pub storage_entries: Vec<StorageDiffItem>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnExecutionStatus {
-        #[serde(rename = "SUCCEEDED")]
-        Succeeded,
-        #[serde(rename = "REVERTED")]
-        Reverted,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum DeployAccountTxn {
-        DeployAccountTxnV1(DeployAccountTxnV1),
-        DeployAccountTxnV3(DeployAccountTxnV3),
+    pub enum TransactionTrace {
+        InvokeTxnTrace(InvokeTxnTrace),
+        DeclareTxnTrace(DeclareTxnTrace),
+        DeployAccountTxnTrace(DeployAccountTxnTrace),
+        L1HandlerTxnTrace(L1HandlerTxnTrace),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct SierraEntryPoint {
-        pub selector: Felt,
-        pub function_idx: i64,
+    pub struct FunctionInvocation {
+        #[serde(flatten)]
+        pub function_call: FunctionCall,
+        pub caller_address: Felt,
+        pub class_hash: Felt,
+        pub entry_point_type: EntryPointType,
+        pub call_type: CallType,
+        pub result: Vec<Felt>,
+        pub calls: Vec<NestedCall>,
+        pub events: Vec<OrderedEvent>,
+        pub messages: Vec<OrderedMessage>,
+        pub execution_resources: ExecutionResources,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventAbiEntry {
-        pub r#type: EventAbiType,
-        pub name: String,
-        pub keys: Vec<TypedParameter>,
-        pub data: Vec<TypedParameter>,
+    pub struct DeployTxnReceipt {
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+        pub r#type: DeployTxnReceiptType,
+        pub contract_address: Felt,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2704,19 +2077,238 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnV3 {
-        pub r#type: InvokeTxnV3Type,
+    pub struct OrderedMessage {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub order: Option<i64>,
+        #[serde(flatten)]
+        pub msg_to_l1: MsgToL1,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct StorageDiffItem {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub key: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub value: Option<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV0 {
+        pub r#type: DeclareTxnV0Type,
         pub sender_address: Address,
-        pub calldata: Vec<Felt>,
-        pub version: InvokeTxnV3Version,
+        pub max_fee: Felt,
+        pub version: DeclareTxnV0Version,
         pub signature: Signature,
-        pub nonce: Felt,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub account_deployment_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
+        pub class_hash: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum TxnExecutionStatus {
+        #[serde(rename = "SUCCEEDED")]
+        Succeeded,
+        #[serde(rename = "REVERTED")]
+        Reverted,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResourceBoundsMapping {
+        pub l1_gas: ResourceBounds,
+        pub l2_gas: ResourceBounds,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BlockTag {
+        #[serde(rename = "latest")]
+        Latest,
+        #[serde(rename = "pending")]
+        Pending,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct ChainId(String);
+
+    mod chainid {
+        use super::jsonrpc;
+        use super::ChainId;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static CHAINID_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+
+        impl ChainId {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if CHAINID_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "ChainId value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for ChainId {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for ChainId {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum SimulationFlag {
+        #[serde(rename = "SKIP_VALIDATE")]
+        SkipValidate,
+        #[serde(rename = "SKIP_FEE_CHARGE")]
+        SkipFeeCharge,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TxnWithHash {
+        #[serde(flatten)]
+        pub txn: Txn,
+        pub transaction_hash: TxnHash,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingDeclareTxnReceipt {
+        pub r#type: PendingDeclareTxnReceiptType,
+        #[serde(flatten)]
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ContractClass {
+        pub sierra_program: Vec<Felt>,
+        pub contract_class_version: String,
+        pub entry_points_by_type: ContractClassEntryPointsByType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub abi: Option<String>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FunctionAbiEntry {
+        pub r#type: FunctionAbiType,
+        pub name: String,
+        pub inputs: Vec<TypedParameter>,
+        pub outputs: Vec<TypedParameter>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub statemutability: Option<FunctionStateMutability>,
+    }
+
+    type Signature = Vec<Felt>;
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EmittedEvent {
+        #[serde(flatten)]
+        pub event: Event,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub block_hash: Option<BlockHash>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub block_number: Option<BlockNumber>,
+        pub transaction_hash: TxnHash,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BlockStatus {
+        #[serde(rename = "PENDING")]
+        Pending,
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+        #[serde(rename = "ACCEPTED_ON_L1")]
+        AcceptedOnL1,
+        #[serde(rename = "REJECTED")]
+        Rejected,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum EventAbiType {
+        #[serde(rename = "event")]
+        Event,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct U128(String);
+
+    mod u128 {
+        use super::jsonrpc;
+        use super::U128;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static U128_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,31})$").unwrap()
+        });
+
+        impl U128 {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if U128_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "U128 value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for U128 {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for U128 {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedInvokeTxn(pub InvokeTxn);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct MsgToL1 {
+        pub from_address: Felt,
+        pub to_address: Felt,
+        pub payload: Vec<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ContractStorageDiffItem {
+        pub address: Felt,
+        pub storage_entries: Vec<StorageDiffItem>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnReceipt {
+        pub r#type: InvokeTxnReceiptType,
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2763,13 +2355,108 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockHash(pub Felt);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ReplacedClass {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub contract_address: Option<Address>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub class_hash: Option<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum TxnReceipt {
-        InvokeTxnReceipt(InvokeTxnReceipt),
-        L1HandlerTxnReceipt(L1HandlerTxnReceipt),
-        DeclareTxnReceipt(DeclareTxnReceipt),
-        DeployTxnReceipt(DeployTxnReceipt),
-        DeployAccountTxnReceipt(DeployAccountTxnReceipt),
+    pub enum Txn {
+        InvokeTxn(InvokeTxn),
+        L1HandlerTxn(L1HandlerTxn),
+        DeclareTxn(DeclareTxn),
+        DeployTxn(DeployTxn),
+        DeployAccountTxn(DeployAccountTxn),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnReceipt {
+        pub r#type: DeclareTxnReceiptType,
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct U64(String);
+
+    mod u64 {
+        use super::jsonrpc;
+        use super::U64;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static U64_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,15})$").unwrap()
+        });
+
+        impl U64 {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if U64_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "U64 value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for U64 {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for U64 {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnTrace {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub validate_invocation: Option<FunctionInvocation>,
+        pub execute_invocation: InvokeTxnTraceExecuteInvocation,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+        pub r#type: InvokeTxnTraceType,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum ContractAbiEntry {
+        FunctionAbiEntry(FunctionAbiEntry),
+        EventAbiEntry(EventAbiEntry),
+        StructAbiEntry(StructAbiEntry),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployTxn {
+        pub version: Felt,
+        pub r#type: DeployTxnType,
+        pub contract_address_salt: Felt,
+        pub constructor_calldata: Vec<Felt>,
+        pub class_hash: Felt,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2782,35 +2469,154 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum CallType {
-        #[serde(rename = "LIBRARY_CALL")]
-        LibraryCall,
-        #[serde(rename = "CALL")]
-        Call,
-        #[serde(rename = "DELEGATE")]
-        Delegate,
+    #[serde(try_from = "String")]
+    pub struct NumAsHex(String);
+
+    mod numashex {
+        use super::jsonrpc;
+        use super::NumAsHex;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static NUMASHEX_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+
+        impl NumAsHex {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if NUMASHEX_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "NumAsHex value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for NumAsHex {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for NumAsHex {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum BlockId {
-        BlockHash { block_hash: BlockHash },
-        BlockNumber { block_number: BlockNumber },
-        BlockTag(BlockTag),
+    pub enum SimulationFlagForEstimateFee {
+        #[serde(rename = "SKIP_VALIDATE")]
+        SkipValidate,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnTrace {
+    pub struct NonceUpdate {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub validate_invocation: Option<FunctionInvocation>,
+        pub contract_address: Option<Address>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub fee_transfer_invocation: Option<FunctionInvocation>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: DeclareTxnTraceType,
+        pub nonce: Option<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResourceBounds {
+        pub max_amount: U64,
+        pub max_price_per_unit: U128,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockHeader {
+        pub block_hash: BlockHash,
+        pub parent_hash: BlockHash,
+        pub block_number: BlockNumber,
+        pub new_root: Felt,
+        pub timestamp: BlockHeaderTimestamp,
+        pub sequencer_address: Felt,
+        pub l1_gas_price: ResourcePrice,
+        pub starknet_version: String,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DaMode {
+        #[serde(rename = "L1")]
+        L1,
+        #[serde(rename = "L2")]
+        L2,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct MsgFromL1 {
+        pub from_address: EthAddress,
+        pub to_address: Address,
+        pub entry_point_selector: Felt,
+        pub payload: Vec<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockBodyWithTxs {
+        pub transactions: Vec<TxnWithHash>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockWithTxs {
+        pub status: BlockStatus,
+        #[serde(flatten)]
+        pub block_header: BlockHeader,
+        #[serde(flatten)]
+        pub block_body_with_txs: BlockBodyWithTxs,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct NestedCall(pub FunctionInvocation);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct StorageKey(String);
+
+    mod storagekey {
+        use super::jsonrpc;
+        use super::StorageKey;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static STORAGEKEY_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x0[0-7]{1}[a-fA-F0-9]{0,62}$").unwrap());
+
+        impl StorageKey {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if STORAGEKEY_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "StorageKey value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for StorageKey {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for StorageKey {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2825,16 +2631,15 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockHash(pub Felt);
+    pub enum StructAbiType {
+        #[serde(rename = "struct")]
+        Struct,
+    }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StateDiff {
-        pub storage_diffs: Vec<ContractStorageDiffItem>,
-        pub deprecated_declared_classes: Vec<Felt>,
-        pub declared_classes: Vec<DeclaredClass>,
-        pub deployed_contracts: Vec<DeployedContractItem>,
-        pub replaced_classes: Vec<ReplacedClass>,
-        pub nonces: Vec<NonceUpdate>,
+    pub struct FeePayment {
+        pub amount: Felt,
+        pub unit: PriceUnit,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2844,18 +2649,213 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FunctionInvocation {
+    #[serde(try_from = "String")]
+    pub struct Program(String);
+
+    mod program {
+        use super::jsonrpc;
+        use super::Program;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static PROGRAM_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").unwrap()
+        });
+
+        impl Program {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if PROGRAM_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "Program value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for Program {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for Program {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ExecutionResources {
+        pub steps: i64,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub memory_holes: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub range_check_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub pedersen_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub poseidon_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub ec_op_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub ecdsa_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub bitwise_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub keccak_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub segment_arena_builtin: Option<i64>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct Event(pub EventContent);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct L1HandlerTxnReceipt {
+        pub r#type: L1HandlerTxnReceiptType,
+        pub message_hash: NumAsHex,
         #[serde(flatten)]
-        pub function_call: FunctionCall,
-        pub caller_address: Felt,
+        pub common_receipt_properties: CommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockWithTxHashes {
+        pub status: BlockStatus,
+        #[serde(flatten)]
+        pub block_header: BlockHeader,
+        #[serde(flatten)]
+        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum TxnStatus {
+        #[serde(rename = "RECEIVED")]
+        Received,
+        #[serde(rename = "REJECTED")]
+        Rejected,
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+        #[serde(rename = "ACCEPTED_ON_L1")]
+        AcceptedOnL1,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployAccountTxnTrace {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub validate_invocation: Option<FunctionInvocation>,
+        pub constructor_invocation: FunctionInvocation,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+        pub r#type: DeployAccountTxnTraceType,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum CallType {
+        #[serde(rename = "LIBRARY_CALL")]
+        LibraryCall,
+        #[serde(rename = "CALL")]
+        Call,
+        #[serde(rename = "DELEGATE")]
+        Delegate,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingBlockWithTxs {
+        #[serde(flatten)]
+        pub block_body_with_txs: BlockBodyWithTxs,
+        #[serde(flatten)]
+        pub pending_block_header: PendingBlockHeader,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum TxnFinalityStatus {
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+        #[serde(rename = "ACCEPTED_ON_L1")]
+        AcceptedOnL1,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV3 {
+        pub r#type: DeclareTxnV3Type,
+        pub sender_address: Address,
+        pub compiled_class_hash: Felt,
+        pub version: DeclareTxnV3Version,
+        pub signature: Signature,
+        pub nonce: Felt,
         pub class_hash: Felt,
-        pub entry_point_type: EntryPointType,
-        pub call_type: CallType,
-        pub result: Vec<Felt>,
-        pub calls: Vec<NestedCall>,
-        pub events: Vec<OrderedEvent>,
-        pub messages: Vec<OrderedMessage>,
-        pub execution_resources: ExecutionResources,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub tip: U64,
+        pub paymaster_data: Vec<Felt>,
+        pub account_deployment_data: Vec<Felt>,
+        pub nonce_data_availability_mode: DaMode,
+        pub fee_data_availability_mode: DaMode,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum DeclareTxn {
+        DeclareTxnV0(DeclareTxnV0),
+        DeclareTxnV1(DeclareTxnV1),
+        DeclareTxnV2(DeclareTxnV2),
+        DeclareTxnV3(DeclareTxnV3),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeployAccountTxn(pub DeployAccountTxn);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum InvokeTxn {
+        InvokeTxnV0(InvokeTxnV0),
+        InvokeTxnV1(InvokeTxnV1),
+        InvokeTxnV3(InvokeTxnV3),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum BroadcastedTxn {
+        BroadcastedInvokeTxn(BroadcastedInvokeTxn),
+        BroadcastedDeclareTxn(BroadcastedDeclareTxn),
+        BroadcastedDeployAccountTxn(BroadcastedDeployAccountTxn),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct SierraEntryPoint {
+        pub selector: Felt,
+        pub function_idx: i64,
+    }
+
+    type ContractAbi = Vec<ContractAbiEntry>;
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TxnHash(pub Felt);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TypedParameter {
+        pub name: String,
+        pub r#type: String,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
