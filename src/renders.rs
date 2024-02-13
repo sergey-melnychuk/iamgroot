@@ -514,7 +514,7 @@ fn `method_name`(
             format!("Invalid params: {e}."),
         ))?;
     let req = jsonrpc::Request::new(
-            "`method_name`".to_string(), 
+            "`full_method_name`".to_string(), 
             params,
         )
         .with_id(jsonrpc::Id::Number(1));
@@ -562,7 +562,7 @@ fn `method_name`(
 const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
 fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
     let req = jsonrpc::Request::new(
-        "`method_name`".to_string(),
+        "`full_method_name`".to_string(),
         serde_json::Value::Array(vec![]),
     )
     .with_id(jsonrpc::Id::Number(1));
@@ -615,6 +615,7 @@ pub fn render_client_method(method: &codegen::Method) -> String {
 
     if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
+            .replace("`full_method_name`", &method.name)
             .replace("`method_name`", &unprefix(&method.name))
             .replace("`result_type`", &return_type);
     }
@@ -636,6 +637,7 @@ pub fn render_client_method(method: &codegen::Method) -> String {
     CLIENT_METHOD_REQWEST_BLOCKING
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
+        .replace("`full_method_name`", &method.name)
         .replace("`method_name`", &unprefix(&method.name))
         .replace("`result_type`", &return_type)
 }
