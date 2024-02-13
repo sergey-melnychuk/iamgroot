@@ -165,13 +165,11 @@ fn bind_all_of(
                 let type_name = normalize(name);
                 let ty = Type::Named(type_name);
                 let prop_name = get_prop_name(name);
-
-                // TODO: mark for flattening with serde?
-                eprintln!("marked for flattening prop={prop_name}");
-
+                // eprintln!("marked for flattening prop={prop_name}");
                 vec![Property {
                     name: prop_name,
                     r#type: ty,
+                    flatten: true,
                 }]
             }
             SchemaOrRef::Schema(schema) => {
@@ -205,6 +203,7 @@ fn bind_one_of(
                     properties: vec![Property {
                         name: Default::default(),
                         r#type: ty,
+                        flatten: false,
                     }],
                 })
             }
@@ -410,7 +409,11 @@ fn bind_prop(
             Type::Named(type_name)
         }
     };
-    Some(Property { name, r#type })
+    Some(Property {
+        name,
+        r#type,
+        flatten: false,
+    })
 }
 
 pub fn bind_object(

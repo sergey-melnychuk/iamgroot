@@ -32,6 +32,7 @@ pub enum Visibility {
 pub struct Property {
     pub name: String,
     pub r#type: Type,
+    pub flatten: bool,
 }
 
 impl Property {
@@ -39,6 +40,7 @@ impl Property {
         Self {
             name: Default::default(),
             r#type,
+            flatten: false,
         }
     }
 }

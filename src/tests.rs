@@ -34,6 +34,7 @@ fn test_simple_felt() {
                     "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$".to_owned(),
                 )],
             ),
+            flatten: false,
         }],
     };
 
@@ -61,6 +62,7 @@ fn test_simple_int() {
         properties: vec![Property {
             name: Default::default(),
             r#type: Type::Primitive(Primitive::Integer, vec![Rule::Min(0)]),
+            flatten: false,
         }],
     };
 
@@ -93,6 +95,7 @@ fn test_wrapped_felt() {
         properties: vec![Property {
             name: Default::default(),
             r#type: Type::Named("Felt".to_owned()),
+            flatten: false,
         }],
     };
 
@@ -176,10 +179,12 @@ fn test_simple_object() {
             Property {
                 name: "data".to_owned(),
                 r#type: Type::Array(Box::new(Type::Named("Felt".to_owned()))),
+                flatten: false,
             },
             Property {
                 name: "keys".to_owned(),
                 r#type: Type::Array(Box::new(Type::Named("Felt".to_owned()))),
+                flatten: false,
             },
         ],
     };
@@ -363,6 +368,7 @@ fn test_one_of() {
                 properties: vec![Property {
                     name: "block_hash".to_owned(),
                     r#type: Type::Named("BlockHash".to_owned()),
+                    flatten: false,
                 }],
             }),
             Variant::Struct(Struct {
@@ -370,6 +376,7 @@ fn test_one_of() {
                 properties: vec![Property {
                     name: "block_number".to_owned(),
                     r#type: Type::Named("BlockNumber".to_owned()),
+                    flatten: false,
                 }],
             }),
             Variant::Struct(Struct {
@@ -377,6 +384,7 @@ fn test_one_of() {
                 properties: vec![Property {
                     name: "".to_owned(),
                     r#type: Type::Named("BlockTag".to_owned()),
+                    flatten: false,
                 }],
             }),
         ],
@@ -403,24 +411,28 @@ fn test_nested_array() {
                 r#type: Type::Option(Box::new(Type::Named(
                     "Address".to_owned(),
                 ))),
+                flatten: false,
             },
             Property {
                 name: "from_block".to_owned(),
                 r#type: Type::Option(Box::new(Type::Named(
                     "BlockId".to_owned(),
                 ))),
+                flatten: false,
             },
             Property {
                 name: "keys".to_owned(),
                 r#type: Type::Option(Box::new(Type::Array(Box::new(
                     Type::Array(Box::new(Type::Named("Felt".to_owned()))),
                 )))),
+                flatten: false,
             },
             Property {
                 name: "to_block".to_owned(),
                 r#type: Type::Option(Box::new(Type::Named(
                     "BlockId".to_owned(),
                 ))),
+                flatten: false,
             },
         ],
     });
@@ -527,6 +539,7 @@ fn test_all_of() {
             r#type: Type::Array(Box::new(Type::Named(
                 "TxnWithHash".to_owned(),
             ))),
+            flatten: false,
         }],
     });
     assert_eq!(
@@ -540,10 +553,12 @@ fn test_all_of() {
             Property {
                 name: "txn".to_owned(),
                 r#type: Type::Named("Txn".to_owned()),
+                flatten: true,
             },
             Property {
                 name: "transaction_hash".to_owned(),
                 r#type: Type::Named("TxnHash".to_owned()),
+                flatten: false,
             },
         ],
     });
