@@ -62,6 +62,7 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
     static HEADER: &str = "#[derive(Clone, Debug, Deserialize, Serialize)]";
     static OPTION: &str =
         "    #[serde(skip_serializing_if = \"Option::is_none\")]\n    #[serde(default)]";
+    static FLATTEN: &str = "#[serde(flatten)]";
 
     let mut lines: Vec<String> = Vec::new();
     // lines.push(format!("/*\nDEBUG:\n{:#?}\n*/", object));
@@ -153,6 +154,9 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
                     } else {
                         if p.name.is_empty() {
                             panic!("struct {} has nameless property", s.name);
+                        }
+                        if p.flatten {
+                            lines.push(FLATTEN.to_owned());
                         }
                         lines.push(format!("    pub {}: {},", p.name, ty));
                     }

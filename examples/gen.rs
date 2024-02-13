@@ -12,7 +12,9 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getBlockWithTxHashes",
             "params": {
-                "block_id": {"block_hash": "0xFACE"}
+                "block_id": {
+                    "block_hash": "0xFACE"
+                }
             }
         }),
     );
@@ -24,7 +26,9 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getBlockWithTxs",
             "params": {
-                "block_id": {"block_number": 123456}
+                "block_id": {
+                    "block_number": 123456
+                }
             }
         }),
     );
@@ -50,7 +54,9 @@ fn main() {
             "params": {
                 "contract_address": "0x1",
                 "key": "0x02",
-                "block_id": {"block_number": 42},
+                "block_id": {
+                    "block_number": 42
+                },
             }
         }),
     );
@@ -86,7 +92,9 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getTransactionByBlockIdAndIndex",
             "params": {
-                "block_id": {"block_number": 42},
+                "block_id": {
+                    "block_number": 42
+                },
                 "index": 24
             }
         }),
@@ -111,7 +119,9 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getClass",
             "params": {
-                "block_id": {"block_number": 1},
+                "block_id": {
+                    "block_number": 1
+                },
                 "class_hash": "0x1"
             }
         }),
@@ -124,7 +134,9 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_getClassAt",
             "params": {
-                "block_id": {"block_number": 42},
+                "block_id": {
+                    "block_number": 42
+                },
                 "contract_address": "0xFF"
             }
         }),
@@ -167,7 +179,9 @@ fn main() {
                     "calldata": ["0x2"],
                     "contract_address": "0x3"
                 },
-                {"block_number": 42}
+                {
+                    "block_number": 42
+                }
             ]
         }),
     );
@@ -195,7 +209,9 @@ fn main() {
                     "type": "INVOKE"
                 }],
                 "simulation_flags": [],
-                "block_id": {"block_number": 1}
+                "block_id": {
+                    "block_number": 1
+                }
             },
         }),
     );
@@ -207,25 +223,29 @@ fn main() {
             "jsonrpc": "2.0",
             "method": "starknet_estimateFee",
             "params": {
-                "request": [{
-                    "nonce": "0x01",
-                    "version": "0x0",
-                    "max_fee": "0x3",
-                    "signature": [
-                        "0x4",
-                        "0x5"
-                    ],
-                    "sender_address": "0xA",
-                    "calldata": [
-                        "0xB",
-                        "0xC"
-                    ],
-                    "entry_point_selector": "0x8",
-                    "contract_address": "0x9",
-                    "type": "INVOKE"
-                }],
+                "request": [
+                    {
+                        "nonce": "0x01",
+                        "version": "0x0",
+                        "max_fee": "0x3",
+                        "signature": [
+                            "0x4",
+                            "0x5"
+                        ],
+                        "sender_address": "0xA",
+                        "calldata": [
+                            "0xB",
+                            "0xC"
+                        ],
+                        "entry_point_selector": "0x8",
+                        "contract_address": "0x9",
+                        "type": "INVOKE"
+                    }
+                ],
                 "simulation_flags": [],
-                "block_id": {"block_number": 1}
+                "block_id": {
+                    "block_number": 1
+                }
             },
         }),
     );
@@ -274,19 +294,15 @@ fn main() {
             "method": "starknet_getEvents",
             "params": {
                 "filter": {
-                    "event_filter": {
-                        "to_block": {"block_number": 200},
-                        "from_block": {"block_number": 100},
-                        "address": "0xA",
-                        "keys": [
-                            ["0x1", "0x2"],
-                            ["0x3", "0x4"]
-                        ]
-                    },
-                    "result_page_request": {
-                        "continuation_token": "req-token-0",
-                        "chunk_size": 42
-                    }
+                    "to_block": {"block_number": 200},
+                    "from_block": {"block_number": 100},
+                    "address": "0xA",
+                    "keys": [
+                        ["0x1", "0x2"],
+                        ["0x3", "0x4"]
+                    ],
+                    "continuation_token": "req-token-0",
+                    "chunk_size": 42
                 }
             }
         }),
@@ -305,7 +321,6 @@ fn main() {
         }),
     );
 
-    // TODO: "invalid params"
     call(
         &state,
         201,
@@ -315,7 +330,7 @@ fn main() {
             "params": {
                 "invoke_transaction": {
                     "max_fee": "0x1",
-                    "version": "0x2",
+                    "version": "0x0",
                     "nonce": "0x3",
                     "signature": [
                         "0x4"
@@ -332,7 +347,6 @@ fn main() {
         }),
     );
 
-    // TODO: "invalid params"
     call(
         &state,
         202,
@@ -342,7 +356,7 @@ fn main() {
             "params": {
                 "invoke_transaction": {
                     "max_fee": "0x1",
-                    "version": "0x2",
+                    "version": "0x1",
                     "nonce": "0x3",
                     "signature": [
                         "0x4"
@@ -358,7 +372,6 @@ fn main() {
         }),
     );
 
-    // TODO: "invalid params"
     call(
         &state,
         21,
@@ -381,7 +394,7 @@ fn main() {
                             "external": [],
                             "l1_handler": []
                         },
-                        "program": "just-some-string"
+                        "program": "CAFEBABE"
                     },
                     "sender_address": "0xA"
                 }
