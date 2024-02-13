@@ -21,9 +21,9 @@ pub fn bind_method(
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
         object => {
+            // anonymous object definition
             let name = format!("{}Result", capitalize(&name));
             let object = object.with_name(name.clone());
-            // println!("/*\nanonymous object detected (ret): {object:#?}\n*/");
             objects.push(object);
             Type::Named(name)
         }
@@ -54,10 +54,10 @@ fn bind_param(
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
         object => {
+            // anonymous object definition
             let name = capitalize(&name);
             let name = format!("{}{name}", capitalize(&unprefix(method_name)));
             let object = object.with_name(name.clone());
-            // println!("/*\nanonymous object detected (param): {object:#?}\n*/",);
             objects.push(object);
             Type::Named(name)
         }
@@ -362,9 +362,9 @@ fn bind_type(
                         Object::Type(ty) => ty,
                         Object::Alias(name, _) => Type::Named(name),
                         object => {
+                            // anonymous object definition
                             let name = schema.title.clone().unwrap_or_default();
                             let object = object.with_name(name.clone());
-                            // println!("/*\nanonymous object detected (type): {object:#?}\n*/");
                             objects.push(object);
                             Type::Named(name)
                         }
@@ -401,10 +401,10 @@ fn bind_prop(
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
         object => {
+            // anonymous object definition
             let type_name = normalize(prop_name);
             let type_name = format!("{}{type_name}", normalize(parent_name));
             let object = object.with_name(type_name.clone());
-            // println!("/*\nanonymous object detected (prop): {object:#?}\n*/",);
             objects.push(object);
             Type::Named(type_name)
         }

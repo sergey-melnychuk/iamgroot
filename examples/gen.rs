@@ -465,11 +465,14 @@ fn main() {
 
     use crate::gen::Rpc;
     env_logger::init();
-    let client = gen::client::Client::new(env!("URL"));
-    let block = client
-        .getBlockWithTxs(gen::BlockId::BlockTag(gen::BlockTag::Latest))
-        .unwrap();
-    println!("{block:#?}");
+    let url: Option<&'static str> = option_env!("URL");
+    if let Some(url) = url {
+        let client = gen::client::Client::new(url);
+        let block = client
+            .getBlockWithTxs(gen::BlockId::BlockTag(gen::BlockTag::Latest))
+            .unwrap();
+        println!("{block:#?}");
+    }
 }
 
 fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
