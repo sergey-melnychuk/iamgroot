@@ -775,9 +775,9 @@
 		"result": {
 		  "name": "work",
 		  "schema": {
-			"title": "getWorkResults",
 			"type": "array",
 			"items": {
+			  "title": "GetWorkItem",
 			  "schema": {
 				"oneOf": [
 				  {
@@ -1023,6 +1023,7 @@
 				}
 			  },
 			  {
+				"title": "boolean",
 				"type": "boolean"
 			  }
 			]
@@ -1067,7 +1068,7 @@
 		  "type": "array",
 		  "description": "Current block header PoW hash.",
 		  "items": {
-			"title": "storageProof",
+			"title": "StorageProof",
 			"type": "object",
 			"description": "Object proving a relationship of a storage value to an account's storageHash.",
 			"properties": {
@@ -1075,7 +1076,7 @@
 				"$ref": "#/components/schemas/StorageProofKey"
 			  },
 			  "value": {
-				"title": "storageProofValue",
+				"title": "StorageProofValue",
 				"description": "The value of the storage slot in its account tree",
 				"$ref": "#/components/schemas/Integer"
 			  },
@@ -1443,7 +1444,7 @@
 			  "description": "Array of transaction objects, or 32 Bytes transaction hashes depending on the last given parameter",
 			  "type": "array",
 			  "items": {
-				"title": "transactionOrTransactionHash",
+				"title": "TransactionOrTransactionHash",
 				"oneOf": [
 				  {
 					"$ref": "#/components/schemas/Transaction"
