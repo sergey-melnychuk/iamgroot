@@ -519,7 +519,7 @@ fn `method_name`(
         )
         .with_id(jsonrpc::Id::Number(1));
 
-    log::debug!("{req:#?}");
+    log::debug!("REQ: {req:#?}");
 
     let mut res: jsonrpc::Response = self
         .client
@@ -536,13 +536,15 @@ fn `method_name`(
             format!("Invalid response JSON: {e}."),
         ))?;
 
+    log::debug!("RES: {res:#?}");
+
     if let Some(err) = res.error.take() {
         log::error!("{err:#?}");
         return Err(err);
     }
 
     if let Some(value) = res.result.take() {
-        let out: `result_type` =
+        let ret: `result_type` =
             serde_json::from_value(value).map_err(|e| {
                 jsonrpc::Error::new(
                     5002,
@@ -550,9 +552,9 @@ fn `method_name`(
                 )
             })?;
 
-        log::debug!("{out:#?}");
+        log::debug!("RET: {ret:#?}");
 
-        Ok(out)
+        Ok(ret)
     } else {
         Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
     }
@@ -567,7 +569,7 @@ fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
     )
     .with_id(jsonrpc::Id::Number(1));
 
-    log::debug!("{req:#?}");
+    log::debug!("REQ: {req:#?}");
 
     let mut res: jsonrpc::Response = self
         .client
@@ -578,12 +580,14 @@ fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
         .json()
         .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
 
+    log::debug!("RES: {res:#?}");
+
     if let Some(err) = res.error.take() {
         return Err(err);
     }
 
     if let Some(value) = res.result.take() {
-        let out: `result_type` = serde_json::from_value(value)
+        let ret: `result_type` = serde_json::from_value(value)
             .map_err(|e| {
                 jsonrpc::Error::new(
                     5002,
@@ -591,9 +595,9 @@ fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
                 )
             })?;
 
-        log::debug!("{out:#?}");
+        log::debug!("RET: {ret:#?}");
 
-        Ok(out)
+        Ok(ret)
     } else {
         Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
     }
