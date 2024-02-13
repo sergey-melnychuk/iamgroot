@@ -167,6 +167,8 @@ fn bind_all_of(
                 let prop_name = get_prop_name(name);
 
                 // TODO: mark for flattening with serde?
+                eprintln!("marked for flattening prop={prop_name}");
+
                 vec![Property {
                     name: prop_name,
                     r#type: ty,
