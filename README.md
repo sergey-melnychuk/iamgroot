@@ -14,7 +14,7 @@ I am groot
 * Generate the code and then run suggested example:
 
 ```
-URL="https://starknet-mainnet.g.alchemy.com/v2/<snip>" cargo run --example gen
+URL="https://starknet-mainnet.g.alchemy.com/v2/<snip>" RUST_LOG='gen::client=debug' cargo run --example gen
 ```
 
 ### TODO
