@@ -29,7 +29,7 @@ pub fn bind_method(
         }
     };
     Some(codegen::Method {
-        name,
+        name: method.name.to_owned(),
         args: method
             .params
             .iter()
@@ -88,7 +88,7 @@ pub fn get_error<'a>(
     }
 }
 
-fn unprefix(name: &str) -> String {
+pub fn unprefix(name: &str) -> String {
     name.split('_')
         .nth(1)
         .map(|s| s.to_owned())

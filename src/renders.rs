@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::binding::unprefix;
 use crate::codegen::{self, Variant};
 use crate::codegen::{Primitive, Rule, Type};
 use crate::openrpc;
@@ -219,7 +220,7 @@ pub fn render_method(method: &codegen::Method) -> String {
     if let Some(doc) = method.doc.as_ref().map(|doc| format!("/// {}", doc)) {
         lines.push(doc);
     }
-    lines.push(format!("fn {}(\n    &self,", method.name));
+    lines.push(format!("fn {}(\n    &self,", unprefix(&method.name)));
 
     for (name, ty) in &method.args {
         lines.push(format!("    {}: {},", name, render_type(ty)));
@@ -405,7 +406,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Respon
 pub fn render_method_handler(method: &codegen::Method) -> String {
     if method.args.is_empty() {
         return METHOD_HANDLER_NO_ARGUMENTS
-            .replace("`method_name`", &method.name);
+            .replace("`method_name`", &unprefix(&method.name));
     }
 
     let params_names_only = method
@@ -433,15 +434,14 @@ pub fn render_method_handler(method: &codegen::Method) -> String {
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_types`", &params_types_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
-        .replace("`method_name`", &method.name)
+        .replace("`method_name`", &&unprefix(&method.name))
 }
 
 const HANDLE_FUNCTION: &str = r###"
 pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
     let params = &req.params.clone().unwrap_or_default();
 
-    let name = req.method.split('_').nth(1).unwrap();
-    let response = match name {
+    let response = match req.method.as_str() {
 `handlers`
         _ => jsonrpc::Response::error(-32601, "Method not found"),
     };
@@ -460,7 +460,8 @@ pub fn render_handle_function(methods: &[codegen::Method]) -> String {
         .map(|contract| {
             format!(
                 "        \"{}\" => handle_{}(rpc, params),",
-                contract.name, contract.name
+                contract.name,
+                unprefix(&contract.name)
             )
         })
         .collect::<Vec<_>>()
@@ -610,7 +611,7 @@ pub fn render_client_method(method: &codegen::Method) -> String {
 
     if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
-            .replace("`method_name`", &method.name)
+            .replace("`method_name`", &unprefix(&method.name))
             .replace("`result_type`", &return_type);
     }
 
@@ -631,6 +632,6 @@ pub fn render_client_method(method: &codegen::Method) -> String {
     CLIENT_METHOD_REQWEST_BLOCKING
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
-        .replace("`method_name`", &method.name)
+        .replace("`method_name`", &unprefix(&method.name))
         .replace("`result_type`", &return_type)
 }
