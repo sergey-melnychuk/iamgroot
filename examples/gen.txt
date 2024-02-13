@@ -7,8 +7,6 @@ fn main() {
     client::run();
 }
 
-struct State;
-
 mod client {
     use super::*;
     pub fn run() {
@@ -504,12 +502,14 @@ mod demo {
         let req = req.with_id(jsonrpc::Id::Number(id));
         let json = serde_json::to_string_pretty(&req).unwrap();
         log::debug!(">>> {}", json);
-    
+
         let req: jsonrpc::Request = serde_json::from_str(&json).unwrap();
         let res = gen::handle(rpc, &req);
         log::debug!("<<< {}", serde_json::to_string_pretty(&res).unwrap());
-    }    
+    }
 }
+
+struct State;
 
 #[allow(non_snake_case)]
 impl gen::Rpc for State {
