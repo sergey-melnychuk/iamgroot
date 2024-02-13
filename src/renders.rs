@@ -438,7 +438,7 @@ pub fn render_method_handler(method: &codegen::Method) -> String {
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_types`", &params_types_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
-        .replace("`method_name`", &&unprefix(&method.name))
+        .replace("`method_name`", &unprefix(&method.name))
 }
 
 const HANDLE_FUNCTION: &str = r###"
