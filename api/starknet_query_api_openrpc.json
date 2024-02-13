@@ -3778,8 +3778,7 @@
                     }
                 },
                 "required": [
-                    "price_in_wei",
-                    "price_in_fri"
+                    "price_in_wei"
                 ]
             },
             "EXECUTION_RESOURCES": {
