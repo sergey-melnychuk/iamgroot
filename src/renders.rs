@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use crate::codegen::Type;
 use crate::codegen::{self, Variant};
+use crate::codegen::{Primitive, Rule, Type};
 use crate::openrpc;
 
 #[derive(Clone, Debug)]
@@ -65,17 +65,78 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
     let mut lines: Vec<String> = Vec::new();
     // lines.push(format!("/*\nDEBUG:\n{:#?}\n*/", object));
     match object {
-        codegen::Object::Type(_) => (), // noop
+        codegen::Object::Type(_) => (), // skip
         codegen::Object::Alias(name, ty) => {
             lines.push(format!("type {name} = {};\n", render_type(ty)));
         }
         codegen::Object::Struct(s) => {
-            // TODO: regex validation for String
-            // TODO: range validation for Integer
             lines.push(HEADER.to_owned());
             if s.properties.len() == 1 && s.properties[0].name.is_empty() {
-                let ty = render_type(&s.properties[0].r#type);
-                lines.push(format!("pub struct {}(pub {});\n", s.name, ty));
+                match &s.properties[0].r#type {
+                    Type::Primitive(Primitive::String, rules)
+                        if !rules.is_empty() =>
+                    {
+                        let pattern = rules
+                            .first()
+                            .and_then(|rule| match rule {
+                                Rule::Regex(regex) => Some(regex),
+                                _ => None,
+                            })
+                            .map(|p| p.replace('\\', "\\\\"))
+                            .unwrap();
+                        lines.push(
+                            "#[serde(try_from = \"String\")]".to_string(),
+                        );
+                        lines.push(format!("pub struct {}(String);", s.name));
+                        let code = REGEX_VALIDATION_IMPL
+                            .replace("`type_name`", &s.name)
+                            .replace(
+                                "`type_name_uppercase`",
+                                &s.name.to_ascii_uppercase(),
+                            )
+                            .replace(
+                                "`type_name_lowercase`",
+                                &s.name.to_ascii_lowercase(),
+                            )
+                            .replace("`pattern`", &pattern);
+                        lines.push(code);
+                    }
+                    Type::Primitive(Primitive::Integer, rules)
+                        if !rules.is_empty() =>
+                    {
+                        let mut min = i64::MIN;
+                        let mut max = i64::MAX;
+                        for rule in rules {
+                            match rule {
+                                Rule::Min(x) => {
+                                    min = *x;
+                                }
+                                Rule::Max(x) => {
+                                    max = *x;
+                                }
+                                _ => (),
+                            }
+                        }
+                        lines.push("#[serde(try_from = \"i64\")]".to_string());
+                        lines.push(format!("pub struct {}(i64);", s.name));
+                        let code = RANGE_VALIDATION_IMPL
+                            .replace("`type_name`", &s.name)
+                            .replace(
+                                "`type_name_lowercase`",
+                                &s.name.to_ascii_lowercase(),
+                            )
+                            .replace("`min`", &format!("{}", min))
+                            .replace("`max`", &format!("{}", max));
+                        lines.push(code);
+                    }
+                    _ => {
+                        let ty = render_type(&s.properties[0].r#type);
+                        lines.push(format!(
+                            "pub struct {}(pub {});\n",
+                            s.name, ty
+                        ));
+                    }
+                }
             } else {
                 lines.push(format!("pub struct {} {{", s.name));
                 let nameless_properties =
@@ -100,7 +161,13 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
         }
         codegen::Object::Enum(e) => {
             lines.push(HEADER.to_owned());
-            lines.push("#[serde(untagged)]".to_owned());
+            let is_const = e
+                .variants
+                .iter()
+                .all(|v| matches!(v, Variant::Const { .. }));
+            if !is_const {
+                lines.push("#[serde(untagged)]".to_owned());
+            }
             lines.push(format!("pub enum {} {{", e.name));
             e.variants.iter().for_each(|v| match v {
                 Variant::Const { name, value } => {
@@ -204,7 +271,7 @@ mod `type_name_lowercase` {
 }
 "###;
 
-const PATTERN_VALIDATION_IMPL: &str = r###"
+const REGEX_VALIDATION_IMPL: &str = r###"
 mod `type_name_lowercase` {
     use super::jsonrpc;
     use super::`type_name`;
@@ -304,7 +371,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 
     let args: ArgByName = match args {
         Ok(args) => args,
-        Err(e) => return jsonrpc::Response::error(-32602, "Invalid params"),
+        Err(_) => return jsonrpc::Response::error(-32602, "Invalid params"),
     };
 
     let ArgByName { 
@@ -316,7 +383,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
     ) {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
-            Err(e) => jsonrpc::Response::error(-32603, "Internal error"),
+            Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
         },
         Err(e) => jsonrpc::Response::error(e.code, &e.message),
     }
@@ -373,7 +440,8 @@ const HANDLE_FUNCTION: &str = r###"
 pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
     let params = &req.params.clone().unwrap_or_default();
 
-    let response = match req.method.as_str() {
+    let name = req.method.split('_').nth(1).unwrap();
+    let response = match name {
 `handlers`
         _ => jsonrpc::Response::error(-32601, "Method not found"),
     };
