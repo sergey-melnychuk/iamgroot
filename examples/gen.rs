@@ -305,6 +305,7 @@ fn main() {
         }),
     );
 
+    // TODO: "invalid params"
     call(
         &state,
         201,
@@ -331,6 +332,7 @@ fn main() {
         }),
     );
 
+    // TODO: "invalid params"
     call(
         &state,
         202,
@@ -356,6 +358,7 @@ fn main() {
         }),
     );
 
+    // TODO: "invalid params"
     call(
         &state,
         21,
@@ -364,6 +367,7 @@ fn main() {
             "method": "starknet_addDeclareTransaction",
             "params": {
                 "declare_transaction": {
+                    "type": "DECLARE",
                     "max_fee": "0x1",
                     "version": "0x1",
                     "nonce": "0x3",
@@ -394,7 +398,7 @@ fn main() {
             "params": {
                 "declare_transaction": {
                     "max_fee": "0x1",
-                    "version": "0x1",
+                    "version": "0x2",
                     "nonce": "0x3",
                     "signature": [
                         "0x4"
@@ -412,7 +416,7 @@ fn main() {
                             "0xBB",
                             "0xCC"
                         ],
-                        "sierra_version": "some-version"
+                        "contract_class_version": "some-version"
                     },
                     "sender_address": "0xC",
                     "type": "DECLARE"
@@ -430,7 +434,7 @@ fn main() {
             "params": {
                 "deploy_account_transaction": {
                     "max_fee": "0x1",
-                    "version": "0x2",
+                    "version": "0x1",
                     "nonce": "0x3",
                     "signature": [
                         "0x4"
