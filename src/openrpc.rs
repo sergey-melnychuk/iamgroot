@@ -166,6 +166,7 @@ pub struct Schema {
 pub struct Components {
     #[serde(default)]
     #[serde(skip_serializing_if = "Map::is_empty")]
+    // TODO(ethereum): Content -> ContentOrRef, lookup property references when binding methods
     pub contentDescriptors: Map<String, Content>,
     #[serde(skip_serializing_if = "Map::is_empty")]
     pub schemas: Map<String, SchemaOrRef>,
