@@ -24,6 +24,6 @@ fn main() {
     } else if mode.as_str() == "CODE" {
         println!("{}", gen_code(&paths).unwrap());
     } else {
-        eprintln!("Unknown mode: {mode}. Supported are: JSON, TREE, CODE.");
+        eprintln!("Unknown mode: {mode}. Supported are: JSON, CODE.");
     }
 }
