@@ -14,7 +14,16 @@ I am groot
 * Generate the code and then run suggested example:
 
 ```
-URL="https://starknet-mainnet.g.alchemy.com/v2/<snip>" RUST_LOG='gen::client=debug' cargo run --example gen
+KEY="..."
+
+URL="https://starknet-mainnet.g.alchemy.com/v2/$KEY" \
+RUST_LOG='gen=debug' \
+cargo run --example gen > x.json
+
+curl \
+-H 'Content-Type: application/json' \
+-d '{"jsonrpc":"2.0","method":"starknet_getStateUpdate","params":[{"block_hash": "0x4684a9257747388a70848ccf222fd4c7e0bde27b84457e829ee48cac28ea21d"}],"id":1}' \
+$URL
 ```
 
 ### TODO
