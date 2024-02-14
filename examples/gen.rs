@@ -14,18 +14,20 @@ mod client {
         let url: Option<&'static str> = option_env!("URL");
         if let Some(url) = url {
             let client = gen::client::Client::new(url);
-            let block = client
-                .getBlockWithTxs(gen::BlockId::BlockTag(gen::BlockTag::Latest))
-                .unwrap();
+
+            let hash = "0x4684a9257747388a70848ccf222fd4c7e0bde27b84457e829ee48cac28ea21d";
+            let block_hash = gen::BlockHash(gen::Felt::try_new(hash).unwrap());
+            let block_id = gen::BlockId::BlockHash { block_hash };
+            let state = client.getStateUpdate(block_id).unwrap();
+            println!("{}", serde_json::to_string_pretty(&state).unwrap());
+
+            let block_id = gen::BlockId::BlockTag(gen::BlockTag::Latest);
+            let block = client.getBlockWithTxs(block_id).unwrap();
             if let gen::GetBlockWithTxsResult::BlockWithTxs(block) = block {
-                log::debug!(
-                    "block hash: {}",
-                    block.block_header.block_hash.0.as_ref()
-                );
-                log::debug!(
-                    "block number: {}",
-                    block.block_header.block_number.as_ref()
-                );
+                let hash = block.block_header.block_hash.0.as_ref();
+                log::debug!("block hash: {hash}");
+                let number = block.block_header.block_number.as_ref();
+                log::debug!("block number: {number}");
             } else {
                 log::error!("got pending block");
             }
