@@ -15,22 +15,49 @@ mod client {
         if let Some(url) = url {
             let client = gen::client::Client::new(url);
 
-            let hash = "0x4684a9257747388a70848ccf222fd4c7e0bde27b84457e829ee48cac28ea21d";
+            let block_id = gen::BlockId::BlockTag(gen::BlockTag::Latest);
+            let block = match client.getBlockWithTxs(block_id).unwrap() {
+                gen::GetBlockWithTxsResult::BlockWithTxs(block) => block,
+                _ => panic!("got pending block for some reason..."),
+            };
+            let hash = block.block_header.block_hash.0.as_ref();
+            let number = block.block_header.block_number.as_ref();
+            println!("{}", serde_json::to_string_pretty(&block).unwrap());
+
             let block_hash = gen::BlockHash(gen::Felt::try_new(hash).unwrap());
             let block_id = gen::BlockId::BlockHash { block_hash };
             let state = client.getStateUpdate(block_id).unwrap();
             println!("{}", serde_json::to_string_pretty(&state).unwrap());
 
-            let block_id = gen::BlockId::BlockTag(gen::BlockTag::Latest);
-            let block = client.getBlockWithTxs(block_id).unwrap();
-            if let gen::GetBlockWithTxsResult::BlockWithTxs(block) = block {
-                let hash = block.block_header.block_hash.0.as_ref();
-                log::debug!("block hash: {hash}");
-                let number = block.block_header.block_number.as_ref();
-                log::debug!("block number: {number}");
-            } else {
-                log::error!("got pending block");
-            }
+            let events = client
+                .getEvents(gen::GetEventsFilter {
+                    event_filter: gen::EventFilter {
+                        from_block: Some(gen::BlockId::BlockNumber {
+                            block_number: gen::BlockNumber::try_new(
+                                *number - 10,
+                            )
+                            .unwrap(),
+                        }),
+                        to_block: Some(gen::BlockId::BlockNumber {
+                            block_number: gen::BlockNumber::try_new(*number)
+                                .unwrap(),
+                        }),
+                        address: None,
+                        keys: None,
+                    },
+                    result_page_request: gen::ResultPageRequest {
+                        continuation_token: None,
+                        chunk_size: gen::ResultPageRequestChunkSize::try_new(
+                            1000,
+                        )
+                        .unwrap(),
+                    },
+                })
+                .unwrap();
+            println!("{}", serde_json::to_string_pretty(&events).unwrap());
+
+            log::debug!("block hash: {hash}");
+            log::debug!("block number: {number}");
         }
     }
 }
