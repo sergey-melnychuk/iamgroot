@@ -218,13 +218,18 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
     Ok(lines.join("\n"))
 }
 
-pub fn render_method(method: &codegen::Method) -> String {
+pub fn render_method(method: &codegen::Method, is_async: bool) -> String {
     let mut lines = Vec::new();
 
     if let Some(doc) = method.doc.as_ref().map(|doc| format!("/// {}", doc)) {
         lines.push(doc);
     }
-    lines.push(format!("fn {}(\n    &self,", unprefix(&method.name)));
+
+    let async_gap = if is_async { "async " } else { "" };
+    lines.push(format!(
+        "{async_gap}fn {}(\n    &self,",
+        unprefix(&method.name)
+    ));
 
     for (name, ty) in &method.args {
         lines.push(format!("    {}: {},", name, render_type(ty)));
@@ -352,7 +357,7 @@ pub fn render_errors(errors: HashMap<String, openrpc::Error>) -> String {
 }
 
 const METHOD_HANDLER_FULL: &str = r###"
-fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
+`async_gap`fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
     #[derive(Deserialize, Serialize)]
     struct ArgByPos(
 `arg_types`
@@ -385,7 +390,7 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 
     match rpc.`method_name`(
 `arg_names`
-    ) {
+    )`dot_await` {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
             Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
@@ -396,8 +401,8 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Respons
 "###;
 
 const METHOD_HANDLER_NO_ARGUMENTS: &str = r###"
-fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
-    match rpc.`method_name`() {
+`async_gap`fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Response {
+    match rpc.`method_name`()`dot_await` {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
             Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
@@ -407,10 +412,18 @@ fn handle_`method_name`<RPC: Rpc>(rpc: &RPC, _params: &Value) -> jsonrpc::Respon
 }
 "###;
 
-pub fn render_method_handler(method: &codegen::Method) -> String {
+pub fn render_method_handler(
+    method: &codegen::Method,
+    is_async: bool,
+) -> String {
+    let async_gap = if is_async { "async " } else { "" };
+    let dot_await = if is_async { ".await" } else { "" };
+
     if method.args.is_empty() {
         return METHOD_HANDLER_NO_ARGUMENTS
-            .replace("`method_name`", &unprefix(&method.name));
+            .replace("`method_name`", &unprefix(&method.name))
+            .replace("`async_gap`", async_gap)
+            .replace("`dot_await`", dot_await);
     }
 
     let params_names_only = method
@@ -439,10 +452,12 @@ pub fn render_method_handler(method: &codegen::Method) -> String {
         .replace("`arg_types`", &params_types_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
         .replace("`method_name`", &unprefix(&method.name))
+        .replace("`async_gap`", async_gap)
+        .replace("`dot_await`", dot_await)
 }
 
 const HANDLE_FUNCTION: &str = r###"
-pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
+pub `async_gap`fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response {
     let params = &req.params.clone().unwrap_or_default();
 
     let response = match req.method.as_str() {
@@ -458,12 +473,18 @@ pub fn handle<RPC: Rpc>(rpc: &RPC, req: &jsonrpc::Request) -> jsonrpc::Response 
 }
 "###;
 
-pub fn render_handle_function(methods: &[codegen::Method]) -> String {
+pub fn render_handle_function(
+    methods: &[codegen::Method],
+    is_async: bool,
+) -> String {
+    let async_gap = if is_async { "async " } else { "" };
+    let dot_await = if is_async { ".await" } else { "" };
+
     let lines = methods
         .iter()
         .map(|contract| {
             format!(
-                "        \"{}\" => handle_{}(rpc, params),",
+                "        \"{}\" => handle_{}(rpc, params){dot_await},",
                 contract.name,
                 unprefix(&contract.name)
             )
@@ -471,7 +492,9 @@ pub fn render_handle_function(methods: &[codegen::Method]) -> String {
         .collect::<Vec<_>>()
         .join("\n");
 
-    HANDLE_FUNCTION.replace("`handlers`", &lines)
+    HANDLE_FUNCTION
+        .replace("`handlers`", &lines)
+        .replace("`async_gap`", async_gap)
 }
 
 const CLIENT_MOD_REQWEST_BLOCKING: &str = r###"
@@ -479,7 +502,7 @@ pub mod client {
     use super::*;
 
     pub struct Client {
-        client: reqwest::blocking::Client,
+        client: reqwest::`blocking::`Client,
         url: String,
     }
 
@@ -487,11 +510,12 @@ pub mod client {
         pub fn new(url: &str) -> Self {
             Self {
                 url: url.to_string(),
-                client: reqwest::blocking::Client::new(),
+                client: reqwest::`blocking::`Client::new(),
             }
         }
     }
 
+    `async_trait`
     impl super::Rpc for Client {
 `client_methods`
     }
@@ -499,7 +523,7 @@ pub mod client {
 "###;
 
 const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
-fn `method_name`(
+`async_gap`fn `method_name`(
     &self,
 `arg_names_and_types`
 ) -> std::result::Result<`result_type`, jsonrpc::Error> {
@@ -525,12 +549,12 @@ fn `method_name`(
         .client
         .post(&self.url)
         .json(&req)
-        .send()
+        .send()`dot_await`
         .map_err(|e| jsonrpc::Error::new(
             4002,
             format!("Request failed: {e}."),
         ))?
-        .json()
+        .json()`dot_await`
         .map_err(|e| jsonrpc::Error::new(
             5001,
             format!("Invalid response JSON: {e}."),
@@ -562,7 +586,7 @@ fn `method_name`(
 "###;
 
 const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
-fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
+`async_gap`fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
     let req = jsonrpc::Request::new(
         "`full_method_name`".to_string(),
         serde_json::Value::Array(vec![]),
@@ -575,9 +599,9 @@ fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
         .client
         .post(&self.url)
         .json(&req)
-        .send()
+        .send()`dot_await`
         .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
-        .json()
+        .json()`dot_await`
         .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
 
     log::debug!("RES: {res:#?}");
@@ -604,24 +628,42 @@ fn `method_name`(&self) -> std::result::Result<`result_type`, jsonrpc::Error> {
 }
 "###;
 
-pub fn render_client(methods: &[codegen::Method]) -> String {
+pub fn render_client(methods: &[codegen::Method], is_async: bool) -> String {
     let methods = methods
         .iter()
-        .map(render_client_method)
+        .map(|method| render_client_method(method, is_async))
         .collect::<Vec<_>>()
         .join("\n");
 
-    CLIENT_MOD_REQWEST_BLOCKING.replace("`client_methods`", &methods)
+    CLIENT_MOD_REQWEST_BLOCKING
+        .replace("`client_methods`", &methods)
+        .replace("`blocking::`", if is_async { "" } else { "blocking::" })
+        .replace(
+            "`async_trait`",
+            if is_async {
+                "#[async_trait::async_trait]"
+            } else {
+                ""
+            },
+        )
 }
 
-pub fn render_client_method(method: &codegen::Method) -> String {
+pub fn render_client_method(
+    method: &codegen::Method,
+    is_async: bool,
+) -> String {
+    let async_gap = if is_async { "async " } else { "" };
+    let dot_await = if is_async { ".await" } else { "" };
+
     let return_type = render_type(&method.ret);
 
     if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
             .replace("`full_method_name`", &method.name)
             .replace("`method_name`", &unprefix(&method.name))
-            .replace("`result_type`", &return_type);
+            .replace("`result_type`", &return_type)
+            .replace("`async_gap`", async_gap)
+            .replace("`dot_await`", dot_await);
     }
 
     let params_names_only = method
@@ -644,4 +686,6 @@ pub fn render_client_method(method: &codegen::Method) -> String {
         .replace("`full_method_name`", &method.name)
         .replace("`method_name`", &unprefix(&method.name))
         .replace("`result_type`", &return_type)
+        .replace("`async_gap`", async_gap)
+        .replace("`dot_await`", dot_await)
 }

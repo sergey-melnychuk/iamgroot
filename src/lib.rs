@@ -88,7 +88,11 @@ impl Gen {
     }
 }
 
-pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
+pub fn gen_code<P: AsPath>(
+    paths: &[P],
+    is_async: bool,
+    gen_client: bool,
+) -> Result<String, std::fmt::Error> {
     let specs = paths.iter().map(parse).collect::<Vec<_>>();
 
     let schemas = specs
@@ -148,19 +152,31 @@ pub fn gen_code<P: AsPath>(paths: &[P]) -> Result<String, std::fmt::Error> {
         writeln!(target, "{code}")?;
     }
 
-    writeln!(target, "\npub trait Rpc {{")?;
+    writeln!(target, "\n")?;
+    if is_async {
+        writeln!(target, "#[async_trait::async_trait]")?;
+    }
+    writeln!(target, "pub trait Rpc {{")?;
     for method in &methods {
-        let code = renders::render_method(method);
+        let code = renders::render_method(method, is_async);
         writeln!(target, "\n{code}")?;
     }
     writeln!(target, "}}")?;
     for contract in &methods {
-        let code = renders::render_method_handler(contract);
+        let code = renders::render_method_handler(contract, is_async);
         writeln!(target, "{code}")?;
     }
-    writeln!(target, "{}", renders::render_handle_function(&methods))?;
+    writeln!(
+        target,
+        "{}",
+        renders::render_handle_function(&methods, is_async)
+    )?;
     writeln!(target, "{}", renders::render_errors(errors))?;
-    writeln!(target, "{}", renders::render_client(&methods))?;
+
+    if gen_client {
+        writeln!(target, "{}", renders::render_client(&methods, is_async))?;
+    }
+
     writeln!(target, "}}")?;
     writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^")?;
     Ok(target)
