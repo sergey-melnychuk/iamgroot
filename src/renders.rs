@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::binding::unprefix;
 use crate::codegen::{self, Variant};
 use crate::codegen::{Primitive, Rule, Type};
@@ -339,14 +337,14 @@ fn render_error(name: &str, error: &openrpc::Error) -> String {
     )
 }
 
-pub fn render_errors(errors: HashMap<String, openrpc::Error>) -> String {
+pub fn render_errors(errors: Vec<(String, openrpc::Error)>) -> String {
     let mut target = String::new();
     use std::fmt::Write;
 
     writeln!(target, "pub mod error {{").unwrap();
 
     let mut ordered = errors.iter().collect::<Vec<_>>();
-    ordered.sort_by_key(|e| e.0);
+    ordered.sort_by_key(|(key, _)| key);
 
     for (name, error) in ordered {
         writeln!(target, "{}", render_error(name, error)).unwrap();

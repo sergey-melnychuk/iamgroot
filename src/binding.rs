@@ -313,7 +313,7 @@ fn bind_type(
         })),
         openrpc::Type::Null => Some(Object::Struct(Struct::default())),
         openrpc::Type::Object if schema.properties.is_some() => {
-            let properties = schema
+            let mut properties = schema
                 .properties
                 .as_ref()
                 .map(|props| {
@@ -340,6 +340,7 @@ fn bind_type(
                         .collect::<Vec<_>>()
                 })
                 .unwrap_or_default();
+            properties.sort_by_cached_key(|p| p.name.to_owned());
             let object = Struct {
                 properties,
                 ..Default::default()

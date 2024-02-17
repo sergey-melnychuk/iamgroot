@@ -80,6 +80,15 @@ impl Object {
             Self::Alias(_, ty) => Self::Alias(name, ty),
         }
     }
+
+    pub fn get_name(&self) -> &str {
+        match self {
+            Self::Struct(s) => &s.name,
+            Self::Enum(e) => &e.name,
+            Self::Type(_) => "",
+            Self::Alias(name, _) => name,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

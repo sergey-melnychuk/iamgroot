@@ -52,37 +52,40 @@ impl Gen {
         &mut self,
     ) -> (
         Vec<codegen::Object>,
-        Map<String, openrpc::Error>,
+        Vec<(String, openrpc::Error)>,
         Vec<codegen::Method>,
     ) {
         let mut objects = Vec::new();
-        {
-            let processed = self
-                .schemas
-                .iter()
-                .filter_map(|(name, _)| {
-                    bind_object(name, &self.schemas, &mut objects)
-                })
-                .collect::<Vec<_>>();
-            objects.extend_from_slice(&processed);
+        let processed = self
+            .schemas
+            .iter()
+            .filter_map(|(name, _)| {
+                bind_object(name, &self.schemas, &mut objects)
+            })
+            .collect::<Vec<_>>();
+        for object in processed {
+            objects.push(object);
         }
+        objects.sort_by_cached_key(|object| object.get_name().to_owned());
 
-        let errors = self
+        let mut errors = self
             .errors
             .iter()
             .filter_map(|(name, _)| {
                 let error = get_error(name, &self.errors)?;
                 Some((name.to_owned(), error.clone()))
             })
-            .collect();
+            .collect::<Vec<_>>();
+        errors.sort_by_cached_key(|(name, _)| name.to_owned());
 
-        let methods = self
+        let mut methods = self
             .methods
             .iter()
             .filter_map(|method| {
                 bind_method(/* parent_name */ "", method, &mut objects)
             })
-            .collect();
+            .collect::<Vec<_>>();
+        methods.sort_by_cached_key(|method| method.name.to_owned());
 
         (objects, errors, methods)
     }

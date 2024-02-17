@@ -1022,55 +1022,31 @@ pub mod gen {
     use iamgroot::jsonrpc;
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV2Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
+    pub struct Address(pub Felt);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockBodyWithTxHashes {
+        pub transactions: Vec<TxnHash>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV2Version {
-        #[serde(rename = "0x2")]
-        V0x2,
-        #[serde(rename = "0x100000000000000000000000000000002")]
-        V0x100000000000000000000000000000002,
+    pub struct BlockBodyWithTxs {
+        pub transactions: Vec<TxnWithHash>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV3Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
+    pub struct BlockHash(pub Felt);
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingDeclareTxnReceiptType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnReceiptType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum L1HandlerTxnTraceType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnReceiptType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
+    pub struct BlockHeader {
+        pub block_hash: BlockHash,
+        pub block_number: BlockNumber,
+        pub l1_gas_price: ResourcePrice,
+        pub new_root: Felt,
+        pub parent_hash: BlockHash,
+        pub sequencer_address: Felt,
+        pub starknet_version: String,
+        pub timestamp: BlockHeaderTimestamp,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1117,1200 +1093,11 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV3Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum InvokeTxnTraceExecuteInvocation {
-        FunctionInvocation(FunctionInvocation),
-        RevertReason {
-            #[serde(skip_serializing_if = "Option::is_none")]
-            #[serde(default)]
-            revert_reason: Option<String>,
-        },
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnTraceType {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV1Type {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV0Type {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV0Version {
-        #[serde(rename = "0x0")]
-        V0x0,
-        #[serde(rename = "0x100000000000000000000000000000000")]
-        V0x100000000000000000000000000000000,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV1Type {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV1Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnTraceType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ContractClassEntryPointsByType {
-        pub constructor: Vec<SierraEntryPoint>,
-        pub external: Vec<SierraEntryPoint>,
-        pub l1_handler: Vec<SierraEntryPoint>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployTxnType {
-        #[serde(rename = "DEPLOY")]
-        Deploy,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployTxnReceiptType {
-        #[serde(rename = "DEPLOY")]
-        Deploy,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV2Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV2Version {
-        #[serde(rename = "0x2")]
-        V0x2,
-        #[serde(rename = "0x100000000000000000000000000000002")]
-        V0x100000000000000000000000000000002,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV0Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeclareTxnV0Version {
-        #[serde(rename = "0x0")]
-        V0x0,
-        #[serde(rename = "0x100000000000000000000000000000000")]
-        V0x100000000000000000000000000000000,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingCommonReceiptPropertiesFinalityStatus {
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnTraceType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum L1HandlerTxnReceiptType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum L1HandlerTxnType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV3Type {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingDeployAccountTxnReceiptType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "i64")]
-    pub struct ResultPageRequestChunkSize(i64);
-
-    mod resultpagerequestchunksize {
-        use super::jsonrpc;
-        use super::ResultPageRequestChunkSize;
-
-        static MIN: i64 = 1;
-        static MAX: i64 = 9223372036854775807;
-
-        impl ResultPageRequestChunkSize {
-            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
-                if value < MIN {
-                    return Err(jsonrpc::Error {
-                    code: 1001,
-                    message: format!("ResultPageRequestChunkSize value {value} must be > {MIN}"),
-                });
-                }
-                if value > MAX {
-                    return Err(jsonrpc::Error {
-                    code: 1001,
-                    message: format!("ResultPageRequestChunkSize value {value} must be < {MAX}"),
-                });
-                }
-                Ok(Self(value))
-            }
-        }
-
-        impl TryFrom<i64> for ResultPageRequestChunkSize {
-            type Error = String;
-            fn try_from(value: i64) -> Result<Self, Self::Error> {
-                Self::try_new(value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<i64> for ResultPageRequestChunkSize {
-            fn as_ref(&self) -> &i64 {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum InvokeTxnReceiptType {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingL1HandlerTxnReceiptType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "i64")]
-    pub struct StructAbiEntrySize(i64);
-
-    mod structabientrysize {
-        use super::jsonrpc;
-        use super::StructAbiEntrySize;
-
-        static MIN: i64 = 1;
-        static MAX: i64 = 9223372036854775807;
-
-        impl StructAbiEntrySize {
-            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
-                if value < MIN {
-                    return Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "StructAbiEntrySize value {value} must be > {MIN}"
-                        ),
-                    });
-                }
-                if value > MAX {
-                    return Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "StructAbiEntrySize value {value} must be < {MAX}"
-                        ),
-                    });
-                }
-                Ok(Self(value))
-            }
-        }
-
-        impl TryFrom<i64> for StructAbiEntrySize {
-            type Error = String;
-            fn try_from(value: i64) -> Result<Self, Self::Error> {
-                Self::try_new(value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<i64> for StructAbiEntrySize {
-            fn as_ref(&self) -> &i64 {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "i64")]
-    pub struct PendingBlockHeaderTimestamp(i64);
-
-    mod pendingblockheadertimestamp {
-        use super::jsonrpc;
-        use super::PendingBlockHeaderTimestamp;
-
-        static MIN: i64 = 0;
-        static MAX: i64 = 9223372036854775807;
-
-        impl PendingBlockHeaderTimestamp {
-            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
-                if value < MIN {
-                    return Err(jsonrpc::Error {
-                    code: 1001,
-                    message: format!("PendingBlockHeaderTimestamp value {value} must be > {MIN}"),
-                });
-                }
-                if value > MAX {
-                    return Err(jsonrpc::Error {
-                    code: 1001,
-                    message: format!("PendingBlockHeaderTimestamp value {value} must be < {MAX}"),
-                });
-                }
-                Ok(Self(value))
-            }
-        }
-
-        impl TryFrom<i64> for PendingBlockHeaderTimestamp {
-            type Error = String;
-            fn try_from(value: i64) -> Result<Self, Self::Error> {
-                Self::try_new(value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<i64> for PendingBlockHeaderTimestamp {
-            fn as_ref(&self) -> &i64 {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingInvokeTxnReceiptType {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV1Type {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BroadcastedDeclareTxnV1Version {
-        #[serde(rename = "0x1")]
-        V0x1,
-        #[serde(rename = "0x100000000000000000000000000000001")]
-        V0x100000000000000000000000000000001,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV3Type {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DeployAccountTxnV3Version {
-        #[serde(rename = "0x3")]
-        V0x3,
-        #[serde(rename = "0x100000000000000000000000000000003")]
-        V0x100000000000000000000000000000003,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct Felt(String);
-
-    mod felt {
-        use super::jsonrpc;
-        use super::Felt;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static FELT_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$").unwrap()
-        });
-
-        impl Felt {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if FELT_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "Felt value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for Felt {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for Felt {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockWithTxs {
-        pub status: BlockStatus,
-        #[serde(flatten)]
-        pub block_header: BlockHeader,
-        #[serde(flatten)]
-        pub block_body_with_txs: BlockBodyWithTxs,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV2 {
-        pub r#type: DeclareTxnV2Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub max_fee: Felt,
-        pub version: DeclareTxnV2Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum ContractAbiEntry {
-        FunctionAbiEntry(FunctionAbiEntry),
-        EventAbiEntry(EventAbiEntry),
-        StructAbiEntry(StructAbiEntry),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum Txn {
-        InvokeTxn(InvokeTxn),
-        L1HandlerTxn(L1HandlerTxn),
-        DeclareTxn(DeclareTxn),
-        DeployTxn(DeployTxn),
-        DeployAccountTxn(DeployAccountTxn),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventContent {
-        pub keys: Vec<Felt>,
-        pub data: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeprecatedCairoEntryPoint {
-        pub offset: NumAsHex,
-        pub selector: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StateUpdate {
-        pub block_hash: BlockHash,
-        pub old_root: Felt,
-        pub new_root: Felt,
-        pub state_diff: StateDiff,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclaredClass {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub class_hash: Option<Felt>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub compiled_class_hash: Option<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV3 {
-        pub r#type: DeclareTxnV3Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub version: DeclareTxnV3Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub class_hash: Felt,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub account_deployment_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum BroadcastedDeclareTxn {
-        BroadcastedDeclareTxnV1(BroadcastedDeclareTxnV1),
-        BroadcastedDeclareTxnV2(BroadcastedDeclareTxnV2),
-        BroadcastedDeclareTxnV3(BroadcastedDeclareTxnV3),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingDeclareTxnReceipt {
-        pub r#type: PendingDeclareTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum TransactionTrace {
-        InvokeTxnTrace(InvokeTxnTrace),
-        DeclareTxnTrace(DeclareTxnTrace),
-        DeployAccountTxnTrace(DeployAccountTxnTrace),
-        L1HandlerTxnTrace(L1HandlerTxnTrace),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnReceipt {
-        pub r#type: DeclareTxnReceiptType,
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployedContractItem {
-        pub address: Felt,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum DaMode {
-        #[serde(rename = "L1")]
-        L1,
-        #[serde(rename = "L2")]
-        L2,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct EthAddress(String);
-
-    mod ethaddress {
-        use super::jsonrpc;
-        use super::EthAddress;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static ETHADDRESS_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]{40}$").unwrap());
-
-        impl EthAddress {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if ETHADDRESS_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "EthAddress value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for EthAddress {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for EthAddress {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct L1HandlerTxnTrace {
-        pub function_invocation: FunctionInvocation,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: L1HandlerTxnTraceType,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct MsgFromL1 {
-        pub from_address: EthAddress,
-        pub to_address: Address,
-        pub entry_point_selector: Felt,
-        pub payload: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum SimulationFlag {
-        #[serde(rename = "SKIP_VALIDATE")]
-        SkipValidate,
-        #[serde(rename = "SKIP_FEE_CHARGE")]
-        SkipFeeCharge,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnReceipt {
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-        pub r#type: DeployAccountTxnReceiptType,
-        pub contract_address: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockHeader {
-        pub block_hash: BlockHash,
-        pub parent_hash: BlockHash,
-        pub block_number: BlockNumber,
-        pub new_root: Felt,
-        pub timestamp: BlockHeaderTimestamp,
-        pub sequencer_address: Felt,
-        pub l1_gas_price: ResourcePrice,
-        pub starknet_version: String,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeprecatedContractClass {
-        pub program: Program,
-        pub entry_points_by_type: EntryPoints,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub abi: Option<ContractAbi>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TxnHash(pub Felt);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct CommonReceiptProperties {
-        pub transaction_hash: TxnHash,
-        pub actual_fee: FeePayment,
-        pub execution_status: TxnExecutionStatus,
-        pub finality_status: TxnFinalityStatus,
-        pub block_hash: BlockHash,
-        pub block_number: BlockNumber,
-        pub messages_sent: Vec<MsgToL1>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub revert_reason: Option<String>,
-        pub events: Vec<Event>,
-        pub execution_resources: ExecutionResources,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeclareTxnV3 {
-        pub r#type: BroadcastedDeclareTxnV3Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub version: BroadcastedDeclareTxnV3Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub contract_class: ContractClass,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub account_deployment_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResourceBounds {
-        pub max_amount: U64,
-        pub max_price_per_unit: U128,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum TxnReceipt {
-        InvokeTxnReceipt(InvokeTxnReceipt),
-        L1HandlerTxnReceipt(L1HandlerTxnReceipt),
-        DeclareTxnReceipt(DeclareTxnReceipt),
-        DeployTxnReceipt(DeployTxnReceipt),
-        DeployAccountTxnReceipt(DeployAccountTxnReceipt),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResourceBoundsMapping {
-        pub l1_gas: ResourceBounds,
-        pub l2_gas: ResourceBounds,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ExecutionResources {
-        pub steps: i64,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub memory_holes: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub range_check_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub pedersen_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub poseidon_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub ec_op_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub ecdsa_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub bitwise_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub keccak_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub segment_arena_builtin: Option<i64>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockBodyWithTxHashes {
-        pub transactions: Vec<TxnHash>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StateDiff {
-        pub storage_diffs: Vec<ContractStorageDiffItem>,
-        pub deprecated_declared_classes: Vec<Felt>,
-        pub declared_classes: Vec<DeclaredClass>,
-        pub deployed_contracts: Vec<DeployedContractItem>,
-        pub replaced_classes: Vec<ReplacedClass>,
-        pub nonces: Vec<NonceUpdate>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnTrace {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub validate_invocation: Option<FunctionInvocation>,
-        pub execute_invocation: InvokeTxnTraceExecuteInvocation,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub fee_transfer_invocation: Option<FunctionInvocation>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: InvokeTxnTraceType,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TypedParameter {
-        pub name: String,
-        pub r#type: String,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedInvokeTxn(pub InvokeTxn);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BlockStatus {
-        #[serde(rename = "PENDING")]
-        Pending,
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-        #[serde(rename = "ACCEPTED_ON_L1")]
-        AcceptedOnL1,
-        #[serde(rename = "REJECTED")]
-        Rejected,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TxnWithHash {
-        #[serde(flatten)]
-        pub txn: Txn,
-        pub transaction_hash: TxnHash,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnStatus {
-        #[serde(rename = "RECEIVED")]
-        Received,
-        #[serde(rename = "REJECTED")]
-        Rejected,
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-        #[serde(rename = "ACCEPTED_ON_L1")]
-        AcceptedOnL1,
-    }
-
-    type ContractAbi = Vec<ContractAbiEntry>;
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct U64(String);
-
-    mod u64 {
-        use super::jsonrpc;
-        use super::U64;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static U64_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,15})$").unwrap()
-        });
-
-        impl U64 {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if U64_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "U64 value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for U64 {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for U64 {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnV1 {
-        pub r#type: DeployAccountTxnV1Type,
-        pub max_fee: Felt,
-        pub version: DeployAccountTxnV1Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub contract_address_salt: Felt,
-        pub constructor_calldata: Vec<Felt>,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct Program(String);
-
-    mod program {
-        use super::jsonrpc;
-        use super::Program;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static PROGRAM_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").unwrap()
-        });
-
-        impl Program {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if PROGRAM_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "Program value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for Program {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for Program {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum EventAbiType {
-        #[serde(rename = "event")]
-        Event,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct SyncStatus {
-        pub starting_block_hash: BlockHash,
-        pub starting_block_num: BlockNumber,
-        pub current_block_hash: BlockHash,
-        pub current_block_num: BlockNumber,
-        pub highest_block_hash: BlockHash,
-        pub highest_block_num: BlockNumber,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct ChainId(String);
-
-    mod chainid {
-        use super::jsonrpc;
-        use super::ChainId;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static CHAINID_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
-
-        impl ChainId {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if CHAINID_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "ChainId value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for ChainId {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for ChainId {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum BroadcastedTxn {
-        BroadcastedInvokeTxn(BroadcastedInvokeTxn),
-        BroadcastedDeclareTxn(BroadcastedDeclareTxn),
-        BroadcastedDeployAccountTxn(BroadcastedDeployAccountTxn),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct U128(String);
-
-    mod u128 {
-        use super::jsonrpc;
-        use super::U128;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static U128_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,31})$").unwrap()
-        });
-
-        impl U128 {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if U128_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "U128 value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for U128 {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for U128 {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FeeEstimate {
-        pub gas_consumed: Felt,
-        pub gas_price: Felt,
-        pub overall_fee: Felt,
-        pub unit: PriceUnit,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EntryPoints {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockHash(pub Felt);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct OrderedMessage {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub order: Option<i64>,
-        #[serde(flatten)]
-        pub msg_to_l1: MsgToL1,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResourcePrice {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub price_in_fri: Option<Felt>,
-        pub price_in_wei: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnV0 {
-        pub r#type: InvokeTxnV0Type,
-        pub max_fee: Felt,
-        pub version: InvokeTxnV0Version,
-        pub signature: Signature,
-        pub contract_address: Address,
-        pub entry_point_selector: Felt,
-        pub calldata: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct NumAsHex(String);
-
-    mod numashex {
-        use super::jsonrpc;
-        use super::NumAsHex;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static NUMASHEX_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
-
-        impl NumAsHex {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if NUMASHEX_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "NumAsHex value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for NumAsHex {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for NumAsHex {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct SierraEntryPoint {
-        pub selector: Felt,
-        pub function_idx: i64,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnV1 {
-        pub r#type: InvokeTxnV1Type,
-        pub sender_address: Address,
-        pub calldata: Vec<Felt>,
-        pub max_fee: Felt,
-        pub version: InvokeTxnV1Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingStateUpdate {
-        pub old_root: Felt,
-        pub state_diff: StateDiff,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EmittedEvent {
-        #[serde(flatten)]
-        pub event: Event,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub block_hash: Option<BlockHash>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub block_number: Option<BlockNumber>,
-        pub transaction_hash: TxnHash,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PriceUnit {
-        #[serde(rename = "WEI")]
-        Wei,
-        #[serde(rename = "FRI")]
-        Fri,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingBlockWithTxHashes {
-        #[serde(flatten)]
-        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
-        #[serde(flatten)]
-        pub pending_block_header: PendingBlockHeader,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV1 {
-        pub r#type: DeclareTxnV1Type,
-        pub sender_address: Address,
-        pub max_fee: Felt,
-        pub version: DeclareTxnV1Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnTrace {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub validate_invocation: Option<FunctionInvocation>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub fee_transfer_invocation: Option<FunctionInvocation>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: DeclareTxnTraceType,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ContractClass {
-        pub sierra_program: Vec<Felt>,
-        pub contract_class_version: String,
-        pub entry_points_by_type: ContractClassEntryPointsByType,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub abi: Option<String>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FeePayment {
-        pub amount: Felt,
-        pub unit: PriceUnit,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventAbiEntry {
-        pub r#type: EventAbiType,
-        pub name: String,
-        pub keys: Vec<TypedParameter>,
-        pub data: Vec<TypedParameter>,
+    pub enum BlockId {
+        BlockHash { block_hash: BlockHash },
+        BlockNumber { block_number: BlockNumber },
+        BlockTag(BlockTag),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2361,9 +1148,240 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum StructAbiType {
-        #[serde(rename = "struct")]
-        Struct,
+    pub enum BlockStatus {
+        #[serde(rename = "PENDING")]
+        Pending,
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+        #[serde(rename = "ACCEPTED_ON_L1")]
+        AcceptedOnL1,
+        #[serde(rename = "REJECTED")]
+        Rejected,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BlockTag {
+        #[serde(rename = "latest")]
+        Latest,
+        #[serde(rename = "pending")]
+        Pending,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockWithTxHashes {
+        pub status: BlockStatus,
+        #[serde(flatten)]
+        pub block_header: BlockHeader,
+        #[serde(flatten)]
+        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockWithTxs {
+        pub status: BlockStatus,
+        #[serde(flatten)]
+        pub block_header: BlockHeader,
+        #[serde(flatten)]
+        pub block_body_with_txs: BlockBodyWithTxs,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum BroadcastedDeclareTxn {
+        BroadcastedDeclareTxnV1(BroadcastedDeclareTxnV1),
+        BroadcastedDeclareTxnV2(BroadcastedDeclareTxnV2),
+        BroadcastedDeclareTxnV3(BroadcastedDeclareTxnV3),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeclareTxnV1 {
+        pub contract_class: DeprecatedContractClass,
+        pub max_fee: Felt,
+        pub nonce: Felt,
+        pub r#type: BroadcastedDeclareTxnV1Type,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub version: BroadcastedDeclareTxnV1Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV1Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeclareTxnV2 {
+        pub compiled_class_hash: Felt,
+        pub contract_class: ContractClass,
+        pub max_fee: Felt,
+        pub nonce: Felt,
+        pub r#type: BroadcastedDeclareTxnV2Type,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub version: BroadcastedDeclareTxnV2Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV2Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV2Version {
+        #[serde(rename = "0x2")]
+        V0x2,
+        #[serde(rename = "0x100000000000000000000000000000002")]
+        V0x100000000000000000000000000000002,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeclareTxnV3 {
+        pub account_deployment_data: Vec<Felt>,
+        pub compiled_class_hash: Felt,
+        pub contract_class: ContractClass,
+        pub fee_data_availability_mode: DaMode,
+        pub nonce: Felt,
+        pub nonce_data_availability_mode: DaMode,
+        pub paymaster_data: Vec<Felt>,
+        pub r#type: BroadcastedDeclareTxnV3Type,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub tip: U64,
+        pub version: BroadcastedDeclareTxnV3Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV3Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BroadcastedDeclareTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedDeployAccountTxn(pub DeployAccountTxn);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BroadcastedInvokeTxn(pub InvokeTxn);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum BroadcastedTxn {
+        BroadcastedInvokeTxn(BroadcastedInvokeTxn),
+        BroadcastedDeclareTxn(BroadcastedDeclareTxn),
+        BroadcastedDeployAccountTxn(BroadcastedDeployAccountTxn),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum CallType {
+        #[serde(rename = "LIBRARY_CALL")]
+        LibraryCall,
+        #[serde(rename = "CALL")]
+        Call,
+        #[serde(rename = "DELEGATE")]
+        Delegate,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct ChainId(String);
+
+    mod chainid {
+        use super::jsonrpc;
+        use super::ChainId;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static CHAINID_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+
+        impl ChainId {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if CHAINID_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "ChainId value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for ChainId {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for ChainId {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct CommonReceiptProperties {
+        pub actual_fee: FeePayment,
+        pub block_hash: BlockHash,
+        pub block_number: BlockNumber,
+        pub events: Vec<Event>,
+        pub execution_resources: ExecutionResources,
+        pub execution_status: TxnExecutionStatus,
+        pub finality_status: TxnFinalityStatus,
+        pub messages_sent: Vec<MsgToL1>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub revert_reason: Option<String>,
+        pub transaction_hash: TxnHash,
+    }
+
+    type ContractAbi = Vec<ContractAbiEntry>;
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum ContractAbiEntry {
+        FunctionAbiEntry(FunctionAbiEntry),
+        EventAbiEntry(EventAbiEntry),
+        StructAbiEntry(StructAbiEntry),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ContractClass {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub abi: Option<String>,
+        pub contract_class_version: String,
+        pub entry_points_by_type: ContractClassEntryPointsByType,
+        pub sierra_program: Vec<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ContractClassEntryPointsByType {
+        pub constructor: Vec<SierraEntryPoint>,
+        pub external: Vec<SierraEntryPoint>,
+        pub l1_handler: Vec<SierraEntryPoint>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2373,17 +1391,1184 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnType {
+    pub enum DaMode {
+        #[serde(rename = "L1")]
+        L1,
+        #[serde(rename = "L2")]
+        L2,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum DeclareTxn {
+        DeclareTxnV0(DeclareTxnV0),
+        DeclareTxnV1(DeclareTxnV1),
+        DeclareTxnV2(DeclareTxnV2),
+        DeclareTxnV3(DeclareTxnV3),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnReceipt {
+        pub r#type: DeclareTxnReceiptType,
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnReceiptType {
         #[serde(rename = "DECLARE")]
         Declare,
-        #[serde(rename = "DEPLOY")]
-        Deploy,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnTrace {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        pub r#type: DeclareTxnTraceType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub validate_invocation: Option<FunctionInvocation>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnTraceType {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV0 {
+        pub class_hash: Felt,
+        pub max_fee: Felt,
+        pub r#type: DeclareTxnV0Type,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub version: DeclareTxnV0Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV0Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV0Version {
+        #[serde(rename = "0x0")]
+        V0x0,
+        #[serde(rename = "0x100000000000000000000000000000000")]
+        V0x100000000000000000000000000000000,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV1 {
+        pub class_hash: Felt,
+        pub max_fee: Felt,
+        pub nonce: Felt,
+        pub r#type: DeclareTxnV1Type,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub version: DeclareTxnV1Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV1Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV2 {
+        pub class_hash: Felt,
+        pub compiled_class_hash: Felt,
+        pub max_fee: Felt,
+        pub nonce: Felt,
+        pub r#type: DeclareTxnV2Type,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub version: DeclareTxnV2Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV2Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV2Version {
+        #[serde(rename = "0x2")]
+        V0x2,
+        #[serde(rename = "0x100000000000000000000000000000002")]
+        V0x100000000000000000000000000000002,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclareTxnV3 {
+        pub account_deployment_data: Vec<Felt>,
+        pub class_hash: Felt,
+        pub compiled_class_hash: Felt,
+        pub fee_data_availability_mode: DaMode,
+        pub nonce: Felt,
+        pub nonce_data_availability_mode: DaMode,
+        pub paymaster_data: Vec<Felt>,
+        pub r#type: DeclareTxnV3Type,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub tip: U64,
+        pub version: DeclareTxnV3Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV3Type {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeclareTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeclaredClass {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub class_hash: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub compiled_class_hash: Option<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum DeployAccountTxn {
+        DeployAccountTxnV1(DeployAccountTxnV1),
+        DeployAccountTxnV3(DeployAccountTxnV3),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployAccountTxnReceipt {
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+        pub contract_address: Felt,
+        pub r#type: DeployAccountTxnReceiptType,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnReceiptType {
         #[serde(rename = "DEPLOY_ACCOUNT")]
         DeployAccount,
-        #[serde(rename = "INVOKE")]
-        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployAccountTxnTrace {
+        pub constructor_invocation: FunctionInvocation,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        pub r#type: DeployAccountTxnTraceType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub validate_invocation: Option<FunctionInvocation>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnTraceType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployAccountTxnV1 {
+        pub class_hash: Felt,
+        pub constructor_calldata: Vec<Felt>,
+        pub contract_address_salt: Felt,
+        pub max_fee: Felt,
+        pub nonce: Felt,
+        pub r#type: DeployAccountTxnV1Type,
+        pub signature: Signature,
+        pub version: DeployAccountTxnV1Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV1Type {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployAccountTxnV3 {
+        pub class_hash: Felt,
+        pub constructor_calldata: Vec<Felt>,
+        pub contract_address_salt: Felt,
+        pub fee_data_availability_mode: DaMode,
+        pub nonce: Felt,
+        pub nonce_data_availability_mode: DaMode,
+        pub paymaster_data: Vec<Felt>,
+        pub r#type: DeployAccountTxnV3Type,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub signature: Signature,
+        pub tip: U64,
+        pub version: DeployAccountTxnV3Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV3Type {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployAccountTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployTxn {
+        pub class_hash: Felt,
+        pub constructor_calldata: Vec<Felt>,
+        pub contract_address_salt: Felt,
+        pub r#type: DeployTxnType,
+        pub version: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployTxnReceipt {
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+        pub contract_address: Felt,
+        pub r#type: DeployTxnReceiptType,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployTxnReceiptType {
+        #[serde(rename = "DEPLOY")]
+        Deploy,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum DeployTxnType {
+        #[serde(rename = "DEPLOY")]
+        Deploy,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeployedContractItem {
+        pub address: Felt,
+        pub class_hash: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeprecatedCairoEntryPoint {
+        pub offset: NumAsHex,
+        pub selector: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeprecatedContractClass {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub abi: Option<ContractAbi>,
+        pub entry_points_by_type: EntryPoints,
+        pub program: Program,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EmittedEvent {
+        #[serde(flatten)]
+        pub event: Event,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub block_hash: Option<BlockHash>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub block_number: Option<BlockNumber>,
+        pub transaction_hash: TxnHash,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum EntryPointType {
+        #[serde(rename = "EXTERNAL")]
+        External,
         #[serde(rename = "L1_HANDLER")]
         L1Handler,
+        #[serde(rename = "CONSTRUCTOR")]
+        Constructor,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EntryPoints {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct EthAddress(String);
+
+    mod ethaddress {
+        use super::jsonrpc;
+        use super::EthAddress;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static ETHADDRESS_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]{40}$").unwrap());
+
+        impl EthAddress {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if ETHADDRESS_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "EthAddress value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for EthAddress {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for EthAddress {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct Event(pub EventContent);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventAbiEntry {
+        pub data: Vec<TypedParameter>,
+        pub keys: Vec<TypedParameter>,
+        pub name: String,
+        pub r#type: EventAbiType,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum EventAbiType {
+        #[serde(rename = "event")]
+        Event,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventContent {
+        pub data: Vec<Felt>,
+        pub keys: Vec<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventFilter {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub address: Option<Address>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub from_block: Option<BlockId>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub keys: Option<Vec<Vec<Felt>>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub to_block: Option<BlockId>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EventsChunk {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub continuation_token: Option<String>,
+        pub events: Vec<EmittedEvent>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ExecutionResources {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub bitwise_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub ec_op_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub ecdsa_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub keccak_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub memory_holes: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub pedersen_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub poseidon_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub range_check_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub segment_arena_builtin: Option<i64>,
+        pub steps: i64,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FeeEstimate {
+        pub gas_consumed: Felt,
+        pub gas_price: Felt,
+        pub overall_fee: Felt,
+        pub unit: PriceUnit,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FeePayment {
+        pub amount: Felt,
+        pub unit: PriceUnit,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct Felt(String);
+
+    mod felt {
+        use super::jsonrpc;
+        use super::Felt;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static FELT_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$").unwrap()
+        });
+
+        impl Felt {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if FELT_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "Felt value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for Felt {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for Felt {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FunctionAbiEntry {
+        pub inputs: Vec<TypedParameter>,
+        pub name: String,
+        pub outputs: Vec<TypedParameter>,
+        pub r#type: FunctionAbiType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub statemutability: Option<FunctionStateMutability>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum FunctionAbiType {
+        #[serde(rename = "function")]
+        Function,
+        #[serde(rename = "l1_handler")]
+        L1Handler,
+        #[serde(rename = "constructor")]
+        Constructor,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FunctionCall {
+        pub calldata: Vec<Felt>,
+        pub contract_address: Address,
+        pub entry_point_selector: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct FunctionInvocation {
+        #[serde(flatten)]
+        pub function_call: FunctionCall,
+        pub call_type: CallType,
+        pub caller_address: Felt,
+        pub calls: Vec<NestedCall>,
+        pub class_hash: Felt,
+        pub entry_point_type: EntryPointType,
+        pub events: Vec<OrderedEvent>,
+        pub execution_resources: ExecutionResources,
+        pub messages: Vec<OrderedMessage>,
+        pub result: Vec<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum FunctionStateMutability {
+        #[serde(rename = "view")]
+        View,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum InvokeTxn {
+        InvokeTxnV0(InvokeTxnV0),
+        InvokeTxnV1(InvokeTxnV1),
+        InvokeTxnV3(InvokeTxnV3),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnReceipt {
+        pub r#type: InvokeTxnReceiptType,
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnReceiptType {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnTrace {
+        pub execute_invocation: InvokeTxnTraceExecuteInvocation,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub fee_transfer_invocation: Option<FunctionInvocation>,
+        pub r#type: InvokeTxnTraceType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub validate_invocation: Option<FunctionInvocation>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum InvokeTxnTraceExecuteInvocation {
+        FunctionInvocation(FunctionInvocation),
+        RevertReason {
+            #[serde(skip_serializing_if = "Option::is_none")]
+            #[serde(default)]
+            revert_reason: Option<String>,
+        },
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnTraceType {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnV0 {
+        pub calldata: Vec<Felt>,
+        pub contract_address: Address,
+        pub entry_point_selector: Felt,
+        pub max_fee: Felt,
+        pub r#type: InvokeTxnV0Type,
+        pub signature: Signature,
+        pub version: InvokeTxnV0Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV0Type {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV0Version {
+        #[serde(rename = "0x0")]
+        V0x0,
+        #[serde(rename = "0x100000000000000000000000000000000")]
+        V0x100000000000000000000000000000000,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnV1 {
+        pub calldata: Vec<Felt>,
+        pub max_fee: Felt,
+        pub nonce: Felt,
+        pub r#type: InvokeTxnV1Type,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub version: InvokeTxnV1Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV1Type {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV1Version {
+        #[serde(rename = "0x1")]
+        V0x1,
+        #[serde(rename = "0x100000000000000000000000000000001")]
+        V0x100000000000000000000000000000001,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct InvokeTxnV3 {
+        pub account_deployment_data: Vec<Felt>,
+        pub calldata: Vec<Felt>,
+        pub fee_data_availability_mode: DaMode,
+        pub nonce: Felt,
+        pub nonce_data_availability_mode: DaMode,
+        pub paymaster_data: Vec<Felt>,
+        pub r#type: InvokeTxnV3Type,
+        pub resource_bounds: ResourceBoundsMapping,
+        pub sender_address: Address,
+        pub signature: Signature,
+        pub tip: U64,
+        pub version: InvokeTxnV3Version,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV3Type {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum InvokeTxnV3Version {
+        #[serde(rename = "0x3")]
+        V0x3,
+        #[serde(rename = "0x100000000000000000000000000000003")]
+        V0x100000000000000000000000000000003,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct L1HandlerTxn {
+        pub nonce: NumAsHex,
+        pub r#type: L1HandlerTxnType,
+        pub version: Felt,
+        #[serde(flatten)]
+        pub function_call: FunctionCall,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct L1HandlerTxnReceipt {
+        pub message_hash: NumAsHex,
+        pub r#type: L1HandlerTxnReceiptType,
+        #[serde(flatten)]
+        pub common_receipt_properties: CommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum L1HandlerTxnReceiptType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct L1HandlerTxnTrace {
+        pub function_invocation: FunctionInvocation,
+        pub r#type: L1HandlerTxnTraceType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_diff: Option<StateDiff>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum L1HandlerTxnTraceType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum L1HandlerTxnType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct MsgFromL1 {
+        pub entry_point_selector: Felt,
+        pub from_address: EthAddress,
+        pub payload: Vec<Felt>,
+        pub to_address: Address,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct MsgToL1 {
+        pub from_address: Felt,
+        pub payload: Vec<Felt>,
+        pub to_address: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct NestedCall(pub FunctionInvocation);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct NonceUpdate {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub contract_address: Option<Address>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub nonce: Option<Felt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct NumAsHex(String);
+
+    mod numashex {
+        use super::jsonrpc;
+        use super::NumAsHex;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static NUMASHEX_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+
+        impl NumAsHex {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if NUMASHEX_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "NumAsHex value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for NumAsHex {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for NumAsHex {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct OrderedEvent {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub order: Option<i64>,
+        #[serde(flatten)]
+        pub event: Event,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct OrderedMessage {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub order: Option<i64>,
+        #[serde(flatten)]
+        pub msg_to_l1: MsgToL1,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingBlockHeader {
+        pub l1_gas_price: ResourcePrice,
+        pub parent_hash: BlockHash,
+        pub sequencer_address: Felt,
+        pub starknet_version: String,
+        pub timestamp: PendingBlockHeaderTimestamp,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "i64")]
+    pub struct PendingBlockHeaderTimestamp(i64);
+
+    mod pendingblockheadertimestamp {
+        use super::jsonrpc;
+        use super::PendingBlockHeaderTimestamp;
+
+        static MIN: i64 = 0;
+        static MAX: i64 = 9223372036854775807;
+
+        impl PendingBlockHeaderTimestamp {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("PendingBlockHeaderTimestamp value {value} must be > {MIN}"),
+                });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("PendingBlockHeaderTimestamp value {value} must be < {MAX}"),
+                });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for PendingBlockHeaderTimestamp {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for PendingBlockHeaderTimestamp {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingBlockWithTxHashes {
+        #[serde(flatten)]
+        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
+        #[serde(flatten)]
+        pub pending_block_header: PendingBlockHeader,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingBlockWithTxs {
+        #[serde(flatten)]
+        pub block_body_with_txs: BlockBodyWithTxs,
+        #[serde(flatten)]
+        pub pending_block_header: PendingBlockHeader,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingCommonReceiptProperties {
+        pub actual_fee: FeePayment,
+        pub events: Vec<Event>,
+        pub execution_resources: ExecutionResources,
+        pub execution_status: TxnExecutionStatus,
+        pub finality_status: PendingCommonReceiptPropertiesFinalityStatus,
+        pub messages_sent: Vec<MsgToL1>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub revert_reason: Option<String>,
+        pub transaction_hash: TxnHash,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingCommonReceiptPropertiesFinalityStatus {
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingDeclareTxnReceipt {
+        pub r#type: PendingDeclareTxnReceiptType,
+        #[serde(flatten)]
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingDeclareTxnReceiptType {
+        #[serde(rename = "DECLARE")]
+        Declare,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingDeployAccountTxnReceipt {
+        #[serde(flatten)]
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+        pub contract_address: Felt,
+        pub r#type: PendingDeployAccountTxnReceiptType,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingDeployAccountTxnReceiptType {
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingInvokeTxnReceipt {
+        pub r#type: PendingInvokeTxnReceiptType,
+        #[serde(flatten)]
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingInvokeTxnReceiptType {
+        #[serde(rename = "INVOKE")]
+        Invoke,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingL1HandlerTxnReceipt {
+        pub message_hash: NumAsHex,
+        pub r#type: PendingL1HandlerTxnReceiptType,
+        #[serde(flatten)]
+        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingL1HandlerTxnReceiptType {
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingStateUpdate {
+        pub old_root: Felt,
+        pub state_diff: StateDiff,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum PendingTxnReceipt {
+        PendingInvokeTxnReceipt(PendingInvokeTxnReceipt),
+        PendingL1HandlerTxnReceipt(PendingL1HandlerTxnReceipt),
+        PendingDeclareTxnReceipt(PendingDeclareTxnReceipt),
+        PendingDeployAccountTxnReceipt(PendingDeployAccountTxnReceipt),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PriceUnit {
+        #[serde(rename = "WEI")]
+        Wei,
+        #[serde(rename = "FRI")]
+        Fri,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct Program(String);
+
+    mod program {
+        use super::jsonrpc;
+        use super::Program;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static PROGRAM_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").unwrap()
+        });
+
+        impl Program {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if PROGRAM_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "Program value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for Program {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for Program {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ReplacedClass {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub class_hash: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub contract_address: Option<Address>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResourceBounds {
+        pub max_amount: U64,
+        pub max_price_per_unit: U128,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResourceBoundsMapping {
+        pub l1_gas: ResourceBounds,
+        pub l2_gas: ResourceBounds,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResourcePrice {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub price_in_fri: Option<Felt>,
+        pub price_in_wei: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ResultPageRequest {
+        pub chunk_size: ResultPageRequestChunkSize,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub continuation_token: Option<String>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "i64")]
+    pub struct ResultPageRequestChunkSize(i64);
+
+    mod resultpagerequestchunksize {
+        use super::jsonrpc;
+        use super::ResultPageRequestChunkSize;
+
+        static MIN: i64 = 1;
+        static MAX: i64 = 9223372036854775807;
+
+        impl ResultPageRequestChunkSize {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("ResultPageRequestChunkSize value {value} must be > {MIN}"),
+                });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("ResultPageRequestChunkSize value {value} must be < {MAX}"),
+                });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for ResultPageRequestChunkSize {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for ResultPageRequestChunkSize {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct SierraEntryPoint {
+        pub function_idx: i64,
+        pub selector: Felt,
+    }
+
+    type Signature = Vec<Felt>;
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum SimulationFlag {
+        #[serde(rename = "SKIP_VALIDATE")]
+        SkipValidate,
+        #[serde(rename = "SKIP_FEE_CHARGE")]
+        SkipFeeCharge,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum SimulationFlagForEstimateFee {
+        #[serde(rename = "SKIP_VALIDATE")]
+        SkipValidate,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct StateDiff {
+        pub declared_classes: Vec<DeclaredClass>,
+        pub deployed_contracts: Vec<DeployedContractItem>,
+        pub deprecated_declared_classes: Vec<Felt>,
+        pub nonces: Vec<NonceUpdate>,
+        pub replaced_classes: Vec<ReplacedClass>,
+        pub storage_diffs: Vec<ContractStorageDiffItem>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct StateUpdate {
+        pub block_hash: BlockHash,
+        pub new_root: Felt,
+        pub old_root: Felt,
+        pub state_diff: StateDiff,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct StorageDiffItem {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub key: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub value: Option<Felt>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2429,142 +2614,64 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployTxn {
-        pub version: Felt,
-        pub r#type: DeployTxnType,
-        pub contract_address_salt: Felt,
-        pub constructor_calldata: Vec<Felt>,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum BlockId {
-        BlockHash { block_hash: BlockHash },
-        BlockNumber { block_number: BlockNumber },
-        BlockTag(BlockTag),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingBlockWithTxs {
-        #[serde(flatten)]
-        pub block_body_with_txs: BlockBodyWithTxs,
-        #[serde(flatten)]
-        pub pending_block_header: PendingBlockHeader,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployTxnReceipt {
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-        pub r#type: DeployTxnReceiptType,
-        pub contract_address: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FunctionAbiEntry {
-        pub r#type: FunctionAbiType,
+    pub struct StructAbiEntry {
+        pub members: Vec<StructMember>,
         pub name: String,
-        pub inputs: Vec<TypedParameter>,
-        pub outputs: Vec<TypedParameter>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub statemutability: Option<FunctionStateMutability>,
+        pub r#type: StructAbiType,
+        pub size: StructAbiEntrySize,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeclareTxnV2 {
-        pub r#type: BroadcastedDeclareTxnV2Type,
-        pub sender_address: Address,
-        pub compiled_class_hash: Felt,
-        pub max_fee: Felt,
-        pub version: BroadcastedDeclareTxnV2Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub contract_class: ContractClass,
+    #[serde(try_from = "i64")]
+    pub struct StructAbiEntrySize(i64);
+
+    mod structabientrysize {
+        use super::jsonrpc;
+        use super::StructAbiEntrySize;
+
+        static MIN: i64 = 1;
+        static MAX: i64 = 9223372036854775807;
+
+        impl StructAbiEntrySize {
+            pub fn try_new(value: i64) -> Result<Self, jsonrpc::Error> {
+                if value < MIN {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "StructAbiEntrySize value {value} must be > {MIN}"
+                        ),
+                    });
+                }
+                if value > MAX {
+                    return Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "StructAbiEntrySize value {value} must be < {MAX}"
+                        ),
+                    });
+                }
+                Ok(Self(value))
+            }
+        }
+
+        impl TryFrom<i64> for StructAbiEntrySize {
+            type Error = String;
+            fn try_from(value: i64) -> Result<Self, Self::Error> {
+                Self::try_new(value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<i64> for StructAbiEntrySize {
+            fn as_ref(&self) -> &i64 {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventsChunk {
-        pub events: Vec<EmittedEvent>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub continuation_token: Option<String>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FunctionInvocation {
-        #[serde(flatten)]
-        pub function_call: FunctionCall,
-        pub caller_address: Felt,
-        pub class_hash: Felt,
-        pub entry_point_type: EntryPointType,
-        pub call_type: CallType,
-        pub result: Vec<Felt>,
-        pub calls: Vec<NestedCall>,
-        pub events: Vec<OrderedEvent>,
-        pub messages: Vec<OrderedMessage>,
-        pub execution_resources: ExecutionResources,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct Event(pub EventContent);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclareTxnV0 {
-        pub r#type: DeclareTxnV0Type,
-        pub sender_address: Address,
-        pub max_fee: Felt,
-        pub version: DeclareTxnV0Version,
-        pub signature: Signature,
-        pub class_hash: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingCommonReceiptProperties {
-        pub transaction_hash: TxnHash,
-        pub actual_fee: FeePayment,
-        pub messages_sent: Vec<MsgToL1>,
-        pub events: Vec<Event>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub revert_reason: Option<String>,
-        pub finality_status: PendingCommonReceiptPropertiesFinalityStatus,
-        pub execution_status: TxnExecutionStatus,
-        pub execution_resources: ExecutionResources,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnTrace {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub validate_invocation: Option<FunctionInvocation>,
-        pub constructor_invocation: FunctionInvocation,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub fee_transfer_invocation: Option<FunctionInvocation>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub state_diff: Option<StateDiff>,
-        pub r#type: DeployAccountTxnTraceType,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct L1HandlerTxnReceipt {
-        pub r#type: L1HandlerTxnReceiptType,
-        pub message_hash: NumAsHex,
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum EntryPointType {
-        #[serde(rename = "EXTERNAL")]
-        External,
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-        #[serde(rename = "CONSTRUCTOR")]
-        Constructor,
+    pub enum StructAbiType {
+        #[serde(rename = "struct")]
+        Struct,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2577,157 +2684,40 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum FunctionAbiType {
-        #[serde(rename = "function")]
-        Function,
-        #[serde(rename = "l1_handler")]
-        L1Handler,
-        #[serde(rename = "constructor")]
-        Constructor,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct L1HandlerTxn {
-        pub version: Felt,
-        pub r#type: L1HandlerTxnType,
-        pub nonce: NumAsHex,
-        #[serde(flatten)]
-        pub function_call: FunctionCall,
+    pub struct SyncStatus {
+        pub current_block_hash: BlockHash,
+        pub current_block_num: BlockNumber,
+        pub highest_block_hash: BlockHash,
+        pub highest_block_num: BlockNumber,
+        pub starting_block_hash: BlockHash,
+        pub starting_block_num: BlockNumber,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum DeployAccountTxn {
-        DeployAccountTxnV1(DeployAccountTxnV1),
-        DeployAccountTxnV3(DeployAccountTxnV3),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct Address(pub Felt);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnV3 {
-        pub r#type: InvokeTxnV3Type,
-        pub sender_address: Address,
-        pub calldata: Vec<Felt>,
-        pub version: InvokeTxnV3Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub account_deployment_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockBodyWithTxs {
-        pub transactions: Vec<TxnWithHash>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum BlockTag {
-        #[serde(rename = "latest")]
-        Latest,
-        #[serde(rename = "pending")]
-        Pending,
+    pub enum TransactionTrace {
+        InvokeTxnTrace(InvokeTxnTrace),
+        DeclareTxnTrace(DeclareTxnTrace),
+        DeployAccountTxnTrace(DeployAccountTxnTrace),
+        L1HandlerTxnTrace(L1HandlerTxnTrace),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum InvokeTxn {
-        InvokeTxnV0(InvokeTxnV0),
-        InvokeTxnV1(InvokeTxnV1),
-        InvokeTxnV3(InvokeTxnV3),
+    pub enum Txn {
+        InvokeTxn(InvokeTxn),
+        L1HandlerTxn(L1HandlerTxn),
+        DeclareTxn(DeclareTxn),
+        DeployTxn(DeployTxn),
+        DeployAccountTxn(DeployAccountTxn),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingDeployAccountTxnReceipt {
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-        pub r#type: PendingDeployAccountTxnReceiptType,
-        pub contract_address: Felt,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum FunctionStateMutability {
-        #[serde(rename = "view")]
-        View,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeployAccountTxn(pub DeployAccountTxn);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum SimulationFlagForEstimateFee {
-        #[serde(rename = "SKIP_VALIDATE")]
-        SkipValidate,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ResultPageRequest {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub continuation_token: Option<String>,
-        pub chunk_size: ResultPageRequestChunkSize,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum PendingTxnReceipt {
-        PendingInvokeTxnReceipt(PendingInvokeTxnReceipt),
-        PendingL1HandlerTxnReceipt(PendingL1HandlerTxnReceipt),
-        PendingDeclareTxnReceipt(PendingDeclareTxnReceipt),
-        PendingDeployAccountTxnReceipt(PendingDeployAccountTxnReceipt),
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct NestedCall(pub FunctionInvocation);
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct InvokeTxnReceipt {
-        pub r#type: InvokeTxnReceiptType,
-        #[serde(flatten)]
-        pub common_receipt_properties: CommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct NonceUpdate {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub contract_address: Option<Address>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub nonce: Option<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum CallType {
-        #[serde(rename = "LIBRARY_CALL")]
-        LibraryCall,
-        #[serde(rename = "CALL")]
-        Call,
-        #[serde(rename = "DELEGATE")]
-        Delegate,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingL1HandlerTxnReceipt {
-        pub r#type: PendingL1HandlerTxnReceiptType,
-        pub message_hash: NumAsHex,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct ReplacedClass {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub contract_address: Option<Address>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub class_hash: Option<Felt>,
+    pub enum TxnExecutionStatus {
+        #[serde(rename = "SUCCEEDED")]
+        Succeeded,
+        #[serde(rename = "REVERTED")]
+        Reverted,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2739,131 +2729,141 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct FunctionCall {
-        pub contract_address: Address,
-        pub entry_point_selector: Felt,
-        pub calldata: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EventFilter {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub from_block: Option<BlockId>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub to_block: Option<BlockId>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub address: Option<Address>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub keys: Option<Vec<Vec<Felt>>>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StructAbiEntry {
-        pub r#type: StructAbiType,
-        pub name: String,
-        pub size: StructAbiEntrySize,
-        pub members: Vec<StructMember>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct MsgToL1 {
-        pub from_address: Felt,
-        pub to_address: Felt,
-        pub payload: Vec<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct StorageDiffItem {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub key: Option<Felt>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub value: Option<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingBlockHeader {
-        pub parent_hash: BlockHash,
-        pub timestamp: PendingBlockHeaderTimestamp,
-        pub sequencer_address: Felt,
-        pub l1_gas_price: ResourcePrice,
-        pub starknet_version: String,
-    }
+    pub struct TxnHash(pub Felt);
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
-    pub enum DeclareTxn {
-        DeclareTxnV0(DeclareTxnV0),
-        DeclareTxnV1(DeclareTxnV1),
-        DeclareTxnV2(DeclareTxnV2),
-        DeclareTxnV3(DeclareTxnV3),
+    pub enum TxnReceipt {
+        InvokeTxnReceipt(InvokeTxnReceipt),
+        L1HandlerTxnReceipt(L1HandlerTxnReceipt),
+        DeclareTxnReceipt(DeclareTxnReceipt),
+        DeployTxnReceipt(DeployTxnReceipt),
+        DeployAccountTxnReceipt(DeployAccountTxnReceipt),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct OrderedEvent {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub order: Option<i64>,
+    pub enum TxnStatus {
+        #[serde(rename = "RECEIVED")]
+        Received,
+        #[serde(rename = "REJECTED")]
+        Rejected,
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+        #[serde(rename = "ACCEPTED_ON_L1")]
+        AcceptedOnL1,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum TxnType {
+        #[serde(rename = "DECLARE")]
+        Declare,
+        #[serde(rename = "DEPLOY")]
+        Deploy,
+        #[serde(rename = "DEPLOY_ACCOUNT")]
+        DeployAccount,
+        #[serde(rename = "INVOKE")]
+        Invoke,
+        #[serde(rename = "L1_HANDLER")]
+        L1Handler,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TxnWithHash {
         #[serde(flatten)]
-        pub event: Event,
+        pub txn: Txn,
+        pub transaction_hash: TxnHash,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingInvokeTxnReceipt {
-        pub r#type: PendingInvokeTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
+    pub struct TypedParameter {
+        pub name: String,
+        pub r#type: String,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockWithTxHashes {
-        pub status: BlockStatus,
-        #[serde(flatten)]
-        pub block_header: BlockHeader,
-        #[serde(flatten)]
-        pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
+    #[serde(try_from = "String")]
+    pub struct U128(String);
+
+    mod u128 {
+        use super::jsonrpc;
+        use super::U128;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static U128_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,31})$").unwrap()
+        });
+
+        impl U128 {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if U128_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "U128 value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for U128 {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for U128 {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BroadcastedDeclareTxnV1 {
-        pub r#type: BroadcastedDeclareTxnV1Type,
-        pub sender_address: Address,
-        pub max_fee: Felt,
-        pub version: BroadcastedDeclareTxnV1Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub contract_class: DeprecatedContractClass,
-    }
+    #[serde(try_from = "String")]
+    pub struct U64(String);
 
-    type Signature = Vec<Felt>;
+    mod u64 {
+        use super::jsonrpc;
+        use super::U64;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
 
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum TxnExecutionStatus {
-        #[serde(rename = "SUCCEEDED")]
-        Succeeded,
-        #[serde(rename = "REVERTED")]
-        Reverted,
-    }
+        static U64_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,15})$").unwrap()
+        });
 
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeployAccountTxnV3 {
-        pub r#type: DeployAccountTxnV3Type,
-        pub version: DeployAccountTxnV3Version,
-        pub signature: Signature,
-        pub nonce: Felt,
-        pub contract_address_salt: Felt,
-        pub constructor_calldata: Vec<Felt>,
-        pub class_hash: Felt,
-        pub resource_bounds: ResourceBoundsMapping,
-        pub tip: U64,
-        pub paymaster_data: Vec<Felt>,
-        pub nonce_data_availability_mode: DaMode,
-        pub fee_data_availability_mode: DaMode,
+        impl U64 {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if U64_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                        code: 1001,
+                        message: format!(
+                            "U64 value does not match regex: {value}"
+                        ),
+                    })
+                }
+            }
+        }
+
+        impl TryFrom<String> for U64 {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for U64 {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2889,10 +2889,10 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct GetTransactionStatusResult {
-        pub finality_status: TxnStatus,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub execution_status: Option<TxnExecutionStatus>,
+        pub finality_status: TxnStatus,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -3044,120 +3044,67 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct AddDeclareTransactionResult {
-        pub transaction_hash: TxnHash,
         pub class_hash: Felt,
+        pub transaction_hash: TxnHash,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct AddDeployAccountTransactionResult {
-        pub transaction_hash: TxnHash,
         pub contract_address: Felt,
+        pub transaction_hash: TxnHash,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct SimulatedTransaction {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub transaction_trace: Option<TransactionTrace>,
+        pub fee_estimation: Option<FeeEstimate>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub fee_estimation: Option<FeeEstimate>,
+        pub transaction_trace: Option<TransactionTrace>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct BlockTransaction {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub transaction_hash: Option<Felt>,
+        pub trace_root: Option<TransactionTrace>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub trace_root: Option<TransactionTrace>,
+        pub transaction_hash: Option<Felt>,
     }
 
     pub trait Rpc {
-        /// Returns the version of the Starknet JSON-RPC specification being used
-        fn specVersion(&self) -> std::result::Result<String, jsonrpc::Error>;
-
-        /// Get block information with transaction hashes given the block id
-        fn getBlockWithTxHashes(
+        /// Submit a new class declaration transaction
+        fn addDeclareTransaction(
             &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>;
+            declare_transaction: BroadcastedDeclareTxn,
+        ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>;
 
-        /// Get block information with full transactions given the block id
-        fn getBlockWithTxs(
+        /// Submit a new deploy account transaction
+        fn addDeployAccountTransaction(
             &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>;
-
-        /// Get the information about the result of executing the requested block
-        fn getStateUpdate(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>;
-
-        /// Get the value of the storage at the given address and key
-        fn getStorageAt(
-            &self,
-            contract_address: Address,
-            key: StorageKey,
-            block_id: BlockId,
-        ) -> std::result::Result<Felt, jsonrpc::Error>;
-
-        /// Gets the transaction status (possibly reflecting that the tx is still in the mempool, or dropped from it)
-        fn getTransactionStatus(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>;
-
-        /// Get the details and status of a submitted transaction
-        fn getTransactionByHash(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>;
-
-        /// Get the details of a transaction by a given block id and index
-        fn getTransactionByBlockIdAndIndex(
-            &self,
-            block_id: BlockId,
-            index: GetTransactionByBlockIdAndIndexIndex,
+            deploy_account_transaction: BroadcastedDeployAccountTxn,
         ) -> std::result::Result<
-            GetTransactionByBlockIdAndIndexResult,
+            AddDeployAccountTransactionResult,
             jsonrpc::Error,
         >;
 
-        /// Get the transaction receipt by the transaction hash
-        fn getTransactionReceipt(
+        /// Submit a new transaction to be added to the chain
+        fn addInvokeTransaction(
             &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>;
+            invoke_transaction: BroadcastedInvokeTxn,
+        ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>;
 
-        /// Get the contract class definition in the given block associated with the given hash
-        fn getClass(
+        /// Get the most recent accepted block hash and number
+        fn blockHashAndNumber(
             &self,
-            block_id: BlockId,
-            class_hash: Felt,
-        ) -> std::result::Result<GetClassResult, jsonrpc::Error>;
+        ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>;
 
-        /// Get the contract class hash in the given block for the contract deployed at the given address
-        fn getClassHashAt(
+        /// Get the most recent accepted block number
+        fn blockNumber(
             &self,
-            block_id: BlockId,
-            contract_address: Address,
-        ) -> std::result::Result<Felt, jsonrpc::Error>;
-
-        /// Get the contract class definition in the given block at the given address
-        fn getClassAt(
-            &self,
-            block_id: BlockId,
-            contract_address: Address,
-        ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>;
-
-        /// Get the number of transactions in a block given a block id
-        fn getBlockTransactionCount(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetBlockTransactionCountResult, jsonrpc::Error>;
+        ) -> std::result::Result<BlockNumber, jsonrpc::Error>;
 
         /// call a starknet function without creating a StarkNet transaction
         fn call(
@@ -3165,6 +3112,9 @@ pub mod gen {
             request: FunctionCall,
             block_id: BlockId,
         ) -> std::result::Result<Vec<Felt>, jsonrpc::Error>;
+
+        /// Return the currently configured StarkNet chain id
+        fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error>;
 
         /// estimate the fee for of StarkNet transactions
         fn estimateFee(
@@ -3181,22 +3131,44 @@ pub mod gen {
             block_id: BlockId,
         ) -> std::result::Result<FeeEstimate, jsonrpc::Error>;
 
-        /// Get the most recent accepted block number
-        fn blockNumber(
+        /// Get the number of transactions in a block given a block id
+        fn getBlockTransactionCount(
             &self,
-        ) -> std::result::Result<BlockNumber, jsonrpc::Error>;
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockTransactionCountResult, jsonrpc::Error>;
 
-        /// Get the most recent accepted block hash and number
-        fn blockHashAndNumber(
+        /// Get block information with transaction hashes given the block id
+        fn getBlockWithTxHashes(
             &self,
-        ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>;
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>;
 
-        /// Return the currently configured StarkNet chain id
-        fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error>;
+        /// Get block information with full transactions given the block id
+        fn getBlockWithTxs(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>;
 
-        /// Returns an object about the sync status, or false if the node is not synching
-        fn syncing(&self)
-            -> std::result::Result<SyncingResult, jsonrpc::Error>;
+        /// Get the contract class definition in the given block associated with the given hash
+        fn getClass(
+            &self,
+            block_id: BlockId,
+            class_hash: Felt,
+        ) -> std::result::Result<GetClassResult, jsonrpc::Error>;
+
+        /// Get the contract class definition in the given block at the given address
+        fn getClassAt(
+            &self,
+            block_id: BlockId,
+            contract_address: Address,
+        ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>;
+
+        /// Get the contract class hash in the given block for the contract deployed at the given address
+        fn getClassHashAt(
+            &self,
+            block_id: BlockId,
+            contract_address: Address,
+        ) -> std::result::Result<Felt, jsonrpc::Error>;
 
         /// Returns all events matching the given filter
         fn getEvents(
@@ -3211,32 +3183,47 @@ pub mod gen {
             contract_address: Address,
         ) -> std::result::Result<Felt, jsonrpc::Error>;
 
-        /// Submit a new transaction to be added to the chain
-        fn addInvokeTransaction(
+        /// Get the information about the result of executing the requested block
+        fn getStateUpdate(
             &self,
-            invoke_transaction: BroadcastedInvokeTxn,
-        ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>;
+            block_id: BlockId,
+        ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>;
 
-        /// Submit a new class declaration transaction
-        fn addDeclareTransaction(
+        /// Get the value of the storage at the given address and key
+        fn getStorageAt(
             &self,
-            declare_transaction: BroadcastedDeclareTxn,
-        ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>;
+            contract_address: Address,
+            key: StorageKey,
+            block_id: BlockId,
+        ) -> std::result::Result<Felt, jsonrpc::Error>;
 
-        /// Submit a new deploy account transaction
-        fn addDeployAccountTransaction(
+        /// Get the details of a transaction by a given block id and index
+        fn getTransactionByBlockIdAndIndex(
             &self,
-            deploy_account_transaction: BroadcastedDeployAccountTxn,
+            block_id: BlockId,
+            index: GetTransactionByBlockIdAndIndexIndex,
         ) -> std::result::Result<
-            AddDeployAccountTransactionResult,
+            GetTransactionByBlockIdAndIndexResult,
             jsonrpc::Error,
         >;
 
-        /// For a given executed transaction, return the trace of its execution, including internal calls
-        fn traceTransaction(
+        /// Get the details and status of a submitted transaction
+        fn getTransactionByHash(
             &self,
             transaction_hash: TxnHash,
-        ) -> std::result::Result<TransactionTrace, jsonrpc::Error>;
+        ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>;
+
+        /// Get the transaction receipt by the transaction hash
+        fn getTransactionReceipt(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>;
+
+        /// Gets the transaction status (possibly reflecting that the tx is still in the mempool, or dropped from it)
+        fn getTransactionStatus(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>;
 
         /// Simulate a given sequence of transactions on the requested state, and generate the execution traces. Note that some of the transactions may revert, in which case no error is thrown, but revert details can be seen on the returned trace object. . Note that some of the transactions may revert, this will be reflected by the revert_error property in the trace. Other types of failures (e.g. unexpected error or failure in the validation phase) will result in TRANSACTION_EXECUTION_ERROR.
         fn simulateTransactions(
@@ -3246,18 +3233,159 @@ pub mod gen {
             simulation_flags: Vec<SimulationFlag>,
         ) -> std::result::Result<Vec<SimulatedTransaction>, jsonrpc::Error>;
 
+        /// Returns the version of the Starknet JSON-RPC specification being used
+        fn specVersion(&self) -> std::result::Result<String, jsonrpc::Error>;
+
+        /// Returns an object about the sync status, or false if the node is not synching
+        fn syncing(&self)
+            -> std::result::Result<SyncingResult, jsonrpc::Error>;
+
         /// Retrieve traces for all transactions in the given block
         fn traceBlockTransactions(
             &self,
             block_id: BlockId,
         ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>;
+
+        /// For a given executed transaction, return the trace of its execution, including internal calls
+        fn traceTransaction(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<TransactionTrace, jsonrpc::Error>;
     }
 
-    fn handle_specVersion<RPC: Rpc>(
+    fn handle_addDeclareTransaction<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BroadcastedDeclareTxn);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            declare_transaction: BroadcastedDeclareTxn,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(declare_transaction) = args_by_pos;
+                        ArgByName {
+                            declare_transaction,
+                        }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName {
+            declare_transaction,
+        } = args;
+
+        match rpc.addDeclareTransaction(declare_transaction) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_addDeployAccountTransaction<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BroadcastedDeployAccountTxn);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            deploy_account_transaction: BroadcastedDeployAccountTxn,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(deploy_account_transaction) = args_by_pos;
+                        ArgByName {
+                            deploy_account_transaction,
+                        }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName {
+            deploy_account_transaction,
+        } = args;
+
+        match rpc.addDeployAccountTransaction(deploy_account_transaction) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_addInvokeTransaction<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BroadcastedInvokeTxn);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            invoke_transaction: BroadcastedInvokeTxn,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(invoke_transaction) = args_by_pos;
+                        ArgByName { invoke_transaction }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { invoke_transaction } = args;
+
+        match rpc.addInvokeTransaction(invoke_transaction) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_blockHashAndNumber<RPC: Rpc>(
         rpc: &RPC,
         _params: &Value,
     ) -> jsonrpc::Response {
-        match rpc.specVersion() {
+        match rpc.blockHashAndNumber() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
@@ -3266,514 +3394,14 @@ pub mod gen {
         }
     }
 
-    fn handle_getBlockWithTxHashes<RPC: Rpc>(
+    fn handle_blockNumber<RPC: Rpc>(
         rpc: &RPC,
-        params: &Value,
+        _params: &Value,
     ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getBlockWithTxHashes(block_id) {
+        match rpc.blockNumber() {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getBlockWithTxs<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getBlockWithTxs(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getStateUpdate<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getStateUpdate(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getStorageAt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(Address, StorageKey, BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            contract_address: Address,
-            key: StorageKey,
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(contract_address, key, block_id) =
-                            args_by_pos;
-                        ArgByName {
-                            contract_address,
-                            key,
-                            block_id,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            contract_address,
-            key,
-            block_id,
-        } = args;
-
-        match rpc.getStorageAt(contract_address, key, block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionStatus<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTransactionStatus(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionByHash<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTransactionByHash(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionByBlockIdAndIndex<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, GetTransactionByBlockIdAndIndexIndex);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            index: GetTransactionByBlockIdAndIndexIndex,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, index) = args_by_pos;
-                        ArgByName { block_id, index }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id, index } = args;
-
-        match rpc.getTransactionByBlockIdAndIndex(block_id, index) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionReceipt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTransactionReceipt(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getClass<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Felt);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            class_hash: Felt,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, class_hash) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            class_hash,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            class_hash,
-        } = args;
-
-        match rpc.getClass(block_id, class_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getClassHashAt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Address);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            contract_address: Address,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, contract_address) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            contract_address,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            contract_address,
-        } = args;
-
-        match rpc.getClassHashAt(block_id, contract_address) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getClassAt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Address);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            contract_address: Address,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, contract_address) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            contract_address,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            contract_address,
-        } = args;
-
-        match rpc.getClassAt(block_id, contract_address) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getBlockTransactionCount<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getBlockTransactionCount(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
             },
             Err(e) => jsonrpc::Response::error(e.code, &e.message),
         }
@@ -3812,6 +3440,19 @@ pub mod gen {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_chainId<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
+        match rpc.chainId() {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
             },
             Err(e) => jsonrpc::Response::error(e.code, &e.message),
         }
@@ -3913,53 +3554,262 @@ pub mod gen {
         }
     }
 
-    fn handle_blockNumber<RPC: Rpc>(
+    fn handle_getBlockTransactionCount<RPC: Rpc>(
         rpc: &RPC,
-        _params: &Value,
+        params: &Value,
     ) -> jsonrpc::Response {
-        match rpc.blockNumber() {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id) = args_by_pos;
+                        ArgByName { block_id }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { block_id } = args;
+
+        match rpc.getBlockTransactionCount(block_id) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
             },
             Err(e) => jsonrpc::Response::error(e.code, &e.message),
         }
     }
 
-    fn handle_blockHashAndNumber<RPC: Rpc>(
+    fn handle_getBlockWithTxHashes<RPC: Rpc>(
         rpc: &RPC,
-        _params: &Value,
+        params: &Value,
     ) -> jsonrpc::Response {
-        match rpc.blockHashAndNumber() {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id) = args_by_pos;
+                        ArgByName { block_id }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { block_id } = args;
+
+        match rpc.getBlockWithTxHashes(block_id) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
             },
             Err(e) => jsonrpc::Response::error(e.code, &e.message),
         }
     }
 
-    fn handle_chainId<RPC: Rpc>(
+    fn handle_getBlockWithTxs<RPC: Rpc>(
         rpc: &RPC,
-        _params: &Value,
+        params: &Value,
     ) -> jsonrpc::Response {
-        match rpc.chainId() {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id) = args_by_pos;
+                        ArgByName { block_id }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { block_id } = args;
+
+        match rpc.getBlockWithTxs(block_id) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
             },
             Err(e) => jsonrpc::Response::error(e.code, &e.message),
         }
     }
 
-    fn handle_syncing<RPC: Rpc>(
+    fn handle_getClass<RPC: Rpc>(
         rpc: &RPC,
-        _params: &Value,
+        params: &Value,
     ) -> jsonrpc::Response {
-        match rpc.syncing() {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId, Felt);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+            class_hash: Felt,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id, class_hash) = args_by_pos;
+                        ArgByName {
+                            block_id,
+                            class_hash,
+                        }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName {
+            block_id,
+            class_hash,
+        } = args;
+
+        match rpc.getClass(block_id, class_hash) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_getClassAt<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId, Address);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+            contract_address: Address,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id, contract_address) = args_by_pos;
+                        ArgByName {
+                            block_id,
+                            contract_address,
+                        }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName {
+            block_id,
+            contract_address,
+        } = args;
+
+        match rpc.getClassAt(block_id, contract_address) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_getClassHashAt<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId, Address);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+            contract_address: Address,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id, contract_address) = args_by_pos;
+                        ArgByName {
+                            block_id,
+                            contract_address,
+                        }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName {
+            block_id,
+            contract_address,
+        } = args;
+
+        match rpc.getClassHashAt(block_id, contract_address) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
             },
             Err(e) => jsonrpc::Response::error(e.code, &e.message),
         }
@@ -4052,24 +3902,24 @@ pub mod gen {
         }
     }
 
-    fn handle_addInvokeTransaction<RPC: Rpc>(
+    fn handle_getStateUpdate<RPC: Rpc>(
         rpc: &RPC,
         params: &Value,
     ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedInvokeTxn);
+        struct ArgByPos(BlockId);
 
         #[derive(Deserialize, Serialize)]
         struct ArgByName {
-            invoke_transaction: BroadcastedInvokeTxn,
+            block_id: BlockId,
         }
 
         let args =
             serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
                 serde_json::from_value::<ArgByPos>(params.clone()).map(
                     |args_by_pos| {
-                        let ArgByPos(invoke_transaction) = args_by_pos;
-                        ArgByName { invoke_transaction }
+                        let ArgByPos(block_id) = args_by_pos;
+                        ArgByName { block_id }
                     },
                 )
             });
@@ -4081,9 +3931,9 @@ pub mod gen {
             }
         };
 
-        let ArgByName { invoke_transaction } = args;
+        let ArgByName { block_id } = args;
 
-        match rpc.addInvokeTransaction(invoke_transaction) {
+        match rpc.getStateUpdate(block_id) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
@@ -4092,25 +3942,30 @@ pub mod gen {
         }
     }
 
-    fn handle_addDeclareTransaction<RPC: Rpc>(
+    fn handle_getStorageAt<RPC: Rpc>(
         rpc: &RPC,
         params: &Value,
     ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedDeclareTxn);
+        struct ArgByPos(Address, StorageKey, BlockId);
 
         #[derive(Deserialize, Serialize)]
         struct ArgByName {
-            declare_transaction: BroadcastedDeclareTxn,
+            contract_address: Address,
+            key: StorageKey,
+            block_id: BlockId,
         }
 
         let args =
             serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
                 serde_json::from_value::<ArgByPos>(params.clone()).map(
                     |args_by_pos| {
-                        let ArgByPos(declare_transaction) = args_by_pos;
+                        let ArgByPos(contract_address, key, block_id) =
+                            args_by_pos;
                         ArgByName {
-                            declare_transaction,
+                            contract_address,
+                            key,
+                            block_id,
                         }
                     },
                 )
@@ -4124,10 +3979,12 @@ pub mod gen {
         };
 
         let ArgByName {
-            declare_transaction,
+            contract_address,
+            key,
+            block_id,
         } = args;
 
-        match rpc.addDeclareTransaction(declare_transaction) {
+        match rpc.getStorageAt(contract_address, key, block_id) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
@@ -4136,26 +3993,25 @@ pub mod gen {
         }
     }
 
-    fn handle_addDeployAccountTransaction<RPC: Rpc>(
+    fn handle_getTransactionByBlockIdAndIndex<RPC: Rpc>(
         rpc: &RPC,
         params: &Value,
     ) -> jsonrpc::Response {
         #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedDeployAccountTxn);
+        struct ArgByPos(BlockId, GetTransactionByBlockIdAndIndexIndex);
 
         #[derive(Deserialize, Serialize)]
         struct ArgByName {
-            deploy_account_transaction: BroadcastedDeployAccountTxn,
+            block_id: BlockId,
+            index: GetTransactionByBlockIdAndIndexIndex,
         }
 
         let args =
             serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
                 serde_json::from_value::<ArgByPos>(params.clone()).map(
                     |args_by_pos| {
-                        let ArgByPos(deploy_account_transaction) = args_by_pos;
-                        ArgByName {
-                            deploy_account_transaction,
-                        }
+                        let ArgByPos(block_id, index) = args_by_pos;
+                        ArgByName { block_id, index }
                     },
                 )
             });
@@ -4167,11 +4023,9 @@ pub mod gen {
             }
         };
 
-        let ArgByName {
-            deploy_account_transaction,
-        } = args;
+        let ArgByName { block_id, index } = args;
 
-        match rpc.addDeployAccountTransaction(deploy_account_transaction) {
+        match rpc.getTransactionByBlockIdAndIndex(block_id, index) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
@@ -4180,7 +4034,7 @@ pub mod gen {
         }
     }
 
-    fn handle_traceTransaction<RPC: Rpc>(
+    fn handle_getTransactionByHash<RPC: Rpc>(
         rpc: &RPC,
         params: &Value,
     ) -> jsonrpc::Response {
@@ -4211,7 +4065,87 @@ pub mod gen {
 
         let ArgByName { transaction_hash } = args;
 
-        match rpc.traceTransaction(transaction_hash) {
+        match rpc.getTransactionByHash(transaction_hash) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_getTransactionReceipt<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(TxnHash);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            transaction_hash: TxnHash,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transaction_hash) = args_by_pos;
+                        ArgByName { transaction_hash }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { transaction_hash } = args;
+
+        match rpc.getTransactionReceipt(transaction_hash) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_getTransactionStatus<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(TxnHash);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            transaction_hash: TxnHash,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transaction_hash) = args_by_pos;
+                        ArgByName { transaction_hash }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { transaction_hash } = args;
+
+        match rpc.getTransactionStatus(transaction_hash) {
             Ok(ret) => match serde_json::to_value(ret) {
                 Ok(ret) => jsonrpc::Response::result(ret),
                 Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
@@ -4272,6 +4206,32 @@ pub mod gen {
         }
     }
 
+    fn handle_specVersion<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
+        match rpc.specVersion() {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    fn handle_syncing<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
+        match rpc.syncing() {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
     fn handle_traceBlockTransactions<RPC: Rpc>(
         rpc: &RPC,
         params: &Value,
@@ -4312,6 +4272,46 @@ pub mod gen {
         }
     }
 
+    fn handle_traceTransaction<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(TxnHash);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            transaction_hash: TxnHash,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transaction_hash) = args_by_pos;
+                        ArgByName { transaction_hash }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { transaction_hash } = args;
+
+        match rpc.traceTransaction(transaction_hash) {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
     pub fn handle<RPC: Rpc>(
         rpc: &RPC,
         req: &jsonrpc::Request,
@@ -4319,60 +4319,60 @@ pub mod gen {
         let params = &req.params.clone().unwrap_or_default();
 
         let response = match req.method.as_str() {
-            "starknet_specVersion" => handle_specVersion(rpc, params),
-            "starknet_getBlockWithTxHashes" => {
-                handle_getBlockWithTxHashes(rpc, params)
-            }
-            "starknet_getBlockWithTxs" => handle_getBlockWithTxs(rpc, params),
-            "starknet_getStateUpdate" => handle_getStateUpdate(rpc, params),
-            "starknet_getStorageAt" => handle_getStorageAt(rpc, params),
-            "starknet_getTransactionStatus" => {
-                handle_getTransactionStatus(rpc, params)
-            }
-            "starknet_getTransactionByHash" => {
-                handle_getTransactionByHash(rpc, params)
-            }
-            "starknet_getTransactionByBlockIdAndIndex" => {
-                handle_getTransactionByBlockIdAndIndex(rpc, params)
-            }
-            "starknet_getTransactionReceipt" => {
-                handle_getTransactionReceipt(rpc, params)
-            }
-            "starknet_getClass" => handle_getClass(rpc, params),
-            "starknet_getClassHashAt" => handle_getClassHashAt(rpc, params),
-            "starknet_getClassAt" => handle_getClassAt(rpc, params),
-            "starknet_getBlockTransactionCount" => {
-                handle_getBlockTransactionCount(rpc, params)
-            }
-            "starknet_call" => handle_call(rpc, params),
-            "starknet_estimateFee" => handle_estimateFee(rpc, params),
-            "starknet_estimateMessageFee" => {
-                handle_estimateMessageFee(rpc, params)
-            }
-            "starknet_blockNumber" => handle_blockNumber(rpc, params),
-            "starknet_blockHashAndNumber" => {
-                handle_blockHashAndNumber(rpc, params)
-            }
-            "starknet_chainId" => handle_chainId(rpc, params),
-            "starknet_syncing" => handle_syncing(rpc, params),
-            "starknet_getEvents" => handle_getEvents(rpc, params),
-            "starknet_getNonce" => handle_getNonce(rpc, params),
-            "starknet_addInvokeTransaction" => {
-                handle_addInvokeTransaction(rpc, params)
-            }
             "starknet_addDeclareTransaction" => {
                 handle_addDeclareTransaction(rpc, params)
             }
             "starknet_addDeployAccountTransaction" => {
                 handle_addDeployAccountTransaction(rpc, params)
             }
-            "starknet_traceTransaction" => handle_traceTransaction(rpc, params),
+            "starknet_addInvokeTransaction" => {
+                handle_addInvokeTransaction(rpc, params)
+            }
+            "starknet_blockHashAndNumber" => {
+                handle_blockHashAndNumber(rpc, params)
+            }
+            "starknet_blockNumber" => handle_blockNumber(rpc, params),
+            "starknet_call" => handle_call(rpc, params),
+            "starknet_chainId" => handle_chainId(rpc, params),
+            "starknet_estimateFee" => handle_estimateFee(rpc, params),
+            "starknet_estimateMessageFee" => {
+                handle_estimateMessageFee(rpc, params)
+            }
+            "starknet_getBlockTransactionCount" => {
+                handle_getBlockTransactionCount(rpc, params)
+            }
+            "starknet_getBlockWithTxHashes" => {
+                handle_getBlockWithTxHashes(rpc, params)
+            }
+            "starknet_getBlockWithTxs" => handle_getBlockWithTxs(rpc, params),
+            "starknet_getClass" => handle_getClass(rpc, params),
+            "starknet_getClassAt" => handle_getClassAt(rpc, params),
+            "starknet_getClassHashAt" => handle_getClassHashAt(rpc, params),
+            "starknet_getEvents" => handle_getEvents(rpc, params),
+            "starknet_getNonce" => handle_getNonce(rpc, params),
+            "starknet_getStateUpdate" => handle_getStateUpdate(rpc, params),
+            "starknet_getStorageAt" => handle_getStorageAt(rpc, params),
+            "starknet_getTransactionByBlockIdAndIndex" => {
+                handle_getTransactionByBlockIdAndIndex(rpc, params)
+            }
+            "starknet_getTransactionByHash" => {
+                handle_getTransactionByHash(rpc, params)
+            }
+            "starknet_getTransactionReceipt" => {
+                handle_getTransactionReceipt(rpc, params)
+            }
+            "starknet_getTransactionStatus" => {
+                handle_getTransactionStatus(rpc, params)
+            }
             "starknet_simulateTransactions" => {
                 handle_simulateTransactions(rpc, params)
             }
+            "starknet_specVersion" => handle_specVersion(rpc, params),
+            "starknet_syncing" => handle_syncing(rpc, params),
             "starknet_traceBlockTransactions" => {
                 handle_traceBlockTransactions(rpc, params)
             }
+            "starknet_traceTransaction" => handle_traceTransaction(rpc, params),
             _ => jsonrpc::Response::error(-32601, "Method not found"),
         };
 
@@ -4464,11 +4464,218 @@ pub mod gen {
         }
 
         impl super::Rpc for Client {
-            fn specVersion(
+            fn addDeclareTransaction(
                 &self,
-            ) -> std::result::Result<String, jsonrpc::Error> {
+                declare_transaction: BroadcastedDeclareTxn,
+            ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>
+            {
+                let args = (declare_transaction,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_specVersion".to_string(),
+                    "starknet_addDeclareTransaction".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: AddDeclareTransactionResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn addDeployAccountTransaction(
+                &self,
+                deploy_account_transaction: BroadcastedDeployAccountTxn,
+            ) -> std::result::Result<
+                AddDeployAccountTransactionResult,
+                jsonrpc::Error,
+            > {
+                let args = (deploy_account_transaction,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_addDeployAccountTransaction".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: AddDeployAccountTransactionResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn addInvokeTransaction(
+                &self,
+                invoke_transaction: BroadcastedInvokeTxn,
+            ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>
+            {
+                let args = (invoke_transaction,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_addInvokeTransaction".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: AddInvokeTransactionResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn blockHashAndNumber(
+                &self,
+            ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>
+            {
+                let req = jsonrpc::Request::new(
+                    "starknet_blockHashAndNumber".to_string(),
                     serde_json::Value::Array(vec![]),
                 )
                 .with_id(jsonrpc::Id::Number(1));
@@ -4501,7 +4708,7 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: String =
+                    let ret: BlockHashAndNumberResult =
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
@@ -4520,23 +4727,12 @@ pub mod gen {
                 }
             }
 
-            fn getBlockWithTxHashes(
+            fn blockNumber(
                 &self,
-                block_id: BlockId,
-            ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>
-            {
-                let args = (block_id,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
+            ) -> std::result::Result<BlockNumber, jsonrpc::Error> {
                 let req = jsonrpc::Request::new(
-                    "starknet_getBlockWithTxHashes".to_string(),
-                    params,
+                    "starknet_blockNumber".to_string(),
+                    serde_json::Value::Array(vec![]),
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
@@ -4564,769 +4760,12 @@ pub mod gen {
                 log::debug!("RES: {res:#?}");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
                     return Err(err);
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: GetBlockWithTxHashesResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getBlockWithTxs(
-                &self,
-                block_id: BlockId,
-            ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>
-            {
-                let args = (block_id,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getBlockWithTxs".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetBlockWithTxsResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getStateUpdate(
-                &self,
-                block_id: BlockId,
-            ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>
-            {
-                let args = (block_id,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getStateUpdate".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetStateUpdateResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getStorageAt(
-                &self,
-                contract_address: Address,
-                key: StorageKey,
-                block_id: BlockId,
-            ) -> std::result::Result<Felt, jsonrpc::Error> {
-                let args = (contract_address, key, block_id);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getStorageAt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Felt =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getTransactionStatus(
-                &self,
-                transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionStatus".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionStatusResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getTransactionByHash(
-                &self,
-                transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionByHash".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionByHashResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getTransactionByBlockIdAndIndex(
-                &self,
-                block_id: BlockId,
-                index: GetTransactionByBlockIdAndIndexIndex,
-            ) -> std::result::Result<
-                GetTransactionByBlockIdAndIndexResult,
-                jsonrpc::Error,
-            > {
-                let args = (block_id, index);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionByBlockIdAndIndex".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionByBlockIdAndIndexResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getTransactionReceipt(
-                &self,
-                transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionReceipt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionReceiptResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getClass(
-                &self,
-                block_id: BlockId,
-                class_hash: Felt,
-            ) -> std::result::Result<GetClassResult, jsonrpc::Error>
-            {
-                let args = (block_id, class_hash);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getClass".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetClassResult = serde_json::from_value(value)
+                    let ret: BlockNumber = serde_json::from_value(value)
                         .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getClassHashAt(
-                &self,
-                block_id: BlockId,
-                contract_address: Address,
-            ) -> std::result::Result<Felt, jsonrpc::Error> {
-                let args = (block_id, contract_address);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getClassHashAt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Felt =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getClassAt(
-                &self,
-                block_id: BlockId,
-                contract_address: Address,
-            ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>
-            {
-                let args = (block_id, contract_address);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getClassAt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetClassAtResult = serde_json::from_value(value)
-                        .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5002,
-                            format!("Invalid response object: {e}."),
-                        )
-                    })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn getBlockTransactionCount(
-                &self,
-                block_id: BlockId,
-            ) -> std::result::Result<
-                GetBlockTransactionCountResult,
-                jsonrpc::Error,
-            > {
-                let args = (block_id,);
-
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getBlockTransactionCount".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetBlockTransactionCountResult =
-                        serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
                                 format!("Invalid response object: {e}."),
@@ -5393,6 +4832,60 @@ pub mod gen {
                 if let Some(value) = res.result.take() {
                     let ret: Vec<Felt> = serde_json::from_value(value)
                         .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error> {
+                let req = jsonrpc::Request::new(
+                    "starknet_chainId".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: ChainId =
+                        serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
                                 format!("Invalid response object: {e}."),
@@ -5548,12 +5041,25 @@ pub mod gen {
                 }
             }
 
-            fn blockNumber(
+            fn getBlockTransactionCount(
                 &self,
-            ) -> std::result::Result<BlockNumber, jsonrpc::Error> {
+                block_id: BlockId,
+            ) -> std::result::Result<
+                GetBlockTransactionCountResult,
+                jsonrpc::Error,
+            > {
+                let args = (block_id,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_blockNumber".to_string(),
-                    serde_json::Value::Array(vec![]),
+                    "starknet_getBlockTransactionCount".to_string(),
+                    params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
@@ -5581,68 +5087,12 @@ pub mod gen {
                 log::debug!("RES: {res:#?}");
 
                 if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
                     return Err(err);
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: BlockNumber = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn blockHashAndNumber(
-                &self,
-            ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>
-            {
-                let req = jsonrpc::Request::new(
-                    "starknet_blockHashAndNumber".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: BlockHashAndNumberResult =
+                    let ret: GetBlockTransactionCountResult =
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
@@ -5661,10 +5111,23 @@ pub mod gen {
                 }
             }
 
-            fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error> {
+            fn getBlockWithTxHashes(
+                &self,
+                block_id: BlockId,
+            ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>
+            {
+                let args = (block_id,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_chainId".to_string(),
-                    serde_json::Value::Array(vec![]),
+                    "starknet_getBlockWithTxHashes".to_string(),
+                    params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
@@ -5692,11 +5155,12 @@ pub mod gen {
                 log::debug!("RES: {res:#?}");
 
                 if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
                     return Err(err);
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: ChainId =
+                    let ret: GetBlockWithTxHashesResult =
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
@@ -5715,13 +5179,23 @@ pub mod gen {
                 }
             }
 
-            fn syncing(
+            fn getBlockWithTxs(
                 &self,
-            ) -> std::result::Result<SyncingResult, jsonrpc::Error>
+                block_id: BlockId,
+            ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>
             {
+                let args = (block_id,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_syncing".to_string(),
-                    serde_json::Value::Array(vec![]),
+                    "starknet_getBlockWithTxs".to_string(),
+                    params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
@@ -5749,12 +5223,219 @@ pub mod gen {
                 log::debug!("RES: {res:#?}");
 
                 if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
                     return Err(err);
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: SyncingResult = serde_json::from_value(value)
+                    let ret: GetBlockWithTxsResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn getClass(
+                &self,
+                block_id: BlockId,
+                class_hash: Felt,
+            ) -> std::result::Result<GetClassResult, jsonrpc::Error>
+            {
+                let args = (block_id, class_hash);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_getClass".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: GetClassResult = serde_json::from_value(value)
                         .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn getClassAt(
+                &self,
+                block_id: BlockId,
+                contract_address: Address,
+            ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>
+            {
+                let args = (block_id, contract_address);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_getClassAt".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: GetClassAtResult = serde_json::from_value(value)
+                        .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5002,
+                            format!("Invalid response object: {e}."),
+                        )
+                    })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn getClassHashAt(
+                &self,
+                block_id: BlockId,
+                contract_address: Address,
+            ) -> std::result::Result<Felt, jsonrpc::Error> {
+                let args = (block_id, contract_address);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_getClassHashAt".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: Felt =
+                        serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
                                 format!("Invalid response object: {e}."),
@@ -5907,12 +5588,12 @@ pub mod gen {
                 }
             }
 
-            fn addInvokeTransaction(
+            fn getStateUpdate(
                 &self,
-                invoke_transaction: BroadcastedInvokeTxn,
-            ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>
+                block_id: BlockId,
+            ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>
             {
-                let args = (invoke_transaction,);
+                let args = (block_id,);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| {
@@ -5922,7 +5603,7 @@ pub mod gen {
                         )
                     })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_addInvokeTransaction".to_string(),
+                    "starknet_getStateUpdate".to_string(),
                     params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
@@ -5956,7 +5637,7 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: AddInvokeTransactionResult =
+                    let ret: GetStateUpdateResult =
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
@@ -5975,12 +5656,13 @@ pub mod gen {
                 }
             }
 
-            fn addDeclareTransaction(
+            fn getStorageAt(
                 &self,
-                declare_transaction: BroadcastedDeclareTxn,
-            ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>
-            {
-                let args = (declare_transaction,);
+                contract_address: Address,
+                key: StorageKey,
+                block_id: BlockId,
+            ) -> std::result::Result<Felt, jsonrpc::Error> {
+                let args = (contract_address, key, block_id);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| {
@@ -5990,7 +5672,7 @@ pub mod gen {
                         )
                     })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_addDeclareTransaction".to_string(),
+                    "starknet_getStorageAt".to_string(),
                     params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
@@ -6024,7 +5706,7 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: AddDeclareTransactionResult =
+                    let ret: Felt =
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
@@ -6043,14 +5725,15 @@ pub mod gen {
                 }
             }
 
-            fn addDeployAccountTransaction(
+            fn getTransactionByBlockIdAndIndex(
                 &self,
-                deploy_account_transaction: BroadcastedDeployAccountTxn,
+                block_id: BlockId,
+                index: GetTransactionByBlockIdAndIndexIndex,
             ) -> std::result::Result<
-                AddDeployAccountTransactionResult,
+                GetTransactionByBlockIdAndIndexResult,
                 jsonrpc::Error,
             > {
-                let args = (deploy_account_transaction,);
+                let args = (block_id, index);
 
                 let params: serde_json::Value = serde_json::to_value(args)
                     .map_err(|e| {
@@ -6060,7 +5743,7 @@ pub mod gen {
                         )
                     })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_addDeployAccountTransaction".to_string(),
+                    "starknet_getTransactionByBlockIdAndIndex".to_string(),
                     params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
@@ -6094,7 +5777,7 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: AddDeployAccountTransactionResult =
+                    let ret: GetTransactionByBlockIdAndIndexResult =
                         serde_json::from_value(value).map_err(|e| {
                             jsonrpc::Error::new(
                                 5002,
@@ -6113,10 +5796,10 @@ pub mod gen {
                 }
             }
 
-            fn traceTransaction(
+            fn getTransactionByHash(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<TransactionTrace, jsonrpc::Error>
+            ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>
             {
                 let args = (transaction_hash,);
 
@@ -6128,7 +5811,7 @@ pub mod gen {
                         )
                     })?;
                 let req = jsonrpc::Request::new(
-                    "starknet_traceTransaction".to_string(),
+                    "starknet_getTransactionByHash".to_string(),
                     params,
                 )
                 .with_id(jsonrpc::Id::Number(1));
@@ -6162,13 +5845,149 @@ pub mod gen {
                 }
 
                 if let Some(value) = res.result.take() {
-                    let ret: TransactionTrace = serde_json::from_value(value)
-                        .map_err(|e| {
+                    let ret: GetTransactionByHashResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn getTransactionReceipt(
+                &self,
+                transaction_hash: TxnHash,
+            ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>
+            {
+                let args = (transaction_hash,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
                         jsonrpc::Error::new(
-                            5002,
-                            format!("Invalid response object: {e}."),
+                            4001,
+                            format!("Invalid params: {e}."),
                         )
                     })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_getTransactionReceipt".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: GetTransactionReceiptResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn getTransactionStatus(
+                &self,
+                transaction_hash: TxnHash,
+            ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>
+            {
+                let args = (transaction_hash,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_getTransactionStatus".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: GetTransactionStatusResult =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
 
                     log::debug!("RET: {ret:#?}");
 
@@ -6251,6 +6070,119 @@ pub mod gen {
                 }
             }
 
+            fn specVersion(
+                &self,
+            ) -> std::result::Result<String, jsonrpc::Error> {
+                let req = jsonrpc::Request::new(
+                    "starknet_specVersion".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: String =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn syncing(
+                &self,
+            ) -> std::result::Result<SyncingResult, jsonrpc::Error>
+            {
+                let req = jsonrpc::Request::new(
+                    "starknet_syncing".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: SyncingResult = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
             fn traceBlockTransactions(
                 &self,
                 block_id: BlockId,
@@ -6307,6 +6239,74 @@ pub mod gen {
                                 format!("Invalid response object: {e}."),
                             )
                         })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            fn traceTransaction(
+                &self,
+                transaction_hash: TxnHash,
+            ) -> std::result::Result<TransactionTrace, jsonrpc::Error>
+            {
+                let args = (transaction_hash,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "starknet_traceTransaction".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: TransactionTrace = serde_json::from_value(value)
+                        .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5002,
+                            format!("Invalid response object: {e}."),
+                        )
+                    })?;
 
                     log::debug!("RET: {ret:#?}");
 

@@ -1,5 +1,4 @@
-// ensure deterministic ordering of entries
-use indexmap::IndexMap as Map;
+use std::collections::HashMap as Map;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
