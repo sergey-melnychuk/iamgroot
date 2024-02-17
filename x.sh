@@ -15,13 +15,13 @@ cargo run -- CODE \
     ./api/starknet_trace_api_openrpc.json \
     --client >> examples/demo.rs
 
-rm examples/server.rs
-cp examples/server.txt examples/server.rs
+rm examples/proxy.rs
+cp examples/proxy.txt examples/proxy.rs
 cargo run -- CODE \
     ./api/starknet_query_api_openrpc.json \
     ./api/starknet_write_api_openrpc.json \
     ./api/starknet_trace_api_openrpc.json \
-    --async --client >> examples/server.rs
+    --async --client >> examples/proxy.rs
 
 # rm examples/eth.rs
 # cp examples/eth.txt examples/eth.rs
