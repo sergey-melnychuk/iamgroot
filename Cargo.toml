@@ -23,3 +23,4 @@ async-trait = "0.1.77"
 reqwest = { version = "0.11", features = ["json", "blocking"] }
 tokio = { version = "1.36.0", features = ["full"] }
 pretty_assertions = "1.4.0"
+axum = "0.7.4"

@@ -1,0 +1,307 @@
+use axum::{
+    extract::State, response::IntoResponse, routing::post, Json, Router,
+};
+use serde::{Deserialize, Serialize};
+use tokio::net::TcpListener;
+
+use iamgroot::jsonrpc;
+
+#[tokio::main]
+async fn main() {
+    let ctx = Context;
+
+    let app = Router::new()
+        .route("/rpc", post(handle_request))
+        .with_state(ctx);
+
+    let listener = TcpListener::bind("0.0.0.0:9000").await.unwrap();
+    axum::serve(listener, app.into_make_service())
+        .await
+        .unwrap();
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(untagged)]
+enum Request {
+    Single(jsonrpc::Request),
+    Batch(Vec<jsonrpc::Request>),
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(untagged)]
+enum Response {
+    Single(jsonrpc::Response),
+    Batch(Vec<jsonrpc::Response>),
+}
+
+struct RpcError(jsonrpc::Error);
+
+impl IntoResponse for RpcError {
+    fn into_response(self) -> axum::response::Response {
+        let code = axum::http::StatusCode::INTERNAL_SERVER_ERROR;
+        let message = format!("RPC error: {}", self.0.message);
+        (code, message).into_response()
+    }
+}
+
+#[derive(Clone)]
+struct Context;
+
+async fn handle_request(
+    State(ctx): State<Context>,
+    Json(req): Json<Request>,
+) -> Result<impl IntoResponse, RpcError> {
+    match req {
+        Request::Single(req) => {
+            let res = gen::handle(&ctx, &req).await;
+            Ok(Json(Response::Single(res)))
+        }
+        Request::Batch(reqs) => {
+            let mut ret = Vec::with_capacity(reqs.len());
+            for req in reqs {
+                let ctx = ctx.clone();
+                let res = gen::handle(&ctx, &req).await;
+                ret.push(res)
+            }
+            Ok(Json(Response::Batch(ret)))
+        }
+    }
+}
+
+mod rpc {
+    use super::gen::*;
+    use super::*;
+    use iamgroot::jsonrpc;
+
+    fn not_implemented() -> jsonrpc::Error {
+        jsonrpc::Error {
+            code: 0,
+            message: "not implemented".to_owned(),
+        }
+    }
+
+    #[allow(unused_variables)]
+    #[async_trait::async_trait]
+    impl gen::Rpc for Context {
+        async fn addDeclareTransaction(
+            &self,
+            declare_transaction: BroadcastedDeclareTxn,
+        ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn addDeployAccountTransaction(
+            &self,
+            deploy_account_transaction: BroadcastedDeployAccountTxn,
+        ) -> std::result::Result<
+            AddDeployAccountTransactionResult,
+            jsonrpc::Error,
+        > {
+            Err(not_implemented())
+        }
+
+        async fn addInvokeTransaction(
+            &self,
+            invoke_transaction: BroadcastedInvokeTxn,
+        ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn blockHashAndNumber(
+            &self,
+        ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn blockNumber(
+            &self,
+        ) -> std::result::Result<BlockNumber, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn call(
+            &self,
+            request: FunctionCall,
+            block_id: BlockId,
+        ) -> std::result::Result<Vec<Felt>, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn chainId(
+            &self,
+        ) -> std::result::Result<ChainId, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn estimateFee(
+            &self,
+            request: Vec<BroadcastedTxn>,
+            simulation_flags: Vec<SimulationFlagForEstimateFee>,
+            block_id: BlockId,
+        ) -> std::result::Result<Vec<FeeEstimate>, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn estimateMessageFee(
+            &self,
+            message: MsgFromL1,
+            block_id: BlockId,
+        ) -> std::result::Result<FeeEstimate, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getBlockTransactionCount(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockTransactionCountResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn getBlockWithTxHashes(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn getBlockWithTxs(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn getClass(
+            &self,
+            block_id: BlockId,
+            class_hash: Felt,
+        ) -> std::result::Result<GetClassResult, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getClassAt(
+            &self,
+            block_id: BlockId,
+            contract_address: Address,
+        ) -> std::result::Result<GetClassAtResult, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getClassHashAt(
+            &self,
+            block_id: BlockId,
+            contract_address: Address,
+        ) -> std::result::Result<Felt, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getEvents(
+            &self,
+            filter: GetEventsFilter,
+        ) -> std::result::Result<EventsChunk, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getNonce(
+            &self,
+            block_id: BlockId,
+            contract_address: Address,
+        ) -> std::result::Result<Felt, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getStateUpdate(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getStorageAt(
+            &self,
+            contract_address: Address,
+            key: StorageKey,
+            block_id: BlockId,
+        ) -> std::result::Result<Felt, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn getTransactionByBlockIdAndIndex(
+            &self,
+            block_id: BlockId,
+            index: GetTransactionByBlockIdAndIndexIndex,
+        ) -> std::result::Result<
+            GetTransactionByBlockIdAndIndexResult,
+            jsonrpc::Error,
+        > {
+            Err(not_implemented())
+        }
+
+        async fn getTransactionByHash(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn getTransactionReceipt(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn getTransactionStatus(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn simulateTransactions(
+            &self,
+            block_id: BlockId,
+            transactions: Vec<BroadcastedTxn>,
+            simulation_flags: Vec<SimulationFlag>,
+        ) -> std::result::Result<Vec<SimulatedTransaction>, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn specVersion(
+            &self,
+        ) -> std::result::Result<String, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn syncing(
+            &self,
+        ) -> std::result::Result<SyncingResult, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+
+        async fn traceBlockTransactions(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>
+        {
+            Err(not_implemented())
+        }
+
+        async fn traceTransaction(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<TransactionTrace, jsonrpc::Error> {
+            Err(not_implemented())
+        }
+    }
+}
