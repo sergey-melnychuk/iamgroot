@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{
     extract::State, response::IntoResponse, routing::post, Json, Router,
 };
@@ -8,7 +10,10 @@ use iamgroot::jsonrpc;
 
 #[tokio::main]
 async fn main() {
-    let ctx = Context;
+    let url = std::env::var("URL").unwrap();
+    let ctx = Context {
+        client: Arc::new(gen::client::Client::new(&url)),
+    };
 
     let app = Router::new()
         .route("/rpc", post(handle_request))
@@ -45,7 +50,9 @@ impl IntoResponse for RpcError {
 }
 
 #[derive(Clone)]
-struct Context;
+struct Context {
+    client: Arc<gen::client::Client>,
+}
 
 async fn handle_request(
     State(ctx): State<Context>,
@@ -73,13 +80,6 @@ mod rpc {
     use super::*;
     use iamgroot::jsonrpc;
 
-    fn not_implemented() -> jsonrpc::Error {
-        jsonrpc::Error {
-            code: 0,
-            message: "not implemented".to_owned(),
-        }
-    }
-
     #[allow(unused_variables)]
     #[async_trait::async_trait]
     impl gen::Rpc for Context {
@@ -88,7 +88,7 @@ mod rpc {
             declare_transaction: BroadcastedDeclareTxn,
         ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.addDeclareTransaction(declare_transaction).await
         }
 
         async fn addDeployAccountTransaction(
@@ -98,7 +98,9 @@ mod rpc {
             AddDeployAccountTransactionResult,
             jsonrpc::Error,
         > {
-            Err(not_implemented())
+            self.client
+                .addDeployAccountTransaction(deploy_account_transaction)
+                .await
         }
 
         async fn addInvokeTransaction(
@@ -106,20 +108,20 @@ mod rpc {
             invoke_transaction: BroadcastedInvokeTxn,
         ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.addInvokeTransaction(invoke_transaction).await
         }
 
         async fn blockHashAndNumber(
             &self,
         ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.blockHashAndNumber().await
         }
 
         async fn blockNumber(
             &self,
         ) -> std::result::Result<BlockNumber, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.blockNumber().await
         }
 
         async fn call(
@@ -127,13 +129,13 @@ mod rpc {
             request: FunctionCall,
             block_id: BlockId,
         ) -> std::result::Result<Vec<Felt>, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.call(request, block_id).await
         }
 
         async fn chainId(
             &self,
         ) -> std::result::Result<ChainId, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.chainId().await
         }
 
         async fn estimateFee(
@@ -142,7 +144,9 @@ mod rpc {
             simulation_flags: Vec<SimulationFlagForEstimateFee>,
             block_id: BlockId,
         ) -> std::result::Result<Vec<FeeEstimate>, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client
+                .estimateFee(request, simulation_flags, block_id)
+                .await
         }
 
         async fn estimateMessageFee(
@@ -150,7 +154,7 @@ mod rpc {
             message: MsgFromL1,
             block_id: BlockId,
         ) -> std::result::Result<FeeEstimate, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.estimateMessageFee(message, block_id).await
         }
 
         async fn getBlockTransactionCount(
@@ -158,7 +162,7 @@ mod rpc {
             block_id: BlockId,
         ) -> std::result::Result<GetBlockTransactionCountResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.getBlockTransactionCount(block_id).await
         }
 
         async fn getBlockWithTxHashes(
@@ -166,7 +170,7 @@ mod rpc {
             block_id: BlockId,
         ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.getBlockWithTxHashes(block_id).await
         }
 
         async fn getBlockWithTxs(
@@ -174,7 +178,7 @@ mod rpc {
             block_id: BlockId,
         ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.getBlockWithTxs(block_id).await
         }
 
         async fn getClass(
@@ -182,7 +186,7 @@ mod rpc {
             block_id: BlockId,
             class_hash: Felt,
         ) -> std::result::Result<GetClassResult, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.getClass(block_id, class_hash).await
         }
 
         async fn getClassAt(
@@ -190,7 +194,7 @@ mod rpc {
             block_id: BlockId,
             contract_address: Address,
         ) -> std::result::Result<GetClassAtResult, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.getClassAt(block_id, contract_address).await
         }
 
         async fn getClassHashAt(
@@ -198,14 +202,14 @@ mod rpc {
             block_id: BlockId,
             contract_address: Address,
         ) -> std::result::Result<Felt, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.getClassHashAt(block_id, contract_address).await
         }
 
         async fn getEvents(
             &self,
             filter: GetEventsFilter,
         ) -> std::result::Result<EventsChunk, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.getEvents(filter).await
         }
 
         async fn getNonce(
@@ -213,14 +217,14 @@ mod rpc {
             block_id: BlockId,
             contract_address: Address,
         ) -> std::result::Result<Felt, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.getNonce(block_id, contract_address).await
         }
 
         async fn getStateUpdate(
             &self,
             block_id: BlockId,
         ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.getStateUpdate(block_id).await
         }
 
         async fn getStorageAt(
@@ -229,7 +233,9 @@ mod rpc {
             key: StorageKey,
             block_id: BlockId,
         ) -> std::result::Result<Felt, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client
+                .getStorageAt(contract_address, key, block_id)
+                .await
         }
 
         async fn getTransactionByBlockIdAndIndex(
@@ -240,7 +246,9 @@ mod rpc {
             GetTransactionByBlockIdAndIndexResult,
             jsonrpc::Error,
         > {
-            Err(not_implemented())
+            self.client
+                .getTransactionByBlockIdAndIndex(block_id, index)
+                .await
         }
 
         async fn getTransactionByHash(
@@ -248,7 +256,7 @@ mod rpc {
             transaction_hash: TxnHash,
         ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.getTransactionByHash(transaction_hash).await
         }
 
         async fn getTransactionReceipt(
@@ -256,7 +264,7 @@ mod rpc {
             transaction_hash: TxnHash,
         ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.getTransactionReceipt(transaction_hash).await
         }
 
         async fn getTransactionStatus(
@@ -264,7 +272,7 @@ mod rpc {
             transaction_hash: TxnHash,
         ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.getTransactionStatus(transaction_hash).await
         }
 
         async fn simulateTransactions(
@@ -274,19 +282,21 @@ mod rpc {
             simulation_flags: Vec<SimulationFlag>,
         ) -> std::result::Result<Vec<SimulatedTransaction>, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client
+                .simulateTransactions(block_id, transactions, simulation_flags)
+                .await
         }
 
         async fn specVersion(
             &self,
         ) -> std::result::Result<String, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.specVersion().await
         }
 
         async fn syncing(
             &self,
         ) -> std::result::Result<SyncingResult, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.syncing().await
         }
 
         async fn traceBlockTransactions(
@@ -294,14 +304,14 @@ mod rpc {
             block_id: BlockId,
         ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>
         {
-            Err(not_implemented())
+            self.client.traceBlockTransactions(block_id).await
         }
 
         async fn traceTransaction(
             &self,
             transaction_hash: TxnHash,
         ) -> std::result::Result<TransactionTrace, jsonrpc::Error> {
-            Err(not_implemented())
+            self.client.traceTransaction(transaction_hash).await
         }
     }
 }
