@@ -76,8 +76,8 @@ async fn handle_request(
 }
 
 mod rpc {
-    use super::*;
     use super::gen::*;
+    use super::*;
     use iamgroot::jsonrpc;
 
     #[allow(unused_variables)]
@@ -312,6 +312,26 @@ mod rpc {
             transaction_hash: TxnHash,
         ) -> std::result::Result<TransactionTrace, jsonrpc::Error> {
             self.client.traceTransaction(transaction_hash).await
+        }
+
+        async fn getProof(
+            &self,
+            block_id: gen::BlockId,
+            contract_address: gen::Address,
+            keys: Vec<gen::Address>,
+        ) -> std::result::Result<gen::GetProofResult, jsonrpc::Error> {
+            self.client.getProof(block_id, contract_address, keys).await
+        }
+    
+        async fn getTxStatus(
+            &self,
+            transaction_hash: gen::TxnHash,
+        ) -> std::result::Result<gen::TxGatewayStatus, jsonrpc::Error> {
+            self.client.getTxStatus(transaction_hash).await
+        }
+    
+        async fn version(&self) -> std::result::Result<String, jsonrpc::Error> {
+            self.client.version().await
         }
     }
 }

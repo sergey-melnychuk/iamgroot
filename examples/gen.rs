@@ -69,6 +69,17 @@ pub mod gen {
     pub struct Address(pub Felt);
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BinaryNode {
+        pub binary: BinaryNodeBinary,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BinaryNodeBinary {
+        pub left: Felt,
+        pub right: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct BlockBodyWithTxHashes {
         pub transactions: Vec<TxnHash>,
     }
@@ -749,6 +760,23 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EdgeNode {
+        pub edge: EdgeNodeEdge,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EdgeNodeEdge {
+        pub child: Felt,
+        pub path: EdgeNodePath,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct EdgeNodePath {
+        pub len: i64,
+        pub value: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct EmittedEvent {
         #[serde(flatten)]
         pub event: Event,
@@ -1207,6 +1235,13 @@ pub mod gen {
     pub struct NestedCall(pub FunctionInvocation);
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum Node {
+        BinaryNode(BinaryNode),
+        EdgeNode(EdgeNode),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct NonceUpdate {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
@@ -1484,6 +1519,8 @@ pub mod gen {
         }
     }
 
+    type Proof = Vec<Node>;
+
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct ReplacedClass {
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -1744,6 +1781,26 @@ pub mod gen {
         DeclareTxnTrace(DeclareTxnTrace),
         DeployAccountTxnTrace(DeployAccountTxnTrace),
         L1HandlerTxnTrace(L1HandlerTxnTrace),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum TxGatewayStatus {
+        #[serde(rename = "NOT_RECEIVED")]
+        NotReceived,
+        #[serde(rename = "RECEIVED")]
+        Received,
+        #[serde(rename = "PENDING")]
+        Pending,
+        #[serde(rename = "REJECTED")]
+        Rejected,
+        #[serde(rename = "ACCEPTED_ON_L1")]
+        AcceptedOnL1,
+        #[serde(rename = "ACCEPTED_ON_L2")]
+        AcceptedOnL2,
+        #[serde(rename = "REVERTED")]
+        Reverted,
+        #[serde(rename = "ABORTED")]
+        Aborted,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2118,8 +2175,50 @@ pub mod gen {
         pub transaction_hash: Option<Felt>,
     }
 
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ContractData {
+        pub class_hash: Felt,
+        pub contract_state_hash_version: Felt,
+        pub nonce: Felt,
+        pub root: Felt,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub storage_proofs: Option<Vec<Proof>>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct GetProofResult {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub class_commitment: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub contract_data: Option<ContractData>,
+        pub contract_proof: Proof,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub state_commitment: Option<Felt>,
+    }
+
     #[async_trait::async_trait]
     pub trait Rpc {
+        /// Returns merkle proofs of a contract's storage state
+        async fn getProof(
+            &self,
+            block_id: BlockId,
+            contract_address: Address,
+            keys: Vec<Address>,
+        ) -> std::result::Result<GetProofResult, jsonrpc::Error>;
+
+        /// Returns the status of a transaction
+        async fn getTxStatus(
+            &self,
+            transaction_hash: TxnHash,
+        ) -> std::result::Result<TxGatewayStatus, jsonrpc::Error>;
+
+        /// The version of the pathfinder node hosting this API.
+        async fn version(&self) -> std::result::Result<String, jsonrpc::Error>;
+
         /// Submit a new class declaration transaction
         async fn addDeclareTransaction(
             &self,
@@ -2300,6 +2399,110 @@ pub mod gen {
             &self,
             transaction_hash: TxnHash,
         ) -> std::result::Result<TransactionTrace, jsonrpc::Error>;
+    }
+
+    async fn handle_getProof<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(BlockId, Address, Vec<Address>);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            block_id: BlockId,
+            contract_address: Address,
+            keys: Vec<Address>,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(block_id, contract_address, keys) =
+                            args_by_pos;
+                        ArgByName {
+                            block_id,
+                            contract_address,
+                            keys,
+                        }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName {
+            block_id,
+            contract_address,
+            keys,
+        } = args;
+
+        match rpc.getProof(block_id, contract_address, keys).await {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    async fn handle_getTxStatus<RPC: Rpc>(
+        rpc: &RPC,
+        params: &Value,
+    ) -> jsonrpc::Response {
+        #[derive(Deserialize, Serialize)]
+        struct ArgByPos(TxnHash);
+
+        #[derive(Deserialize, Serialize)]
+        struct ArgByName {
+            transaction_hash: TxnHash,
+        }
+
+        let args =
+            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
+                serde_json::from_value::<ArgByPos>(params.clone()).map(
+                    |args_by_pos| {
+                        let ArgByPos(transaction_hash) = args_by_pos;
+                        ArgByName { transaction_hash }
+                    },
+                )
+            });
+
+        let args: ArgByName = match args {
+            Ok(args) => args,
+            Err(_) => {
+                return jsonrpc::Response::error(-32602, "Invalid params")
+            }
+        };
+
+        let ArgByName { transaction_hash } = args;
+
+        match rpc.getTxStatus(transaction_hash).await {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
+    }
+
+    async fn handle_version<RPC: Rpc>(
+        rpc: &RPC,
+        _params: &Value,
+    ) -> jsonrpc::Response {
+        match rpc.version().await {
+            Ok(ret) => match serde_json::to_value(ret) {
+                Ok(ret) => jsonrpc::Response::result(ret),
+                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+            },
+            Err(e) => jsonrpc::Response::error(e.code, &e.message),
+        }
     }
 
     async fn handle_addDeclareTransaction<RPC: Rpc>(
@@ -3376,6 +3579,9 @@ pub mod gen {
         let params = &req.params.clone().unwrap_or_default();
 
         let response = match req.method.as_str() {
+            "pathfinder_getProof" => handle_getProof(rpc, params).await,
+            "pathfinder_getTxStatus" => handle_getTxStatus(rpc, params).await,
+            "pathfinder_version" => handle_version(rpc, params).await,
             "starknet_addDeclareTransaction" => {
                 handle_addDeclareTransaction(rpc, params).await
             }
@@ -3484,6 +3690,8 @@ pub mod gen {
             Error(10, "No trace available for transaction");
         pub const PAGE_SIZE_TOO_BIG: Error =
             Error(31, "Requested page size is too big");
+        pub const PROOF_LIMIT_EXCEEDED: Error =
+            Error(10000, "Too many storage keys requested");
         pub const TOO_MANY_KEYS_IN_FILTER: Error =
             Error(34, "Too many keys provided in a filter");
         pub const TRANSACTION_EXECUTION_ERROR: Error =
@@ -3530,6 +3738,206 @@ pub mod gen {
 
         #[async_trait::async_trait]
         impl super::Rpc for Client {
+            async fn getProof(
+                &self,
+                block_id: BlockId,
+                contract_address: Address,
+                keys: Vec<Address>,
+            ) -> std::result::Result<GetProofResult, jsonrpc::Error>
+            {
+                let args = (block_id, contract_address, keys);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "pathfinder_getProof".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .await
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .await
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: GetProofResult = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            async fn getTxStatus(
+                &self,
+                transaction_hash: TxnHash,
+            ) -> std::result::Result<TxGatewayStatus, jsonrpc::Error>
+            {
+                let args = (transaction_hash,);
+
+                let params: serde_json::Value = serde_json::to_value(args)
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4001,
+                            format!("Invalid params: {e}."),
+                        )
+                    })?;
+                let req = jsonrpc::Request::new(
+                    "pathfinder_getTxStatus".to_string(),
+                    params,
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .await
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .await
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    log::error!("{err:#?}");
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: TxGatewayStatus = serde_json::from_value(value)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
+            async fn version(
+                &self,
+            ) -> std::result::Result<String, jsonrpc::Error> {
+                let req = jsonrpc::Request::new(
+                    "pathfinder_version".to_string(),
+                    serde_json::Value::Array(vec![]),
+                )
+                .with_id(jsonrpc::Id::Number(1));
+
+                log::debug!("REQ: {req:#?}");
+
+                let mut res: jsonrpc::Response = self
+                    .client
+                    .post(&self.url)
+                    .json(&req)
+                    .send()
+                    .await
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            4002,
+                            format!("Request failed: {e}."),
+                        )
+                    })?
+                    .json()
+                    .await
+                    .map_err(|e| {
+                        jsonrpc::Error::new(
+                            5001,
+                            format!("Invalid response JSON: {e}."),
+                        )
+                    })?;
+
+                log::debug!("RES: {res:#?}");
+
+                if let Some(err) = res.error.take() {
+                    return Err(err);
+                }
+
+                if let Some(value) = res.result.take() {
+                    let ret: String =
+                        serde_json::from_value(value).map_err(|e| {
+                            jsonrpc::Error::new(
+                                5002,
+                                format!("Invalid response object: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RET: {ret:#?}");
+
+                    Ok(ret)
+                } else {
+                    Err(jsonrpc::Error::new(
+                        5003,
+                        "Response missing".to_string(),
+                    ))
+                }
+            }
+
             async fn addDeclareTransaction(
                 &self,
                 declare_transaction: BroadcastedDeclareTxn,

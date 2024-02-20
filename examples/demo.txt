@@ -956,7 +956,7 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::TransactionTrace, jsonrpc::Error> {
         Err(jsonrpc::Error {
             code: 1,
-            message: "unimplemented".to_owned(),
+            message: "not implemented".to_owned(),
         })
     }
 
@@ -966,7 +966,7 @@ impl gen::Rpc for State {
     ) -> std::result::Result<Vec<gen::BlockTransaction>, jsonrpc::Error> {
         Err(jsonrpc::Error {
             code: 1,
-            message: "unimplemented".to_owned(),
+            message: "not implemented".to_owned(),
         })
     }
 
@@ -981,7 +981,7 @@ impl gen::Rpc for State {
     {
         Err(jsonrpc::Error {
             code: 1,
-            message: "unimplemented".to_owned(),
+            message: "not implemented".to_owned(),
         })
     }
 
@@ -992,7 +992,7 @@ impl gen::Rpc for State {
     ) -> std::result::Result<gen::FeeEstimate, jsonrpc::Error> {
         Err(jsonrpc::Error {
             code: 1,
-            message: "unimplemented".to_owned(),
+            message: "not implemented".to_owned(),
         })
     }
 
@@ -1005,7 +1005,36 @@ impl gen::Rpc for State {
     {
         Err(jsonrpc::Error {
             code: 1,
-            message: "unimplemented".to_owned(),
+            message: "not implemented".to_owned(),
+        })
+    }
+
+    fn getProof(
+        &self,
+        _block_id: gen::BlockId,
+        _contract_address: gen::Address,
+        _keys: Vec<gen::Address>,
+    ) -> std::result::Result<gen::GetProofResult, jsonrpc::Error> {
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "not implemented".to_owned(),
+        })
+    }
+
+    fn getTxStatus(
+        &self,
+        _transaction_hash: gen::TxnHash,
+    ) -> std::result::Result<gen::TxGatewayStatus, jsonrpc::Error> {
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "not implemented".to_owned(),
+        })
+    }
+
+    fn version(&self) -> std::result::Result<String, jsonrpc::Error> {
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "not implemented".to_owned(),
         })
     }
 }

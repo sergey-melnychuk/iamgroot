@@ -149,7 +149,7 @@ fn bind_schema(
     if let Some(SchemaOrRef::Schema(nested)) = schema.schema.as_deref() {
         return bind_schema(name, nested, objects);
     }
-    panic!("schema binding failed: {schema:#?}");
+    panic!("schema binding failed, name={name}: {schema:#?}");
 }
 
 fn bind_all_of(
