@@ -10,7 +10,12 @@ use iamgroot::jsonrpc;
 
 #[tokio::main]
 async fn main() {
-    let url = std::env::var("URL").unwrap();
+    let url = &std::env::var("URL").expect("URL");
+    let bind = "0.0.0.0:9000";
+    serve(url, bind).await;
+}
+
+async fn serve(url: &str, bind: &str) {
     let ctx = Context {
         client: Arc::new(gen::client::Client::new(&url)),
     };
@@ -19,7 +24,7 @@ async fn main() {
         .route("/rpc", post(handle_request))
         .with_state(ctx);
 
-    let listener = TcpListener::bind("0.0.0.0:9000").await.unwrap();
+    let listener = TcpListener::bind(bind).await.unwrap();
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
