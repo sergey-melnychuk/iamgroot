@@ -365,6 +365,12 @@ fn bind_type(
                         object => {
                             // anonymous object definition
                             let name = schema.title.clone().unwrap_or_default();
+                            let name = normalize(&name);
+                            if name.is_empty() {
+                                panic!(
+                                    "anonymous object definition: {object:#?}"
+                                );
+                            }
                             let object = object.with_name(name.clone());
                             objects.push(object);
                             Type::Named(name)
