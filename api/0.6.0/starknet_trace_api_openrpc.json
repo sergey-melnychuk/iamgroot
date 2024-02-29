@@ -78,7 +78,7 @@
                 "schema": {
                     "type": "array",
                     "items": {
-                        "title": "SimulatedTransaction",
+                        "title": "Simulated Transaction",
                         "type": "object",
                         "properties": {
                             "transaction_trace": {
@@ -123,7 +123,7 @@
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "title": "BlockTransaction",
+                        "title": "Block Transaction",
                         "description": "A single pair of transaction hash and corresponding trace",
                         "properties": {
                             "transaction_hash": {
