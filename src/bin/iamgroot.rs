@@ -20,6 +20,7 @@ fn main() {
 
     let is_async = flags.iter().any(|flag| flag == "async");
     let gen_client = flags.iter().any(|flag| flag == "client");
+    let reexport = flags.iter().any(|flag| flag == "reexport");
 
     match mode.as_str() {
         _ if paths.is_empty() => {
@@ -34,6 +35,9 @@ fn main() {
         }
         "CODE" => {
             let code = gen_code(&paths, is_async, gen_client).unwrap();
+            if reexport {
+                println!("pub use gen::*;\n");
+            }
             println!("{code}");
         }
         mode => {
