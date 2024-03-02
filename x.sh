@@ -1,7 +1,7 @@
 #!/bin/sh
 rm examples/gen.rs
 cp examples/gen.txt examples/gen.rs
-cargo run -- CODE \
+RUST_LOG=off cargo run -- CODE \
     ./api/0.6.0/starknet_query_api_openrpc.json \
     ./api/0.6.0/starknet_write_api_openrpc.json \
     ./api/0.6.0/starknet_trace_api_openrpc.json \
@@ -10,7 +10,7 @@ cargo run -- CODE \
 
 rm examples/demo.rs
 cp examples/demo.txt examples/demo.rs
-cargo run -- CODE \
+RUST_LOG=off cargo run -- CODE \
     ./api/0.6.0/starknet_query_api_openrpc.json \
     ./api/0.6.0/starknet_write_api_openrpc.json \
     ./api/0.6.0/starknet_trace_api_openrpc.json \
@@ -19,7 +19,7 @@ cargo run -- CODE \
 
 rm examples/proxy.rs
 cp examples/proxy.txt examples/proxy.rs
-cargo run -- CODE \
+RUST_LOG=off cargo run -- CODE \
     ./api/0.6.0/starknet_query_api_openrpc.json \
     ./api/0.6.0/starknet_write_api_openrpc.json \
     ./api/0.6.0/starknet_trace_api_openrpc.json \

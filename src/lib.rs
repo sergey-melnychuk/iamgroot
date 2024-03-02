@@ -19,7 +19,7 @@ impl AsPath for String {}
 impl AsPath for &str {}
 
 fn parse<P: AsPath>(path: &P) -> openrpc::Spec {
-    log::info!("Processing file: {path}");
+    tracing::info!(file = path.to_string(), "processing");
     let json = std::fs::read_to_string(path).expect("file");
     serde_json::from_str(&json).expect("json")
 }

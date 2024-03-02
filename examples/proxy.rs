@@ -4042,7 +4042,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4065,10 +4065,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4081,10 +4081,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4112,7 +4113,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4135,10 +4136,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4151,10 +4152,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4171,7 +4173,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4194,9 +4196,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4209,10 +4212,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4240,7 +4244,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4263,10 +4267,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4279,10 +4283,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4312,7 +4317,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4335,10 +4340,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4351,10 +4356,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4382,7 +4388,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4405,10 +4411,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4421,10 +4427,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4442,7 +4449,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4465,9 +4472,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4480,10 +4488,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4500,7 +4509,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4523,9 +4532,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4538,10 +4548,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4567,7 +4578,7 @@ pub mod gen {
                     jsonrpc::Request::new("starknet_call".to_string(), params)
                         .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4590,10 +4601,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4606,10 +4617,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4626,7 +4638,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4649,9 +4661,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4664,10 +4677,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4697,7 +4711,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4720,10 +4734,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4736,10 +4750,11 @@ pub mod gen {
                         )
                     })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4767,7 +4782,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4790,10 +4805,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4806,10 +4821,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4839,7 +4855,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4862,10 +4878,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4878,10 +4894,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4909,7 +4926,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -4932,10 +4949,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -4948,10 +4965,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -4979,7 +4997,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5002,10 +5020,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5018,10 +5036,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5050,7 +5069,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5073,10 +5092,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5089,10 +5108,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5121,7 +5141,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5144,10 +5164,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5160,10 +5180,11 @@ pub mod gen {
                         )
                     })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5191,7 +5212,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5214,10 +5235,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5230,10 +5251,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5260,7 +5282,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5283,10 +5305,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5299,10 +5321,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5330,7 +5353,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5353,10 +5376,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5369,10 +5392,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5400,7 +5424,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5423,10 +5447,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5439,10 +5463,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5471,7 +5496,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5494,10 +5519,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5510,10 +5535,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5544,7 +5570,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5567,10 +5593,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5583,10 +5609,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5614,7 +5641,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5637,10 +5664,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5653,10 +5680,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5684,7 +5712,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5707,10 +5735,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5723,10 +5751,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5754,7 +5783,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5777,10 +5806,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5793,10 +5822,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5826,7 +5856,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5849,10 +5879,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5865,10 +5895,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5885,7 +5916,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5908,9 +5939,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5923,10 +5955,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -5944,7 +5977,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -5967,9 +6000,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -5982,10 +6016,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -6013,7 +6048,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -6036,10 +6071,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -6052,10 +6087,11 @@ pub mod gen {
                             )
                         })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),
@@ -6083,7 +6119,7 @@ pub mod gen {
                 )
                 .with_id(jsonrpc::Id::Number(1));
 
-                log::debug!("REQ: {req:#?}");
+                tracing::debug!(request=?req, "processing");
 
                 let mut res: jsonrpc::Response = self
                     .client
@@ -6106,10 +6142,10 @@ pub mod gen {
                         )
                     })?;
 
-                log::debug!("RES: {res:#?}");
+                tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
+                    tracing::error!(error=?err, "failed");
                     return Err(err);
                 }
 
@@ -6122,10 +6158,11 @@ pub mod gen {
                         )
                     })?;
 
-                    log::debug!("RET: {ret:#?}");
+                    tracing::debug!(result=?ret, "ready");
 
                     Ok(ret)
                 } else {
+                    tracing::error!("both error and result are missing");
                     Err(jsonrpc::Error::new(
                         5003,
                         "Response missing".to_string(),

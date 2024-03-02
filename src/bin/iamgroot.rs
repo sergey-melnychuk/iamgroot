@@ -1,7 +1,7 @@
 use iamgroot::{gen_code, gen_json};
 
 fn main() {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let (mode, paths, flags) = {
         let mut args = std::env::args().skip(1);
@@ -22,7 +22,6 @@ fn main() {
     let gen_blocking = flags.iter().any(|flag| flag == "blocking");
     let gen_client = flags.iter().any(|flag| flag == "client");
     let reexport = flags.iter().any(|flag| flag == "reexport");
-    // TODO: log vs. tracing
 
     match mode.as_str() {
         _ if paths.is_empty() => {

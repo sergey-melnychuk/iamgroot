@@ -537,7 +537,7 @@ const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
         )
         .with_id(jsonrpc::Id::Number(1));
 
-    log::debug!("REQ: {req:#?}");
+    tracing::debug!(request=?req, "processing");
 
     let mut res: jsonrpc::Response = self
         .client
@@ -554,10 +554,10 @@ const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
             format!("Invalid response JSON: {e}."),
         ))?;
 
-    log::debug!("RES: {res:#?}");
+    tracing::debug!(response=?res, "processing");
 
     if let Some(err) = res.error.take() {
-        log::error!("{err:#?}");
+        tracing::error!(error=?err, "failed");
         return Err(err);
     }
 
@@ -570,10 +570,11 @@ const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
                 )
             })?;
 
-        log::debug!("RET: {ret:#?}");
+        tracing::debug!(result=?ret, "ready");
 
         Ok(ret)
     } else {
+        tracing::error!("both error and result are missing");
         Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
     }
 }
@@ -587,7 +588,7 @@ const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
     )
     .with_id(jsonrpc::Id::Number(1));
 
-    log::debug!("REQ: {req:#?}");
+    tracing::debug!(request=?req, "processing");
 
     let mut res: jsonrpc::Response = self
         .client
@@ -598,9 +599,10 @@ const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
         .json()`dot_await`
         .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
 
-    log::debug!("RES: {res:#?}");
+    tracing::debug!(response=?res, "processing");
 
     if let Some(err) = res.error.take() {
+        tracing::error!(error=?err, "failed");
         return Err(err);
     }
 
@@ -613,10 +615,11 @@ const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
                 )
             })?;
 
-        log::debug!("RET: {ret:#?}");
+        tracing::debug!(result=?ret, "ready");
 
         Ok(ret)
     } else {
+        tracing::error!("both error and result are missing");
         Err(jsonrpc::Error::new(5003, "Response missing".to_string()))
     }
 }
