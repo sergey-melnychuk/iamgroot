@@ -93,7 +93,8 @@ impl Gen {
 
 pub fn gen_code<P: AsPath>(
     paths: &[P],
-    is_async: bool,
+    gen_async: bool,
+    gen_blocking: bool,
     gen_client: bool,
 ) -> Result<String, std::fmt::Error> {
     let specs = paths.iter().map(parse).collect::<Vec<_>>();
@@ -156,28 +157,66 @@ pub fn gen_code<P: AsPath>(
     }
 
     writeln!(target, "\n")?;
-    if is_async {
+
+    writeln!(target, "{}", renders::render_errors(&errors))?;
+
+    if gen_async {
         writeln!(target, "#[async_trait::async_trait]")?;
+        writeln!(target, "pub trait Rpc {{")?;
+        for method in &methods {
+            let code = renders::render_method(method, true);
+            writeln!(target, "\n{code}")?;
+        }
+        writeln!(target, "}}")?;
+        for contract in &methods {
+            let code = renders::render_method_handler(contract, true);
+            writeln!(target, "{code}")?;
+        }
+        writeln!(
+            target,
+            "{}",
+            renders::render_handle_function(&methods, true)
+        )?;
     }
-    writeln!(target, "pub trait Rpc {{")?;
-    for method in &methods {
-        let code = renders::render_method(method, is_async);
-        writeln!(target, "\n{code}")?;
+
+    if gen_blocking {
+        writeln!(target, "pub mod blocking {{\nuse super::*;")?;
+
+        writeln!(target, "pub trait Rpc {{")?;
+        for method in &methods {
+            let code = renders::render_method(method, false);
+            writeln!(target, "\n{code}")?;
+        }
+        writeln!(target, "}}")?;
+        for contract in &methods {
+            let code = renders::render_method_handler(contract, false);
+            writeln!(target, "{code}")?;
+        }
+        writeln!(
+            target,
+            "{}",
+            renders::render_handle_function(&methods, false)
+        )?;
+
+        writeln!(target, "\n}}")?;
     }
-    writeln!(target, "}}")?;
-    for contract in &methods {
-        let code = renders::render_method_handler(contract, is_async);
-        writeln!(target, "{code}")?;
-    }
-    writeln!(
-        target,
-        "{}",
-        renders::render_handle_function(&methods, is_async)
-    )?;
-    writeln!(target, "{}", renders::render_errors(errors))?;
 
     if gen_client {
-        writeln!(target, "{}", renders::render_client(&methods, is_async))?;
+        writeln!(target, "pub mod client {{\nuse super::*;")?;
+
+        if gen_async {
+            writeln!(target, "{}", renders::render_client(&methods, true))?;
+        }
+
+        if gen_blocking {
+            let code = renders::render_client(&methods, false);
+            writeln!(
+                target,
+                "pub mod blocking {{\nuse super::*;\n {code} \n}}"
+            )?;
+        }
+
+        writeln!(target, "\n}}")?;
     }
 
     writeln!(target, "}}")?;

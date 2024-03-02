@@ -18,9 +18,11 @@ fn main() {
         (mode, paths, flags)
     };
 
-    let is_async = flags.iter().any(|flag| flag == "async");
+    let gen_async = flags.iter().any(|flag| flag == "async");
+    let gen_blocking = flags.iter().any(|flag| flag == "blocking");
     let gen_client = flags.iter().any(|flag| flag == "client");
     let reexport = flags.iter().any(|flag| flag == "reexport");
+    // TODO: log vs. tracing
 
     match mode.as_str() {
         _ if paths.is_empty() => {
@@ -34,7 +36,8 @@ fn main() {
             eprintln!("JSON mode supports only single file");
         }
         "CODE" => {
-            let code = gen_code(&paths, is_async, gen_client).unwrap();
+            let code =
+                gen_code(&paths, gen_async, gen_blocking, gen_client).unwrap();
             if reexport {
                 println!("pub use gen::*;\n");
             }

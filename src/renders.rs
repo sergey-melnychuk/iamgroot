@@ -320,7 +320,7 @@ mod `type_name_lowercase` {
 const IMPL_INTO_ERROR: &str = r###"
 pub struct Error(i64, &'static str);
 
-impl From<Error> for super::jsonrpc::Error {
+impl From<Error> for iamgroot::jsonrpc::Error {
     fn from(Error(code, message): Error) -> Self {
         Self {
             code,
@@ -337,7 +337,7 @@ fn render_error(name: &str, error: &openrpc::Error) -> String {
     )
 }
 
-pub fn render_errors(errors: Vec<(String, openrpc::Error)>) -> String {
+pub fn render_errors(errors: &[(String, openrpc::Error)]) -> String {
     let mut target = String::new();
     use std::fmt::Write;
 
@@ -496,9 +496,6 @@ pub fn render_handle_function(
 }
 
 const CLIENT_MOD_REQWEST_BLOCKING: &str = r###"
-pub mod client {
-    use super::*;
-
     pub struct Client {
         client: reqwest::`blocking::`Client,
         url: String,
@@ -514,10 +511,9 @@ pub mod client {
     }
 
     `async_trait`
-    impl super::Rpc for Client {
+    impl `super::`super::`blocking::`Rpc for Client {
 `client_methods`
     }
-}
 "###;
 
 const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
@@ -634,6 +630,7 @@ pub fn render_client(methods: &[codegen::Method], is_async: bool) -> String {
         .join("\n");
 
     CLIENT_MOD_REQWEST_BLOCKING
+        .replace("`super::`", if is_async { "" } else { "super::" })
         .replace("`client_methods`", &methods)
         .replace("`blocking::`", if is_async { "" } else { "blocking::" })
         .replace(

@@ -470,14 +470,14 @@ mod demo {
         );
     }
 
-    fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
+    fn call<T: gen::blocking::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
         let req: jsonrpc::Request = serde_json::from_value(json).unwrap();
         let req = req.with_id(jsonrpc::Id::Number(id));
         let json = serde_json::to_string_pretty(&req).unwrap();
         log::debug!(">>> {}", json);
 
         let req: jsonrpc::Request = serde_json::from_str(&json).unwrap();
-        let res = gen::handle(rpc, &req);
+        let res = gen::blocking::handle(rpc, &req);
         log::debug!("<<< {}", serde_json::to_string_pretty(&res).unwrap());
     }
 }
@@ -485,7 +485,7 @@ mod demo {
 struct State;
 
 #[allow(non_snake_case)]
-impl gen::Rpc for State {
+impl gen::blocking::Rpc for State {
     fn getBlockWithTxHashes(
         &self,
         block_id: gen::BlockId,
@@ -3185,1439 +3185,6 @@ pub mod gen {
         pub state_commitment: Option<Felt>,
     }
 
-    pub trait Rpc {
-        /// Returns merkle proofs of a contract's storage state
-        fn getProof(
-            &self,
-            block_id: BlockId,
-            contract_address: Address,
-            keys: Vec<Address>,
-        ) -> std::result::Result<GetProofResult, jsonrpc::Error>;
-
-        /// Returns the status of a transaction
-        fn getTxStatus(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<TxGatewayStatus, jsonrpc::Error>;
-
-        /// The version of the pathfinder node hosting this API.
-        fn version(&self) -> std::result::Result<String, jsonrpc::Error>;
-
-        /// Submit a new class declaration transaction
-        fn addDeclareTransaction(
-            &self,
-            declare_transaction: BroadcastedDeclareTxn,
-        ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>;
-
-        /// Submit a new deploy account transaction
-        fn addDeployAccountTransaction(
-            &self,
-            deploy_account_transaction: BroadcastedDeployAccountTxn,
-        ) -> std::result::Result<
-            AddDeployAccountTransactionResult,
-            jsonrpc::Error,
-        >;
-
-        /// Submit a new transaction to be added to the chain
-        fn addInvokeTransaction(
-            &self,
-            invoke_transaction: BroadcastedInvokeTxn,
-        ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>;
-
-        /// Get the most recent accepted block hash and number
-        fn blockHashAndNumber(
-            &self,
-        ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>;
-
-        /// Get the most recent accepted block number
-        fn blockNumber(
-            &self,
-        ) -> std::result::Result<BlockNumber, jsonrpc::Error>;
-
-        /// call a starknet function without creating a StarkNet transaction
-        fn call(
-            &self,
-            request: FunctionCall,
-            block_id: BlockId,
-        ) -> std::result::Result<Vec<Felt>, jsonrpc::Error>;
-
-        /// Return the currently configured StarkNet chain id
-        fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error>;
-
-        /// estimate the fee for of StarkNet transactions
-        fn estimateFee(
-            &self,
-            request: Vec<BroadcastedTxn>,
-            simulation_flags: Vec<SimulationFlagForEstimateFee>,
-            block_id: BlockId,
-        ) -> std::result::Result<Vec<FeeEstimate>, jsonrpc::Error>;
-
-        /// estimate the L2 fee of a message sent on L1
-        fn estimateMessageFee(
-            &self,
-            message: MsgFromL1,
-            block_id: BlockId,
-        ) -> std::result::Result<FeeEstimate, jsonrpc::Error>;
-
-        /// Get the number of transactions in a block given a block id
-        fn getBlockTransactionCount(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetBlockTransactionCountResult, jsonrpc::Error>;
-
-        /// Get block information with transaction hashes given the block id
-        fn getBlockWithTxHashes(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>;
-
-        /// Get block information with full transactions given the block id
-        fn getBlockWithTxs(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>;
-
-        /// Get the contract class definition in the given block associated with the given hash
-        fn getClass(
-            &self,
-            block_id: BlockId,
-            class_hash: Felt,
-        ) -> std::result::Result<GetClassResult, jsonrpc::Error>;
-
-        /// Get the contract class definition in the given block at the given address
-        fn getClassAt(
-            &self,
-            block_id: BlockId,
-            contract_address: Address,
-        ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>;
-
-        /// Get the contract class hash in the given block for the contract deployed at the given address
-        fn getClassHashAt(
-            &self,
-            block_id: BlockId,
-            contract_address: Address,
-        ) -> std::result::Result<Felt, jsonrpc::Error>;
-
-        /// Returns all events matching the given filter
-        fn getEvents(
-            &self,
-            filter: GetEventsFilter,
-        ) -> std::result::Result<EventsChunk, jsonrpc::Error>;
-
-        /// Get the nonce associated with the given address in the given block
-        fn getNonce(
-            &self,
-            block_id: BlockId,
-            contract_address: Address,
-        ) -> std::result::Result<Felt, jsonrpc::Error>;
-
-        /// Get the information about the result of executing the requested block
-        fn getStateUpdate(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>;
-
-        /// Get the value of the storage at the given address and key
-        fn getStorageAt(
-            &self,
-            contract_address: Address,
-            key: StorageKey,
-            block_id: BlockId,
-        ) -> std::result::Result<Felt, jsonrpc::Error>;
-
-        /// Get the details of a transaction by a given block id and index
-        fn getTransactionByBlockIdAndIndex(
-            &self,
-            block_id: BlockId,
-            index: GetTransactionByBlockIdAndIndexIndex,
-        ) -> std::result::Result<
-            GetTransactionByBlockIdAndIndexResult,
-            jsonrpc::Error,
-        >;
-
-        /// Get the details and status of a submitted transaction
-        fn getTransactionByHash(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>;
-
-        /// Get the transaction receipt by the transaction hash
-        fn getTransactionReceipt(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>;
-
-        /// Gets the transaction status (possibly reflecting that the tx is still in the mempool, or dropped from it)
-        fn getTransactionStatus(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>;
-
-        /// Simulate a given sequence of transactions on the requested state, and generate the execution traces. Note that some of the transactions may revert, in which case no error is thrown, but revert details can be seen on the returned trace object. . Note that some of the transactions may revert, this will be reflected by the revert_error property in the trace. Other types of failures (e.g. unexpected error or failure in the validation phase) will result in TRANSACTION_EXECUTION_ERROR.
-        fn simulateTransactions(
-            &self,
-            block_id: BlockId,
-            transactions: Vec<BroadcastedTxn>,
-            simulation_flags: Vec<SimulationFlag>,
-        ) -> std::result::Result<Vec<SimulatedTransaction>, jsonrpc::Error>;
-
-        /// Returns the version of the Starknet JSON-RPC specification being used
-        fn specVersion(&self) -> std::result::Result<String, jsonrpc::Error>;
-
-        /// Returns an object about the sync status, or false if the node is not synching
-        fn syncing(&self)
-            -> std::result::Result<SyncingResult, jsonrpc::Error>;
-
-        /// Retrieve traces for all transactions in the given block
-        fn traceBlockTransactions(
-            &self,
-            block_id: BlockId,
-        ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>;
-
-        /// For a given executed transaction, return the trace of its execution, including internal calls
-        fn traceTransaction(
-            &self,
-            transaction_hash: TxnHash,
-        ) -> std::result::Result<TransactionTrace, jsonrpc::Error>;
-    }
-
-    fn handle_getProof<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Address, Vec<Address>);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            contract_address: Address,
-            keys: Vec<Address>,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, contract_address, keys) =
-                            args_by_pos;
-                        ArgByName {
-                            block_id,
-                            contract_address,
-                            keys,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            contract_address,
-            keys,
-        } = args;
-
-        match rpc.getProof(block_id, contract_address, keys) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTxStatus<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTxStatus(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_version<RPC: Rpc>(
-        rpc: &RPC,
-        _params: &Value,
-    ) -> jsonrpc::Response {
-        match rpc.version() {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_addDeclareTransaction<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedDeclareTxn);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            declare_transaction: BroadcastedDeclareTxn,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(declare_transaction) = args_by_pos;
-                        ArgByName {
-                            declare_transaction,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            declare_transaction,
-        } = args;
-
-        match rpc.addDeclareTransaction(declare_transaction) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_addDeployAccountTransaction<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedDeployAccountTxn);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            deploy_account_transaction: BroadcastedDeployAccountTxn,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(deploy_account_transaction) = args_by_pos;
-                        ArgByName {
-                            deploy_account_transaction,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            deploy_account_transaction,
-        } = args;
-
-        match rpc.addDeployAccountTransaction(deploy_account_transaction) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_addInvokeTransaction<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BroadcastedInvokeTxn);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            invoke_transaction: BroadcastedInvokeTxn,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(invoke_transaction) = args_by_pos;
-                        ArgByName { invoke_transaction }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { invoke_transaction } = args;
-
-        match rpc.addInvokeTransaction(invoke_transaction) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_blockHashAndNumber<RPC: Rpc>(
-        rpc: &RPC,
-        _params: &Value,
-    ) -> jsonrpc::Response {
-        match rpc.blockHashAndNumber() {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_blockNumber<RPC: Rpc>(
-        rpc: &RPC,
-        _params: &Value,
-    ) -> jsonrpc::Response {
-        match rpc.blockNumber() {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_call<RPC: Rpc>(rpc: &RPC, params: &Value) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(FunctionCall, BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            request: FunctionCall,
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(request, block_id) = args_by_pos;
-                        ArgByName { request, block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { request, block_id } = args;
-
-        match rpc.call(request, block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_chainId<RPC: Rpc>(
-        rpc: &RPC,
-        _params: &Value,
-    ) -> jsonrpc::Response {
-        match rpc.chainId() {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_estimateFee<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(
-            Vec<BroadcastedTxn>,
-            Vec<SimulationFlagForEstimateFee>,
-            BlockId,
-        );
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            request: Vec<BroadcastedTxn>,
-            simulation_flags: Vec<SimulationFlagForEstimateFee>,
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(request, simulation_flags, block_id) =
-                            args_by_pos;
-                        ArgByName {
-                            request,
-                            simulation_flags,
-                            block_id,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            request,
-            simulation_flags,
-            block_id,
-        } = args;
-
-        match rpc.estimateFee(request, simulation_flags, block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_estimateMessageFee<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(MsgFromL1, BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            message: MsgFromL1,
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(message, block_id) = args_by_pos;
-                        ArgByName { message, block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { message, block_id } = args;
-
-        match rpc.estimateMessageFee(message, block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getBlockTransactionCount<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getBlockTransactionCount(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getBlockWithTxHashes<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getBlockWithTxHashes(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getBlockWithTxs<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getBlockWithTxs(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getClass<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Felt);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            class_hash: Felt,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, class_hash) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            class_hash,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            class_hash,
-        } = args;
-
-        match rpc.getClass(block_id, class_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getClassAt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Address);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            contract_address: Address,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, contract_address) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            contract_address,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            contract_address,
-        } = args;
-
-        match rpc.getClassAt(block_id, contract_address) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getClassHashAt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Address);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            contract_address: Address,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, contract_address) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            contract_address,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            contract_address,
-        } = args;
-
-        match rpc.getClassHashAt(block_id, contract_address) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getEvents<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(GetEventsFilter);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            filter: GetEventsFilter,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(filter) = args_by_pos;
-                        ArgByName { filter }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { filter } = args;
-
-        match rpc.getEvents(filter) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getNonce<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Address);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            contract_address: Address,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, contract_address) = args_by_pos;
-                        ArgByName {
-                            block_id,
-                            contract_address,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            contract_address,
-        } = args;
-
-        match rpc.getNonce(block_id, contract_address) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getStateUpdate<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.getStateUpdate(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getStorageAt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(Address, StorageKey, BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            contract_address: Address,
-            key: StorageKey,
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(contract_address, key, block_id) =
-                            args_by_pos;
-                        ArgByName {
-                            contract_address,
-                            key,
-                            block_id,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            contract_address,
-            key,
-            block_id,
-        } = args;
-
-        match rpc.getStorageAt(contract_address, key, block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionByBlockIdAndIndex<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, GetTransactionByBlockIdAndIndexIndex);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            index: GetTransactionByBlockIdAndIndexIndex,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, index) = args_by_pos;
-                        ArgByName { block_id, index }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id, index } = args;
-
-        match rpc.getTransactionByBlockIdAndIndex(block_id, index) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionByHash<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTransactionByHash(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionReceipt<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTransactionReceipt(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_getTransactionStatus<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.getTransactionStatus(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_simulateTransactions<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId, Vec<BroadcastedTxn>, Vec<SimulationFlag>);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-            transactions: Vec<BroadcastedTxn>,
-            simulation_flags: Vec<SimulationFlag>,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id, transactions, simulation_flags) =
-                            args_by_pos;
-                        ArgByName {
-                            block_id,
-                            transactions,
-                            simulation_flags,
-                        }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName {
-            block_id,
-            transactions,
-            simulation_flags,
-        } = args;
-
-        match rpc.simulateTransactions(block_id, transactions, simulation_flags)
-        {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_specVersion<RPC: Rpc>(
-        rpc: &RPC,
-        _params: &Value,
-    ) -> jsonrpc::Response {
-        match rpc.specVersion() {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_syncing<RPC: Rpc>(
-        rpc: &RPC,
-        _params: &Value,
-    ) -> jsonrpc::Response {
-        match rpc.syncing() {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_traceBlockTransactions<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(BlockId);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            block_id: BlockId,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(block_id) = args_by_pos;
-                        ArgByName { block_id }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { block_id } = args;
-
-        match rpc.traceBlockTransactions(block_id) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    fn handle_traceTransaction<RPC: Rpc>(
-        rpc: &RPC,
-        params: &Value,
-    ) -> jsonrpc::Response {
-        #[derive(Deserialize, Serialize)]
-        struct ArgByPos(TxnHash);
-
-        #[derive(Deserialize, Serialize)]
-        struct ArgByName {
-            transaction_hash: TxnHash,
-        }
-
-        let args =
-            serde_json::from_value::<ArgByName>(params.clone()).or_else(|_| {
-                serde_json::from_value::<ArgByPos>(params.clone()).map(
-                    |args_by_pos| {
-                        let ArgByPos(transaction_hash) = args_by_pos;
-                        ArgByName { transaction_hash }
-                    },
-                )
-            });
-
-        let args: ArgByName = match args {
-            Ok(args) => args,
-            Err(_) => {
-                return jsonrpc::Response::error(-32602, "Invalid params")
-            }
-        };
-
-        let ArgByName { transaction_hash } = args;
-
-        match rpc.traceTransaction(transaction_hash) {
-            Ok(ret) => match serde_json::to_value(ret) {
-                Ok(ret) => jsonrpc::Response::result(ret),
-                Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
-            },
-            Err(e) => jsonrpc::Response::error(e.code, &e.message),
-        }
-    }
-
-    pub fn handle<RPC: Rpc>(
-        rpc: &RPC,
-        req: &jsonrpc::Request,
-    ) -> jsonrpc::Response {
-        let params = &req.params.clone().unwrap_or_default();
-
-        let response = match req.method.as_str() {
-            "pathfinder_getProof" => handle_getProof(rpc, params),
-            "pathfinder_getTxStatus" => handle_getTxStatus(rpc, params),
-            "pathfinder_version" => handle_version(rpc, params),
-            "starknet_addDeclareTransaction" => {
-                handle_addDeclareTransaction(rpc, params)
-            }
-            "starknet_addDeployAccountTransaction" => {
-                handle_addDeployAccountTransaction(rpc, params)
-            }
-            "starknet_addInvokeTransaction" => {
-                handle_addInvokeTransaction(rpc, params)
-            }
-            "starknet_blockHashAndNumber" => {
-                handle_blockHashAndNumber(rpc, params)
-            }
-            "starknet_blockNumber" => handle_blockNumber(rpc, params),
-            "starknet_call" => handle_call(rpc, params),
-            "starknet_chainId" => handle_chainId(rpc, params),
-            "starknet_estimateFee" => handle_estimateFee(rpc, params),
-            "starknet_estimateMessageFee" => {
-                handle_estimateMessageFee(rpc, params)
-            }
-            "starknet_getBlockTransactionCount" => {
-                handle_getBlockTransactionCount(rpc, params)
-            }
-            "starknet_getBlockWithTxHashes" => {
-                handle_getBlockWithTxHashes(rpc, params)
-            }
-            "starknet_getBlockWithTxs" => handle_getBlockWithTxs(rpc, params),
-            "starknet_getClass" => handle_getClass(rpc, params),
-            "starknet_getClassAt" => handle_getClassAt(rpc, params),
-            "starknet_getClassHashAt" => handle_getClassHashAt(rpc, params),
-            "starknet_getEvents" => handle_getEvents(rpc, params),
-            "starknet_getNonce" => handle_getNonce(rpc, params),
-            "starknet_getStateUpdate" => handle_getStateUpdate(rpc, params),
-            "starknet_getStorageAt" => handle_getStorageAt(rpc, params),
-            "starknet_getTransactionByBlockIdAndIndex" => {
-                handle_getTransactionByBlockIdAndIndex(rpc, params)
-            }
-            "starknet_getTransactionByHash" => {
-                handle_getTransactionByHash(rpc, params)
-            }
-            "starknet_getTransactionReceipt" => {
-                handle_getTransactionReceipt(rpc, params)
-            }
-            "starknet_getTransactionStatus" => {
-                handle_getTransactionStatus(rpc, params)
-            }
-            "starknet_simulateTransactions" => {
-                handle_simulateTransactions(rpc, params)
-            }
-            "starknet_specVersion" => handle_specVersion(rpc, params),
-            "starknet_syncing" => handle_syncing(rpc, params),
-            "starknet_traceBlockTransactions" => {
-                handle_traceBlockTransactions(rpc, params)
-            }
-            "starknet_traceTransaction" => handle_traceTransaction(rpc, params),
-            _ => jsonrpc::Response::error(-32601, "Method not found"),
-        };
-
-        return if let Some(id) = req.id.as_ref() {
-            response.with_id(id.clone())
-        } else {
-            response
-        };
-    }
-
     pub mod error {
         pub const BLOCK_NOT_FOUND: Error = Error(24, "Block not found");
         pub const CLASS_ALREADY_DECLARED: Error =
@@ -4673,7 +3240,7 @@ pub mod gen {
 
         pub struct Error(i64, &'static str);
 
-        impl From<Error> for super::jsonrpc::Error {
+        impl From<Error> for iamgroot::jsonrpc::Error {
             fn from(Error(code, message): Error) -> Self {
                 Self {
                     code,
@@ -4683,1477 +3250,152 @@ pub mod gen {
         }
     }
 
-    pub mod client {
+    pub mod blocking {
         use super::*;
-
-        pub struct Client {
-            client: reqwest::blocking::Client,
-            url: String,
-        }
-
-        impl Client {
-            pub fn new(url: &str) -> Self {
-                Self {
-                    url: url.to_string(),
-                    client: reqwest::blocking::Client::new(),
-                }
-            }
-        }
-
-        impl super::Rpc for Client {
+        pub trait Rpc {
+            /// Returns merkle proofs of a contract's storage state
             fn getProof(
                 &self,
                 block_id: BlockId,
                 contract_address: Address,
                 keys: Vec<Address>,
-            ) -> std::result::Result<GetProofResult, jsonrpc::Error>
-            {
-                let args = (block_id, contract_address, keys);
+            ) -> std::result::Result<GetProofResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "pathfinder_getProof".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetProofResult = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Returns the status of a transaction
             fn getTxStatus(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<TxGatewayStatus, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
+            ) -> std::result::Result<TxGatewayStatus, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "pathfinder_getTxStatus".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
+            /// The version of the pathfinder node hosting this API.
+            fn version(&self) -> std::result::Result<String, jsonrpc::Error>;
 
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: TxGatewayStatus = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn version(&self) -> std::result::Result<String, jsonrpc::Error> {
-                let req = jsonrpc::Request::new(
-                    "pathfinder_version".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: String =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Submit a new class declaration transaction
             fn addDeclareTransaction(
                 &self,
                 declare_transaction: BroadcastedDeclareTxn,
-            ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>
-            {
-                let args = (declare_transaction,);
+            ) -> std::result::Result<AddDeclareTransactionResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_addDeclareTransaction".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: AddDeclareTransactionResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Submit a new deploy account transaction
             fn addDeployAccountTransaction(
                 &self,
                 deploy_account_transaction: BroadcastedDeployAccountTxn,
             ) -> std::result::Result<
                 AddDeployAccountTransactionResult,
                 jsonrpc::Error,
-            > {
-                let args = (deploy_account_transaction,);
+            >;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_addDeployAccountTransaction".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: AddDeployAccountTransactionResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Submit a new transaction to be added to the chain
             fn addInvokeTransaction(
                 &self,
                 invoke_transaction: BroadcastedInvokeTxn,
-            ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>
-            {
-                let args = (invoke_transaction,);
+            ) -> std::result::Result<AddInvokeTransactionResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_addInvokeTransaction".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: AddInvokeTransactionResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the most recent accepted block hash and number
             fn blockHashAndNumber(
                 &self,
-            ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>
-            {
-                let req = jsonrpc::Request::new(
-                    "starknet_blockHashAndNumber".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
+            ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>;
 
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: BlockHashAndNumberResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the most recent accepted block number
             fn blockNumber(
                 &self,
-            ) -> std::result::Result<BlockNumber, jsonrpc::Error> {
-                let req = jsonrpc::Request::new(
-                    "starknet_blockNumber".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
+            ) -> std::result::Result<BlockNumber, jsonrpc::Error>;
 
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: BlockNumber = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// call a starknet function without creating a StarkNet transaction
             fn call(
                 &self,
                 request: FunctionCall,
                 block_id: BlockId,
-            ) -> std::result::Result<Vec<Felt>, jsonrpc::Error> {
-                let args = (request, block_id);
+            ) -> std::result::Result<Vec<Felt>, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req =
-                    jsonrpc::Request::new("starknet_call".to_string(), params)
-                        .with_id(jsonrpc::Id::Number(1));
+            /// Return the currently configured StarkNet chain id
+            fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error>;
 
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Vec<Felt> = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
-            fn chainId(&self) -> std::result::Result<ChainId, jsonrpc::Error> {
-                let req = jsonrpc::Request::new(
-                    "starknet_chainId".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: ChainId =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// estimate the fee for of StarkNet transactions
             fn estimateFee(
                 &self,
                 request: Vec<BroadcastedTxn>,
                 simulation_flags: Vec<SimulationFlagForEstimateFee>,
                 block_id: BlockId,
-            ) -> std::result::Result<Vec<FeeEstimate>, jsonrpc::Error>
-            {
-                let args = (request, simulation_flags, block_id);
+            ) -> std::result::Result<Vec<FeeEstimate>, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_estimateFee".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Vec<FeeEstimate> = serde_json::from_value(value)
-                        .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5002,
-                            format!("Invalid response object: {e}."),
-                        )
-                    })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// estimate the L2 fee of a message sent on L1
             fn estimateMessageFee(
                 &self,
                 message: MsgFromL1,
                 block_id: BlockId,
-            ) -> std::result::Result<FeeEstimate, jsonrpc::Error> {
-                let args = (message, block_id);
+            ) -> std::result::Result<FeeEstimate, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_estimateMessageFee".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: FeeEstimate = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the number of transactions in a block given a block id
             fn getBlockTransactionCount(
                 &self,
                 block_id: BlockId,
             ) -> std::result::Result<
                 GetBlockTransactionCountResult,
                 jsonrpc::Error,
-            > {
-                let args = (block_id,);
+            >;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getBlockTransactionCount".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetBlockTransactionCountResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get block information with transaction hashes given the block id
             fn getBlockWithTxHashes(
                 &self,
                 block_id: BlockId,
-            ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>
-            {
-                let args = (block_id,);
+            ) -> std::result::Result<GetBlockWithTxHashesResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getBlockWithTxHashes".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetBlockWithTxHashesResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get block information with full transactions given the block id
             fn getBlockWithTxs(
                 &self,
                 block_id: BlockId,
-            ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>
-            {
-                let args = (block_id,);
+            ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getBlockWithTxs".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetBlockWithTxsResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the contract class definition in the given block associated with the given hash
             fn getClass(
                 &self,
                 block_id: BlockId,
                 class_hash: Felt,
-            ) -> std::result::Result<GetClassResult, jsonrpc::Error>
-            {
-                let args = (block_id, class_hash);
+            ) -> std::result::Result<GetClassResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getClass".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetClassResult = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the contract class definition in the given block at the given address
             fn getClassAt(
                 &self,
                 block_id: BlockId,
                 contract_address: Address,
-            ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>
-            {
-                let args = (block_id, contract_address);
+            ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getClassAt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetClassAtResult = serde_json::from_value(value)
-                        .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5002,
-                            format!("Invalid response object: {e}."),
-                        )
-                    })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the contract class hash in the given block for the contract deployed at the given address
             fn getClassHashAt(
                 &self,
                 block_id: BlockId,
                 contract_address: Address,
-            ) -> std::result::Result<Felt, jsonrpc::Error> {
-                let args = (block_id, contract_address);
+            ) -> std::result::Result<Felt, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getClassHashAt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Felt =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Returns all events matching the given filter
             fn getEvents(
                 &self,
                 filter: GetEventsFilter,
-            ) -> std::result::Result<EventsChunk, jsonrpc::Error> {
-                let args = (filter,);
+            ) -> std::result::Result<EventsChunk, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getEvents".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: EventsChunk = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the nonce associated with the given address in the given block
             fn getNonce(
                 &self,
                 block_id: BlockId,
                 contract_address: Address,
-            ) -> std::result::Result<Felt, jsonrpc::Error> {
-                let args = (block_id, contract_address);
+            ) -> std::result::Result<Felt, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getNonce".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Felt =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the information about the result of executing the requested block
             fn getStateUpdate(
                 &self,
                 block_id: BlockId,
-            ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>
-            {
-                let args = (block_id,);
+            ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getStateUpdate".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetStateUpdateResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the value of the storage at the given address and key
             fn getStorageAt(
                 &self,
                 contract_address: Address,
                 key: StorageKey,
                 block_id: BlockId,
-            ) -> std::result::Result<Felt, jsonrpc::Error> {
-                let args = (contract_address, key, block_id);
+            ) -> std::result::Result<Felt, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getStorageAt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Felt =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the details of a transaction by a given block id and index
             fn getTransactionByBlockIdAndIndex(
                 &self,
                 block_id: BlockId,
@@ -6161,590 +3403,3453 @@ pub mod gen {
             ) -> std::result::Result<
                 GetTransactionByBlockIdAndIndexResult,
                 jsonrpc::Error,
-            > {
-                let args = (block_id, index);
+            >;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionByBlockIdAndIndex".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionByBlockIdAndIndexResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the details and status of a submitted transaction
             fn getTransactionByHash(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
+            ) -> std::result::Result<GetTransactionByHashResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionByHash".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionByHashResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Get the transaction receipt by the transaction hash
             fn getTransactionReceipt(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
+            ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionReceipt".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionReceiptResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Gets the transaction status (possibly reflecting that the tx is still in the mempool, or dropped from it)
             fn getTransactionStatus(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
+            ) -> std::result::Result<GetTransactionStatusResult, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_getTransactionStatus".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: GetTransactionStatusResult =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Simulate a given sequence of transactions on the requested state, and generate the execution traces. Note that some of the transactions may revert, in which case no error is thrown, but revert details can be seen on the returned trace object. . Note that some of the transactions may revert, this will be reflected by the revert_error property in the trace. Other types of failures (e.g. unexpected error or failure in the validation phase) will result in TRANSACTION_EXECUTION_ERROR.
             fn simulateTransactions(
                 &self,
                 block_id: BlockId,
                 transactions: Vec<BroadcastedTxn>,
                 simulation_flags: Vec<SimulationFlag>,
-            ) -> std::result::Result<Vec<SimulatedTransaction>, jsonrpc::Error>
-            {
-                let args = (block_id, transactions, simulation_flags);
+            ) -> std::result::Result<Vec<SimulatedTransaction>, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_simulateTransactions".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Vec<SimulatedTransaction> =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Returns the version of the Starknet JSON-RPC specification being used
             fn specVersion(
                 &self,
-            ) -> std::result::Result<String, jsonrpc::Error> {
-                let req = jsonrpc::Request::new(
-                    "starknet_specVersion".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
+            ) -> std::result::Result<String, jsonrpc::Error>;
 
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: String =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Returns an object about the sync status, or false if the node is not synching
             fn syncing(
                 &self,
-            ) -> std::result::Result<SyncingResult, jsonrpc::Error>
-            {
-                let req = jsonrpc::Request::new(
-                    "starknet_syncing".to_string(),
-                    serde_json::Value::Array(vec![]),
-                )
-                .with_id(jsonrpc::Id::Number(1));
+            ) -> std::result::Result<SyncingResult, jsonrpc::Error>;
 
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: SyncingResult = serde_json::from_value(value)
-                        .map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// Retrieve traces for all transactions in the given block
             fn traceBlockTransactions(
                 &self,
                 block_id: BlockId,
-            ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>
-            {
-                let args = (block_id,);
+            ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>;
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_traceBlockTransactions".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
-
-                log::debug!("REQ: {req:#?}");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
-                log::debug!("RES: {res:#?}");
-
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
-                }
-
-                if let Some(value) = res.result.take() {
-                    let ret: Vec<BlockTransaction> =
-                        serde_json::from_value(value).map_err(|e| {
-                            jsonrpc::Error::new(
-                                5002,
-                                format!("Invalid response object: {e}."),
-                            )
-                        })?;
-
-                    log::debug!("RET: {ret:#?}");
-
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
-                }
-            }
-
+            /// For a given executed transaction, return the trace of its execution, including internal calls
             fn traceTransaction(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<TransactionTrace, jsonrpc::Error>
-            {
-                let args = (transaction_hash,);
+            ) -> std::result::Result<TransactionTrace, jsonrpc::Error>;
+        }
 
-                let params: serde_json::Value = serde_json::to_value(args)
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4001,
-                            format!("Invalid params: {e}."),
-                        )
-                    })?;
-                let req = jsonrpc::Request::new(
-                    "starknet_traceTransaction".to_string(),
-                    params,
-                )
-                .with_id(jsonrpc::Id::Number(1));
+        fn handle_getProof<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, Address, Vec<Address>);
 
-                log::debug!("REQ: {req:#?}");
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                contract_address: Address,
+                keys: Vec<Address>,
+            }
 
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id, contract_address, keys) =
+                                args_by_pos;
+                            ArgByName {
+                                block_id,
+                                contract_address,
+                                keys,
+                            }
+                        },
+                    )
+                });
 
-                log::debug!("RES: {res:#?}");
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
 
-                if let Some(err) = res.error.take() {
-                    log::error!("{err:#?}");
-                    return Err(err);
+            let ArgByName {
+                block_id,
+                contract_address,
+                keys,
+            } = args;
+
+            match rpc.getProof(block_id, contract_address, keys) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getTxStatus<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(TxnHash);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                transaction_hash: TxnHash,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(transaction_hash) = args_by_pos;
+                            ArgByName { transaction_hash }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { transaction_hash } = args;
+
+            match rpc.getTxStatus(transaction_hash) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_version<RPC: Rpc>(
+            rpc: &RPC,
+            _params: &Value,
+        ) -> jsonrpc::Response {
+            match rpc.version() {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_addDeclareTransaction<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BroadcastedDeclareTxn);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                declare_transaction: BroadcastedDeclareTxn,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(declare_transaction) = args_by_pos;
+                            ArgByName {
+                                declare_transaction,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                declare_transaction,
+            } = args;
+
+            match rpc.addDeclareTransaction(declare_transaction) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_addDeployAccountTransaction<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BroadcastedDeployAccountTxn);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                deploy_account_transaction: BroadcastedDeployAccountTxn,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(deploy_account_transaction) =
+                                args_by_pos;
+                            ArgByName {
+                                deploy_account_transaction,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                deploy_account_transaction,
+            } = args;
+
+            match rpc.addDeployAccountTransaction(deploy_account_transaction) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_addInvokeTransaction<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BroadcastedInvokeTxn);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                invoke_transaction: BroadcastedInvokeTxn,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(invoke_transaction) = args_by_pos;
+                            ArgByName { invoke_transaction }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { invoke_transaction } = args;
+
+            match rpc.addInvokeTransaction(invoke_transaction) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_blockHashAndNumber<RPC: Rpc>(
+            rpc: &RPC,
+            _params: &Value,
+        ) -> jsonrpc::Response {
+            match rpc.blockHashAndNumber() {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_blockNumber<RPC: Rpc>(
+            rpc: &RPC,
+            _params: &Value,
+        ) -> jsonrpc::Response {
+            match rpc.blockNumber() {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_call<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(FunctionCall, BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                request: FunctionCall,
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(request, block_id) = args_by_pos;
+                            ArgByName { request, block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { request, block_id } = args;
+
+            match rpc.call(request, block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_chainId<RPC: Rpc>(
+            rpc: &RPC,
+            _params: &Value,
+        ) -> jsonrpc::Response {
+            match rpc.chainId() {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_estimateFee<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(
+                Vec<BroadcastedTxn>,
+                Vec<SimulationFlagForEstimateFee>,
+                BlockId,
+            );
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                request: Vec<BroadcastedTxn>,
+                simulation_flags: Vec<SimulationFlagForEstimateFee>,
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(request, simulation_flags, block_id) =
+                                args_by_pos;
+                            ArgByName {
+                                request,
+                                simulation_flags,
+                                block_id,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                request,
+                simulation_flags,
+                block_id,
+            } = args;
+
+            match rpc.estimateFee(request, simulation_flags, block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_estimateMessageFee<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(MsgFromL1, BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                message: MsgFromL1,
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(message, block_id) = args_by_pos;
+                            ArgByName { message, block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { message, block_id } = args;
+
+            match rpc.estimateMessageFee(message, block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getBlockTransactionCount<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id) = args_by_pos;
+                            ArgByName { block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { block_id } = args;
+
+            match rpc.getBlockTransactionCount(block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getBlockWithTxHashes<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id) = args_by_pos;
+                            ArgByName { block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { block_id } = args;
+
+            match rpc.getBlockWithTxHashes(block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getBlockWithTxs<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id) = args_by_pos;
+                            ArgByName { block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { block_id } = args;
+
+            match rpc.getBlockWithTxs(block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getClass<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, Felt);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                class_hash: Felt,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id, class_hash) = args_by_pos;
+                            ArgByName {
+                                block_id,
+                                class_hash,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                block_id,
+                class_hash,
+            } = args;
+
+            match rpc.getClass(block_id, class_hash) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getClassAt<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, Address);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                contract_address: Address,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id, contract_address) =
+                                args_by_pos;
+                            ArgByName {
+                                block_id,
+                                contract_address,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                block_id,
+                contract_address,
+            } = args;
+
+            match rpc.getClassAt(block_id, contract_address) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getClassHashAt<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, Address);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                contract_address: Address,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id, contract_address) =
+                                args_by_pos;
+                            ArgByName {
+                                block_id,
+                                contract_address,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                block_id,
+                contract_address,
+            } = args;
+
+            match rpc.getClassHashAt(block_id, contract_address) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getEvents<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(GetEventsFilter);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                filter: GetEventsFilter,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(filter) = args_by_pos;
+                            ArgByName { filter }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { filter } = args;
+
+            match rpc.getEvents(filter) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getNonce<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, Address);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                contract_address: Address,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id, contract_address) =
+                                args_by_pos;
+                            ArgByName {
+                                block_id,
+                                contract_address,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                block_id,
+                contract_address,
+            } = args;
+
+            match rpc.getNonce(block_id, contract_address) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getStateUpdate<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id) = args_by_pos;
+                            ArgByName { block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { block_id } = args;
+
+            match rpc.getStateUpdate(block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getStorageAt<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(Address, StorageKey, BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                contract_address: Address,
+                key: StorageKey,
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(contract_address, key, block_id) =
+                                args_by_pos;
+                            ArgByName {
+                                contract_address,
+                                key,
+                                block_id,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                contract_address,
+                key,
+                block_id,
+            } = args;
+
+            match rpc.getStorageAt(contract_address, key, block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getTransactionByBlockIdAndIndex<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, GetTransactionByBlockIdAndIndexIndex);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                index: GetTransactionByBlockIdAndIndexIndex,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id, index) = args_by_pos;
+                            ArgByName { block_id, index }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { block_id, index } = args;
+
+            match rpc.getTransactionByBlockIdAndIndex(block_id, index) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getTransactionByHash<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(TxnHash);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                transaction_hash: TxnHash,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(transaction_hash) = args_by_pos;
+                            ArgByName { transaction_hash }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { transaction_hash } = args;
+
+            match rpc.getTransactionByHash(transaction_hash) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getTransactionReceipt<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(TxnHash);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                transaction_hash: TxnHash,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(transaction_hash) = args_by_pos;
+                            ArgByName { transaction_hash }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { transaction_hash } = args;
+
+            match rpc.getTransactionReceipt(transaction_hash) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getTransactionStatus<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(TxnHash);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                transaction_hash: TxnHash,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(transaction_hash) = args_by_pos;
+                            ArgByName { transaction_hash }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { transaction_hash } = args;
+
+            match rpc.getTransactionStatus(transaction_hash) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_simulateTransactions<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId, Vec<BroadcastedTxn>, Vec<SimulationFlag>);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+                transactions: Vec<BroadcastedTxn>,
+                simulation_flags: Vec<SimulationFlag>,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(
+                                block_id,
+                                transactions,
+                                simulation_flags,
+                            ) = args_by_pos;
+                            ArgByName {
+                                block_id,
+                                transactions,
+                                simulation_flags,
+                            }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName {
+                block_id,
+                transactions,
+                simulation_flags,
+            } = args;
+
+            match rpc.simulateTransactions(
+                block_id,
+                transactions,
+                simulation_flags,
+            ) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_specVersion<RPC: Rpc>(
+            rpc: &RPC,
+            _params: &Value,
+        ) -> jsonrpc::Response {
+            match rpc.specVersion() {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_syncing<RPC: Rpc>(
+            rpc: &RPC,
+            _params: &Value,
+        ) -> jsonrpc::Response {
+            match rpc.syncing() {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(e) => jsonrpc::Response::error(1003, &format!("{e:?}")),
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_traceBlockTransactions<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id) = args_by_pos;
+                            ArgByName { block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { block_id } = args;
+
+            match rpc.traceBlockTransactions(block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_traceTransaction<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(TxnHash);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                transaction_hash: TxnHash,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(transaction_hash) = args_by_pos;
+                            ArgByName { transaction_hash }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(_) => {
+                    return jsonrpc::Response::error(-32602, "Invalid params")
+                }
+            };
+
+            let ArgByName { transaction_hash } = args;
+
+            match rpc.traceTransaction(transaction_hash) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(_) => {
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        pub fn handle<RPC: Rpc>(
+            rpc: &RPC,
+            req: &jsonrpc::Request,
+        ) -> jsonrpc::Response {
+            let params = &req.params.clone().unwrap_or_default();
+
+            let response = match req.method.as_str() {
+                "pathfinder_getProof" => handle_getProof(rpc, params),
+                "pathfinder_getTxStatus" => handle_getTxStatus(rpc, params),
+                "pathfinder_version" => handle_version(rpc, params),
+                "starknet_addDeclareTransaction" => {
+                    handle_addDeclareTransaction(rpc, params)
+                }
+                "starknet_addDeployAccountTransaction" => {
+                    handle_addDeployAccountTransaction(rpc, params)
+                }
+                "starknet_addInvokeTransaction" => {
+                    handle_addInvokeTransaction(rpc, params)
+                }
+                "starknet_blockHashAndNumber" => {
+                    handle_blockHashAndNumber(rpc, params)
+                }
+                "starknet_blockNumber" => handle_blockNumber(rpc, params),
+                "starknet_call" => handle_call(rpc, params),
+                "starknet_chainId" => handle_chainId(rpc, params),
+                "starknet_estimateFee" => handle_estimateFee(rpc, params),
+                "starknet_estimateMessageFee" => {
+                    handle_estimateMessageFee(rpc, params)
+                }
+                "starknet_getBlockTransactionCount" => {
+                    handle_getBlockTransactionCount(rpc, params)
+                }
+                "starknet_getBlockWithTxHashes" => {
+                    handle_getBlockWithTxHashes(rpc, params)
+                }
+                "starknet_getBlockWithTxs" => {
+                    handle_getBlockWithTxs(rpc, params)
+                }
+                "starknet_getClass" => handle_getClass(rpc, params),
+                "starknet_getClassAt" => handle_getClassAt(rpc, params),
+                "starknet_getClassHashAt" => handle_getClassHashAt(rpc, params),
+                "starknet_getEvents" => handle_getEvents(rpc, params),
+                "starknet_getNonce" => handle_getNonce(rpc, params),
+                "starknet_getStateUpdate" => handle_getStateUpdate(rpc, params),
+                "starknet_getStorageAt" => handle_getStorageAt(rpc, params),
+                "starknet_getTransactionByBlockIdAndIndex" => {
+                    handle_getTransactionByBlockIdAndIndex(rpc, params)
+                }
+                "starknet_getTransactionByHash" => {
+                    handle_getTransactionByHash(rpc, params)
+                }
+                "starknet_getTransactionReceipt" => {
+                    handle_getTransactionReceipt(rpc, params)
+                }
+                "starknet_getTransactionStatus" => {
+                    handle_getTransactionStatus(rpc, params)
+                }
+                "starknet_simulateTransactions" => {
+                    handle_simulateTransactions(rpc, params)
+                }
+                "starknet_specVersion" => handle_specVersion(rpc, params),
+                "starknet_syncing" => handle_syncing(rpc, params),
+                "starknet_traceBlockTransactions" => {
+                    handle_traceBlockTransactions(rpc, params)
+                }
+                "starknet_traceTransaction" => {
+                    handle_traceTransaction(rpc, params)
+                }
+                _ => jsonrpc::Response::error(-32601, "Method not found"),
+            };
+
+            return if let Some(id) = req.id.as_ref() {
+                response.with_id(id.clone())
+            } else {
+                response
+            };
+        }
+    }
+    pub mod client {
+        use super::*;
+        pub mod blocking {
+            use super::*;
+
+            pub struct Client {
+                client: reqwest::blocking::Client,
+                url: String,
+            }
+
+            impl Client {
+                pub fn new(url: &str) -> Self {
+                    Self {
+                        url: url.to_string(),
+                        client: reqwest::blocking::Client::new(),
+                    }
+                }
+            }
+
+            impl super::super::blocking::Rpc for Client {
+                fn getProof(
+                    &self,
+                    block_id: BlockId,
+                    contract_address: Address,
+                    keys: Vec<Address>,
+                ) -> std::result::Result<GetProofResult, jsonrpc::Error>
+                {
+                    let args = (block_id, contract_address, keys);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "pathfinder_getProof".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetProofResult = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
                 }
 
-                if let Some(value) = res.result.take() {
-                    let ret: TransactionTrace = serde_json::from_value(value)
+                fn getTxStatus(
+                    &self,
+                    transaction_hash: TxnHash,
+                ) -> std::result::Result<TxGatewayStatus, jsonrpc::Error>
+                {
+                    let args = (transaction_hash,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
                         .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5002,
-                            format!("Invalid response object: {e}."),
-                        )
-                    })?;
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "pathfinder_getTxStatus".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
 
-                    log::debug!("RET: {ret:#?}");
+                    log::debug!("REQ: {req:#?}");
 
-                    Ok(ret)
-                } else {
-                    Err(jsonrpc::Error::new(
-                        5003,
-                        "Response missing".to_string(),
-                    ))
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: TxGatewayStatus =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn version(
+                    &self,
+                ) -> std::result::Result<String, jsonrpc::Error>
+                {
+                    let req = jsonrpc::Request::new(
+                        "pathfinder_version".to_string(),
+                        serde_json::Value::Array(vec![]),
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: String = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn addDeclareTransaction(
+                    &self,
+                    declare_transaction: BroadcastedDeclareTxn,
+                ) -> std::result::Result<
+                    AddDeclareTransactionResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (declare_transaction,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_addDeclareTransaction".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: AddDeclareTransactionResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn addDeployAccountTransaction(
+                    &self,
+                    deploy_account_transaction: BroadcastedDeployAccountTxn,
+                ) -> std::result::Result<
+                    AddDeployAccountTransactionResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (deploy_account_transaction,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_addDeployAccountTransaction".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: AddDeployAccountTransactionResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn addInvokeTransaction(
+                    &self,
+                    invoke_transaction: BroadcastedInvokeTxn,
+                ) -> std::result::Result<
+                    AddInvokeTransactionResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (invoke_transaction,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_addInvokeTransaction".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: AddInvokeTransactionResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn blockHashAndNumber(
+                    &self,
+                ) -> std::result::Result<BlockHashAndNumberResult, jsonrpc::Error>
+                {
+                    let req = jsonrpc::Request::new(
+                        "starknet_blockHashAndNumber".to_string(),
+                        serde_json::Value::Array(vec![]),
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: BlockHashAndNumberResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn blockNumber(
+                    &self,
+                ) -> std::result::Result<BlockNumber, jsonrpc::Error>
+                {
+                    let req = jsonrpc::Request::new(
+                        "starknet_blockNumber".to_string(),
+                        serde_json::Value::Array(vec![]),
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: BlockNumber = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn call(
+                    &self,
+                    request: FunctionCall,
+                    block_id: BlockId,
+                ) -> std::result::Result<Vec<Felt>, jsonrpc::Error>
+                {
+                    let args = (request, block_id);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_call".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Vec<Felt> = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn chainId(
+                    &self,
+                ) -> std::result::Result<ChainId, jsonrpc::Error>
+                {
+                    let req = jsonrpc::Request::new(
+                        "starknet_chainId".to_string(),
+                        serde_json::Value::Array(vec![]),
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: ChainId = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn estimateFee(
+                    &self,
+                    request: Vec<BroadcastedTxn>,
+                    simulation_flags: Vec<SimulationFlagForEstimateFee>,
+                    block_id: BlockId,
+                ) -> std::result::Result<Vec<FeeEstimate>, jsonrpc::Error>
+                {
+                    let args = (request, simulation_flags, block_id);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_estimateFee".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Vec<FeeEstimate> =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn estimateMessageFee(
+                    &self,
+                    message: MsgFromL1,
+                    block_id: BlockId,
+                ) -> std::result::Result<FeeEstimate, jsonrpc::Error>
+                {
+                    let args = (message, block_id);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_estimateMessageFee".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: FeeEstimate = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getBlockTransactionCount(
+                    &self,
+                    block_id: BlockId,
+                ) -> std::result::Result<
+                    GetBlockTransactionCountResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (block_id,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getBlockTransactionCount".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetBlockTransactionCountResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getBlockWithTxHashes(
+                    &self,
+                    block_id: BlockId,
+                ) -> std::result::Result<
+                    GetBlockWithTxHashesResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (block_id,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getBlockWithTxHashes".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetBlockWithTxHashesResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getBlockWithTxs(
+                    &self,
+                    block_id: BlockId,
+                ) -> std::result::Result<GetBlockWithTxsResult, jsonrpc::Error>
+                {
+                    let args = (block_id,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getBlockWithTxs".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetBlockWithTxsResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getClass(
+                    &self,
+                    block_id: BlockId,
+                    class_hash: Felt,
+                ) -> std::result::Result<GetClassResult, jsonrpc::Error>
+                {
+                    let args = (block_id, class_hash);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getClass".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetClassResult = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getClassAt(
+                    &self,
+                    block_id: BlockId,
+                    contract_address: Address,
+                ) -> std::result::Result<GetClassAtResult, jsonrpc::Error>
+                {
+                    let args = (block_id, contract_address);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getClassAt".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetClassAtResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getClassHashAt(
+                    &self,
+                    block_id: BlockId,
+                    contract_address: Address,
+                ) -> std::result::Result<Felt, jsonrpc::Error> {
+                    let args = (block_id, contract_address);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getClassHashAt".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Felt =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getEvents(
+                    &self,
+                    filter: GetEventsFilter,
+                ) -> std::result::Result<EventsChunk, jsonrpc::Error>
+                {
+                    let args = (filter,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getEvents".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: EventsChunk = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getNonce(
+                    &self,
+                    block_id: BlockId,
+                    contract_address: Address,
+                ) -> std::result::Result<Felt, jsonrpc::Error> {
+                    let args = (block_id, contract_address);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getNonce".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Felt =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getStateUpdate(
+                    &self,
+                    block_id: BlockId,
+                ) -> std::result::Result<GetStateUpdateResult, jsonrpc::Error>
+                {
+                    let args = (block_id,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getStateUpdate".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetStateUpdateResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getStorageAt(
+                    &self,
+                    contract_address: Address,
+                    key: StorageKey,
+                    block_id: BlockId,
+                ) -> std::result::Result<Felt, jsonrpc::Error> {
+                    let args = (contract_address, key, block_id);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getStorageAt".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Felt =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getTransactionByBlockIdAndIndex(
+                    &self,
+                    block_id: BlockId,
+                    index: GetTransactionByBlockIdAndIndexIndex,
+                ) -> std::result::Result<
+                    GetTransactionByBlockIdAndIndexResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (block_id, index);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getTransactionByBlockIdAndIndex".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetTransactionByBlockIdAndIndexResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getTransactionByHash(
+                    &self,
+                    transaction_hash: TxnHash,
+                ) -> std::result::Result<
+                    GetTransactionByHashResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (transaction_hash,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getTransactionByHash".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetTransactionByHashResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getTransactionReceipt(
+                    &self,
+                    transaction_hash: TxnHash,
+                ) -> std::result::Result<
+                    GetTransactionReceiptResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (transaction_hash,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getTransactionReceipt".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetTransactionReceiptResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn getTransactionStatus(
+                    &self,
+                    transaction_hash: TxnHash,
+                ) -> std::result::Result<
+                    GetTransactionStatusResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (transaction_hash,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getTransactionStatus".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetTransactionStatusResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn simulateTransactions(
+                    &self,
+                    block_id: BlockId,
+                    transactions: Vec<BroadcastedTxn>,
+                    simulation_flags: Vec<SimulationFlag>,
+                ) -> std::result::Result<
+                    Vec<SimulatedTransaction>,
+                    jsonrpc::Error,
+                > {
+                    let args = (block_id, transactions, simulation_flags);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_simulateTransactions".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Vec<SimulatedTransaction> =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn specVersion(
+                    &self,
+                ) -> std::result::Result<String, jsonrpc::Error>
+                {
+                    let req = jsonrpc::Request::new(
+                        "starknet_specVersion".to_string(),
+                        serde_json::Value::Array(vec![]),
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: String = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn syncing(
+                    &self,
+                ) -> std::result::Result<SyncingResult, jsonrpc::Error>
+                {
+                    let req = jsonrpc::Request::new(
+                        "starknet_syncing".to_string(),
+                        serde_json::Value::Array(vec![]),
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: SyncingResult = serde_json::from_value(value)
+                            .map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn traceBlockTransactions(
+                    &self,
+                    block_id: BlockId,
+                ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>
+                {
+                    let args = (block_id,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_traceBlockTransactions".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: Vec<BlockTransaction> =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
+                fn traceTransaction(
+                    &self,
+                    transaction_hash: TxnHash,
+                ) -> std::result::Result<TransactionTrace, jsonrpc::Error>
+                {
+                    let args = (transaction_hash,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_traceTransaction".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    log::debug!("REQ: {req:#?}");
+
+                    let mut res: jsonrpc::Response = self
+                        .client
+                        .post(&self.url)
+                        .json(&req)
+                        .send()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    log::debug!("RES: {res:#?}");
+
+                    if let Some(err) = res.error.take() {
+                        log::error!("{err:#?}");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: TransactionTrace =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        log::debug!("RET: {ret:#?}");
+
+                        Ok(ret)
+                    } else {
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
                 }
             }
         }

@@ -15,7 +15,7 @@ cargo run -- CODE \
     ./api/0.6.0/starknet_write_api_openrpc.json \
     ./api/0.6.0/starknet_trace_api_openrpc.json \
     ./api/pathfinder.json \
-    --client >> examples/demo.rs
+    --blocking --client >> examples/demo.rs
 
 rm examples/proxy.rs
 cp examples/proxy.txt examples/proxy.rs

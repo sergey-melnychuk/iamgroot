@@ -470,14 +470,14 @@ mod demo {
         );
     }
 
-    fn call<T: gen::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
+    fn call<T: gen::blocking::Rpc>(rpc: &T, id: i64, json: serde_json::Value) {
         let req: jsonrpc::Request = serde_json::from_value(json).unwrap();
         let req = req.with_id(jsonrpc::Id::Number(id));
         let json = serde_json::to_string_pretty(&req).unwrap();
         log::debug!(">>> {}", json);
 
         let req: jsonrpc::Request = serde_json::from_str(&json).unwrap();
-        let res = gen::handle(rpc, &req);
+        let res = gen::blocking::handle(rpc, &req);
         log::debug!("<<< {}", serde_json::to_string_pretty(&res).unwrap());
     }
 }
@@ -485,7 +485,7 @@ mod demo {
 struct State;
 
 #[allow(non_snake_case)]
-impl gen::Rpc for State {
+impl gen::blocking::Rpc for State {
     fn getBlockWithTxHashes(
         &self,
         block_id: gen::BlockId,

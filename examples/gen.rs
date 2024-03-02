@@ -2200,6 +2200,71 @@ pub mod gen {
         pub state_commitment: Option<Felt>,
     }
 
+    pub mod error {
+        pub const BLOCK_NOT_FOUND: Error = Error(24, "Block not found");
+        pub const CLASS_ALREADY_DECLARED: Error =
+            Error(51, "Class already declared");
+        pub const CLASS_HASH_NOT_FOUND: Error =
+            Error(28, "Class hash not found");
+        pub const COMPILATION_FAILED: Error = Error(56, "Compilation failed");
+        pub const COMPILED_CLASS_HASH_MISMATCH: Error = Error(60, "the compiled class hash did not match the one supplied in the transaction");
+        pub const CONTRACT_CLASS_SIZE_IS_TOO_LARGE: Error =
+            Error(57, "Contract class size it too large");
+        pub const CONTRACT_ERROR: Error = Error(40, "Contract error");
+        pub const CONTRACT_NOT_FOUND: Error = Error(20, "Contract not found");
+        pub const DUPLICATE_TX: Error = Error(
+            59,
+            "A transaction with the same hash already exists in the mempool",
+        );
+        pub const FAILED_TO_RECEIVE_TXN: Error =
+            Error(1, "Failed to write transaction");
+        pub const INSUFFICIENT_ACCOUNT_BALANCE: Error = Error(
+            54,
+            "Account balance is smaller than the transaction's max_fee",
+        );
+        pub const INSUFFICIENT_MAX_FEE: Error = Error(53, "Max fee is smaller than the minimal transaction cost (validation plus fee transfer)");
+        pub const INVALID_CONTINUATION_TOKEN: Error =
+            Error(33, "The supplied continuation token is invalid or unknown");
+        pub const INVALID_TRANSACTION_NONCE: Error =
+            Error(52, "Invalid transaction nonce");
+        pub const INVALID_TXN_INDEX: Error =
+            Error(27, "Invalid transaction index in a block");
+        pub const NON_ACCOUNT: Error =
+            Error(58, "Sender address in not an account contract");
+        pub const NO_BLOCKS: Error = Error(32, "There are no blocks");
+        pub const NO_TRACE_AVAILABLE: Error =
+            Error(10, "No trace available for transaction");
+        pub const PAGE_SIZE_TOO_BIG: Error =
+            Error(31, "Requested page size is too big");
+        pub const PROOF_LIMIT_EXCEEDED: Error =
+            Error(10000, "Too many storage keys requested");
+        pub const TOO_MANY_KEYS_IN_FILTER: Error =
+            Error(34, "Too many keys provided in a filter");
+        pub const TRANSACTION_EXECUTION_ERROR: Error =
+            Error(41, "Transaction execution error");
+        pub const TXN_HASH_NOT_FOUND: Error =
+            Error(29, "Transaction hash not found");
+        pub const UNEXPECTED_ERROR: Error =
+            Error(63, "An unexpected error occurred");
+        pub const UNSUPPORTED_CONTRACT_CLASS_VERSION: Error =
+            Error(62, "the contract class version is not supported");
+        pub const UNSUPPORTED_TX_VERSION: Error =
+            Error(61, "the transaction version is not supported");
+        pub const VALIDATION_FAILURE: Error =
+            Error(55, "Account validation failed");
+
+        pub struct Error(i64, &'static str);
+
+        impl From<Error> for iamgroot::jsonrpc::Error {
+            fn from(Error(code, message): Error) -> Self {
+                Self {
+                    code,
+                    message: message.to_string(),
+                }
+            }
+        }
+    }
+
     #[async_trait::async_trait]
     pub trait Rpc {
         /// Returns merkle proofs of a contract's storage state
@@ -3652,71 +3717,6 @@ pub mod gen {
         } else {
             response
         };
-    }
-
-    pub mod error {
-        pub const BLOCK_NOT_FOUND: Error = Error(24, "Block not found");
-        pub const CLASS_ALREADY_DECLARED: Error =
-            Error(51, "Class already declared");
-        pub const CLASS_HASH_NOT_FOUND: Error =
-            Error(28, "Class hash not found");
-        pub const COMPILATION_FAILED: Error = Error(56, "Compilation failed");
-        pub const COMPILED_CLASS_HASH_MISMATCH: Error = Error(60, "the compiled class hash did not match the one supplied in the transaction");
-        pub const CONTRACT_CLASS_SIZE_IS_TOO_LARGE: Error =
-            Error(57, "Contract class size it too large");
-        pub const CONTRACT_ERROR: Error = Error(40, "Contract error");
-        pub const CONTRACT_NOT_FOUND: Error = Error(20, "Contract not found");
-        pub const DUPLICATE_TX: Error = Error(
-            59,
-            "A transaction with the same hash already exists in the mempool",
-        );
-        pub const FAILED_TO_RECEIVE_TXN: Error =
-            Error(1, "Failed to write transaction");
-        pub const INSUFFICIENT_ACCOUNT_BALANCE: Error = Error(
-            54,
-            "Account balance is smaller than the transaction's max_fee",
-        );
-        pub const INSUFFICIENT_MAX_FEE: Error = Error(53, "Max fee is smaller than the minimal transaction cost (validation plus fee transfer)");
-        pub const INVALID_CONTINUATION_TOKEN: Error =
-            Error(33, "The supplied continuation token is invalid or unknown");
-        pub const INVALID_TRANSACTION_NONCE: Error =
-            Error(52, "Invalid transaction nonce");
-        pub const INVALID_TXN_INDEX: Error =
-            Error(27, "Invalid transaction index in a block");
-        pub const NON_ACCOUNT: Error =
-            Error(58, "Sender address in not an account contract");
-        pub const NO_BLOCKS: Error = Error(32, "There are no blocks");
-        pub const NO_TRACE_AVAILABLE: Error =
-            Error(10, "No trace available for transaction");
-        pub const PAGE_SIZE_TOO_BIG: Error =
-            Error(31, "Requested page size is too big");
-        pub const PROOF_LIMIT_EXCEEDED: Error =
-            Error(10000, "Too many storage keys requested");
-        pub const TOO_MANY_KEYS_IN_FILTER: Error =
-            Error(34, "Too many keys provided in a filter");
-        pub const TRANSACTION_EXECUTION_ERROR: Error =
-            Error(41, "Transaction execution error");
-        pub const TXN_HASH_NOT_FOUND: Error =
-            Error(29, "Transaction hash not found");
-        pub const UNEXPECTED_ERROR: Error =
-            Error(63, "An unexpected error occurred");
-        pub const UNSUPPORTED_CONTRACT_CLASS_VERSION: Error =
-            Error(62, "the contract class version is not supported");
-        pub const UNSUPPORTED_TX_VERSION: Error =
-            Error(61, "the transaction version is not supported");
-        pub const VALIDATION_FAILURE: Error =
-            Error(55, "Account validation failed");
-
-        pub struct Error(i64, &'static str);
-
-        impl From<Error> for super::jsonrpc::Error {
-            fn from(Error(code, message): Error) -> Self {
-                Self {
-                    code,
-                    message: message.to_string(),
-                }
-            }
-        }
     }
 
     pub mod client {
