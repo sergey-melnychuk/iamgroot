@@ -508,6 +508,9 @@ const CLIENT_MOD_REQWEST_BLOCKING: &str = r###"
                 client: reqwest::`blocking::`Client::new(),
             }
         }
+        pub fn with_client(url: &str, client: reqwest::`blocking::`Client) -> Self {
+            Self { url: url.to_string(), client }
+        }
     }
 
     `async_trait`

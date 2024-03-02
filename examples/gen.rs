@@ -3734,6 +3734,12 @@ pub mod gen {
                     client: reqwest::Client::new(),
                 }
             }
+            pub fn with_client(url: &str, client: reqwest::Client) -> Self {
+                Self {
+                    url: url.to_string(),
+                    client,
+                }
+            }
         }
 
         #[async_trait::async_trait]

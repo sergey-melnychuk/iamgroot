@@ -4764,6 +4764,15 @@ pub mod gen {
                         client: reqwest::blocking::Client::new(),
                     }
                 }
+                pub fn with_client(
+                    url: &str,
+                    client: reqwest::blocking::Client,
+                ) -> Self {
+                    Self {
+                        url: url.to_string(),
+                        client,
+                    }
+                }
             }
 
             impl super::super::blocking::Rpc for Client {
