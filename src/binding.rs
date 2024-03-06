@@ -49,7 +49,7 @@ fn bind_param(
     objects: &mut Vec<Object>,
 ) -> Option<(String, Type)> {
     let object = bind_schema_ref(parent_name, param.schema.as_ref()?, objects)?;
-    let name = get_prop_name(param.name.as_ref()?);
+    let (name, _) = get_prop_name(param.name.as_ref()?);
     let ty = match object {
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
@@ -164,10 +164,11 @@ fn bind_all_of(
                 let name = r.get_ref().unwrap();
                 let type_name = normalize(name);
                 let ty = Type::Named(type_name);
-                let prop_name = get_prop_name(name);
+                let (prop_name, _) = get_prop_name(name);
                 // eprintln!("marked for flattening prop={prop_name}");
                 vec![Property {
                     name: prop_name,
+                    rename: Default::default(),
                     r#type: ty,
                     flatten: true,
                 }]
@@ -202,6 +203,7 @@ fn bind_one_of(
                     name,
                     properties: vec![Property {
                         name: Default::default(),
+                        rename: Default::default(),
                         r#type: ty,
                         flatten: false,
                     }],
@@ -388,11 +390,21 @@ fn bind_type(
     }
 }
 
-fn get_prop_name(name: &str) -> String {
+fn get_prop_name(name: &str) -> (String, String) {
     if name == "enum" || name == "struct" || name == "type" {
-        format!("r#{}", name).to_ascii_lowercase()
+        (
+            format!("r#{}", name).to_ascii_lowercase(),
+            Default::default(),
+        )
     } else {
-        name.to_ascii_lowercase()
+        (
+            name.to_ascii_lowercase(),
+            if name.chars().any(|c| c.is_ascii_uppercase()) {
+                name.to_owned()
+            } else {
+                Default::default()
+            },
+        )
     }
 }
 
@@ -403,7 +415,7 @@ fn bind_prop(
     objects: &mut Vec<Object>,
 ) -> Option<Property> {
     let object = bind_schema_ref(parent_name, schema, objects)?;
-    let name = get_prop_name(prop_name);
+    let (name, rename) = get_prop_name(prop_name);
     let r#type = match object {
         Object::Type(ty) => ty,
         Object::Alias(name, _) => Type::Named(name),
@@ -418,6 +430,7 @@ fn bind_prop(
     };
     Some(Property {
         name,
+        rename,
         r#type,
         flatten: false,
     })

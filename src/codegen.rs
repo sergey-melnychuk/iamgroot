@@ -31,6 +31,7 @@ pub enum Visibility {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Property {
     pub name: String,
+    pub rename: String,
     pub r#type: Type,
     pub flatten: bool,
 }
@@ -39,6 +40,7 @@ impl Property {
     pub fn of(r#type: Type) -> Self {
         Self {
             name: Default::default(),
+            rename: Default::default(),
             r#type,
             flatten: false,
         }

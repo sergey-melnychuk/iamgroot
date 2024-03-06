@@ -28,6 +28,7 @@ fn test_simple_felt() {
         name: "Felt".to_owned(),
         properties: vec![Property {
             name: Default::default(),
+            rename: Default::default(),
             r#type: Type::Primitive(
                 Primitive::String,
                 vec![Rule::Regex(
@@ -61,6 +62,7 @@ fn test_simple_int() {
         name: "BlockNumber".to_owned(),
         properties: vec![Property {
             name: Default::default(),
+            rename: Default::default(),
             r#type: Type::Primitive(Primitive::Integer, vec![Rule::Min(0)]),
             flatten: false,
         }],
@@ -94,6 +96,7 @@ fn test_wrapped_felt() {
         name: "BlockHash".to_owned(),
         properties: vec![Property {
             name: Default::default(),
+            rename: Default::default(),
             r#type: Type::Named("Felt".to_owned()),
             flatten: false,
         }],
@@ -178,11 +181,13 @@ fn test_simple_object() {
         properties: vec![
             Property {
                 name: "data".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Array(Box::new(Type::Named("Felt".to_owned()))),
                 flatten: false,
             },
             Property {
                 name: "keys".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Array(Box::new(Type::Named("Felt".to_owned()))),
                 flatten: false,
             },
@@ -367,6 +372,7 @@ fn test_one_of() {
                 name: "BlockHash".to_owned(),
                 properties: vec![Property {
                     name: "block_hash".to_owned(),
+                    rename: Default::default(),
                     r#type: Type::Named("BlockHash".to_owned()),
                     flatten: false,
                 }],
@@ -375,6 +381,7 @@ fn test_one_of() {
                 name: "BlockNumber".to_owned(),
                 properties: vec![Property {
                     name: "block_number".to_owned(),
+                    rename: Default::default(),
                     r#type: Type::Named("BlockNumber".to_owned()),
                     flatten: false,
                 }],
@@ -383,6 +390,7 @@ fn test_one_of() {
                 name: "BlockTag".to_owned(),
                 properties: vec![Property {
                     name: "".to_owned(),
+                    rename: Default::default(),
                     r#type: Type::Named("BlockTag".to_owned()),
                     flatten: false,
                 }],
@@ -408,6 +416,7 @@ fn test_nested_array() {
         properties: vec![
             Property {
                 name: "address".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Option(Box::new(Type::Named(
                     "Address".to_owned(),
                 ))),
@@ -415,6 +424,7 @@ fn test_nested_array() {
             },
             Property {
                 name: "from_block".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Option(Box::new(Type::Named(
                     "BlockId".to_owned(),
                 ))),
@@ -422,6 +432,7 @@ fn test_nested_array() {
             },
             Property {
                 name: "keys".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Option(Box::new(Type::Array(Box::new(
                     Type::Array(Box::new(Type::Named("Felt".to_owned()))),
                 )))),
@@ -429,6 +440,7 @@ fn test_nested_array() {
             },
             Property {
                 name: "to_block".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Option(Box::new(Type::Named(
                     "BlockId".to_owned(),
                 ))),
@@ -536,6 +548,7 @@ fn test_all_of() {
         name: "BlockBodyWithTxs".to_owned(),
         properties: vec![Property {
             name: "transactions".to_owned(),
+            rename: Default::default(),
             r#type: Type::Array(Box::new(Type::Named(
                 "TxnWithHash".to_owned(),
             ))),
@@ -552,11 +565,13 @@ fn test_all_of() {
         properties: vec![
             Property {
                 name: "txn".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Named("Txn".to_owned()),
                 flatten: true,
             },
             Property {
                 name: "transaction_hash".to_owned(),
+                rename: Default::default(),
                 r#type: Type::Named("TxnHash".to_owned()),
                 flatten: false,
             },

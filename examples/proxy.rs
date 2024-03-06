@@ -716,8 +716,11 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct ContractClassEntryPointsByType {
+        #[serde(rename = "CONSTRUCTOR")]
         pub constructor: Vec<SierraEntryPoint>,
+        #[serde(rename = "EXTERNAL")]
         pub external: Vec<SierraEntryPoint>,
+        #[serde(rename = "L1_HANDLER")]
         pub l1_handler: Vec<SierraEntryPoint>,
     }
 
@@ -1280,6 +1283,7 @@ pub mod gen {
         pub r#type: FunctionAbiType,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
+        #[serde(rename = "stateMutability")]
         pub statemutability: Option<FunctionStateMutability>,
     }
 

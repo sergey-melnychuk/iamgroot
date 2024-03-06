@@ -147,6 +147,12 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
                     if optional {
                         lines.push(OPTION.to_owned());
                     }
+                    if !p.rename.is_empty() {
+                        lines.push(format!(
+                            "#[serde(rename = \"{}\")]",
+                            p.rename
+                        ));
+                    }
                     if nameless_properties {
                         lines.push(format!("    pub {},", ty));
                     } else {
@@ -190,6 +196,12 @@ pub fn render_object(object: &codegen::Object) -> Result<String> {
                         let optional = matches!(&p.r#type, Type::Option(_));
                         if optional {
                             lines.push(OPTION.to_owned());
+                        }
+                        if !p.rename.is_empty() {
+                            lines.push(format!(
+                                "#[serde(rename = \"{}\")]",
+                                p.rename
+                            ));
                         }
                         if nameless_properties {
                             lines.push(format!("    {},", ty));
