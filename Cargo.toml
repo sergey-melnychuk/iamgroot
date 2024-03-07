@@ -1,6 +1,6 @@
 [package]
 name = "iamgroot"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2021"
 description = "Rust code generation from Open-RPC spec"
 license = "MIT"
