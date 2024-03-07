@@ -142,9 +142,7 @@ pub fn gen_code<P: AsPath>(
     let mut target = String::new();
     use std::fmt::Write;
     writeln!(target, "\n// vvv GENERATED CODE BELOW vvv")?;
-    writeln!(target, "#[allow(dead_code)]")?;
     writeln!(target, "#[allow(non_snake_case)]")?;
-    writeln!(target, "#[allow(unused_variables)]")?;
     writeln!(target, "#[allow(clippy::enum_variant_names)]")?;
     writeln!(target, "pub mod gen {{")?;
     writeln!(target, "use serde::{{Deserialize, Serialize}};")?;
@@ -187,7 +185,7 @@ pub fn gen_code<P: AsPath>(
             let code = renders::render_method(method, false);
             writeln!(target, "\n{code}")?;
         }
-        writeln!(target, "}}")?;
+        writeln!(target, "}}")?; // trait Rpc
         for contract in &methods {
             let code = renders::render_method_handler(contract, false);
             writeln!(target, "{code}")?;
@@ -198,7 +196,7 @@ pub fn gen_code<P: AsPath>(
             renders::render_handle_function(&methods, false)
         )?;
 
-        writeln!(target, "\n}}")?;
+        writeln!(target, "\n}}")?; // mod blocking
     }
 
     if gen_client {
@@ -216,10 +214,10 @@ pub fn gen_code<P: AsPath>(
             )?;
         }
 
-        writeln!(target, "\n}}")?;
+        writeln!(target, "\n}}")?; // mod client
     }
 
-    writeln!(target, "}}")?;
+    writeln!(target, "}}")?; // mod gen
     writeln!(target, "// ^^^ GENERATED CODE ABOVE ^^^")?;
     Ok(target)
 }
