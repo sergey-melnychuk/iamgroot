@@ -391,7 +391,10 @@ const METHOD_HANDLER_FULL: &str = r###"
 
     let args: ArgByName = match args {
         Ok(args) => args,
-        Err(_) => return jsonrpc::Response::error(-32602, "Invalid params"),
+        Err(error) => {
+            tracing::debug!(?error, "failed to parse request params");
+            return jsonrpc::Response::error(-32602, "Invalid params");
+        }
     };
 
     let ArgByName { 
@@ -403,7 +406,10 @@ const METHOD_HANDLER_FULL: &str = r###"
     )`dot_await` {
         Ok(ret) => match serde_json::to_value(ret) {
             Ok(ret) => jsonrpc::Response::result(ret),
-            Err(_) => jsonrpc::Response::error(-32603, "Internal error"),
+            Err(error) => {
+                tracing::debug!(?error, "failed to parse response object");
+                jsonrpc::Response::error(-32603, "Internal error")
+            }
         },
         Err(e) => jsonrpc::Response::error(e.code, &e.message),
     }
