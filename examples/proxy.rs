@@ -646,8 +646,9 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static CHAINID_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+        static CHAINID_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x[a-fA-F0-9]+$").expect("ChainId: valid regex")
+        });
 
         impl ChainId {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -1107,8 +1108,9 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static ETHADDRESS_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]{40}$").unwrap());
+        static ETHADDRESS_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x[a-fA-F0-9]{40}$").expect("EthAddress: valid regex")
+        });
 
         impl EthAddress {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -1243,7 +1245,8 @@ pub mod gen {
         use regex::Regex;
 
         static FELT_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$").unwrap()
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$")
+                .expect("Felt: valid regex")
         });
 
         impl Felt {
@@ -1547,8 +1550,9 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static NUMASHEX_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x[a-fA-F0-9]+$").unwrap());
+        static NUMASHEX_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x[a-fA-F0-9]+$").expect("NumAsHex: valid regex")
+        });
 
         impl NumAsHex {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -1773,7 +1777,7 @@ pub mod gen {
         use regex::Regex;
 
         static PROGRAM_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").unwrap()
+            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").expect("Program: valid regex")
         });
 
         impl Program {
@@ -1948,8 +1952,10 @@ pub mod gen {
         use once_cell::sync::Lazy;
         use regex::Regex;
 
-        static STORAGEKEY_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new("^0x0[0-7]{1}[a-fA-F0-9]{0,62}$").unwrap());
+        static STORAGEKEY_REGEX: Lazy<Regex> = Lazy::new(|| {
+            Regex::new("^0x0[0-7]{1}[a-fA-F0-9]{0,62}$")
+                .expect("StorageKey: valid regex")
+        });
 
         impl StorageKey {
             pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
@@ -2178,7 +2184,8 @@ pub mod gen {
         use regex::Regex;
 
         static U128_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,31})$").unwrap()
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,31})$")
+                .expect("U128: valid regex")
         });
 
         impl U128 {
@@ -2221,7 +2228,8 @@ pub mod gen {
         use regex::Regex;
 
         static U64_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,15})$").unwrap()
+            Regex::new("^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,15})$")
+                .expect("U64: valid regex")
         });
 
         impl U64 {

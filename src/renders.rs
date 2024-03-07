@@ -299,7 +299,7 @@ mod `type_name_lowercase` {
     use regex::Regex;
 
     static `type_name_uppercase`_REGEX: Lazy<Regex> =
-        Lazy::new(|| Regex::new("`pattern`").unwrap());
+        Lazy::new(|| Regex::new("`pattern`").expect("`type_name`: valid regex"));
 
     impl `type_name` {
         pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
