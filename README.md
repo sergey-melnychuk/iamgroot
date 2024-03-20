@@ -34,7 +34,7 @@ $URL
 
 ### TODO
 
-1. [ ] `async` version of the `Rpc` trait and the client
+1. [X] `async` version of the `Rpc` trait and the client
    - using [`async_trait`](https://docs.rs/async-trait/latest/async_trait/)
 1. [ ] Seamless inclusion into a build process
    - extract `-build` sub-crate for `[build-dependencies]`
