@@ -142,6 +142,7 @@ pub fn gen_code<P: AsPath>(
     let mut target = String::new();
     use std::fmt::Write;
     writeln!(target, "\n// vvv GENERATED CODE BELOW vvv")?;
+    writeln!(target, "#[allow(clippy::module_inception)]")?;
     writeln!(target, "#[allow(non_snake_case)]")?;
     writeln!(target, "#[allow(clippy::enum_variant_names)]")?;
     writeln!(target, "pub mod gen {{")?;

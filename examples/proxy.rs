@@ -337,9 +337,8 @@ mod rpc {
 }
 
 // vvv GENERATED CODE BELOW vvv
-#[allow(dead_code)]
+#[allow(clippy::module_inception)]
 #[allow(non_snake_case)]
-#[allow(unused_variables)]
 #[allow(clippy::enum_variant_names)]
 pub mod gen {
     use serde::{Deserialize, Serialize};
@@ -4116,6 +4115,7 @@ pub mod gen {
     pub mod client {
         use super::*;
 
+        #[derive(Clone)]
         pub struct Client {
             client: reqwest::Client,
             url: String,

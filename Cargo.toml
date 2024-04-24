@@ -1,6 +1,6 @@
 [package]
 name = "iamgroot"
-version = "0.2.6"
+version = "0.2.7"
 edition = "2021"
 description = "Rust code generation from Open-RPC spec"
 license = "MIT"
@@ -24,3 +24,4 @@ reqwest = { version = "0.11", features = ["json", "blocking"] }
 tokio = { version = "1.36.0", features = ["full"] }
 pretty_assertions = "1.4.0"
 axum = "0.7.4"
+ureq = { version = "2.9.6", features = ["json"] }
