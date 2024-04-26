@@ -685,16 +685,19 @@ impl gen::blocking::Rpc for State {
                     ],
                     from_address: gen::Felt::try_new("0x1")?,
                 }],
-                events: vec![gen::Event(gen::EventContent {
-                    data: vec![
-                        gen::Felt::try_new("0x1")?,
-                        gen::Felt::try_new("0x1")?,
-                    ],
-                    keys: vec![
-                        gen::Felt::try_new("0x1")?,
-                        gen::Felt::try_new("0x1")?,
-                    ],
-                })],
+                events: vec![gen::Event {
+                    from_address: gen::Address(gen::Felt::try_new("0x42")?),
+                    event_content: gen::EventContent {
+                        data: vec![
+                            gen::Felt::try_new("0x1")?,
+                            gen::Felt::try_new("0x1")?,
+                        ],
+                        keys: vec![
+                            gen::Felt::try_new("0x1")?,
+                            gen::Felt::try_new("0x1")?,
+                        ],
+                    },
+                }],
                 transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
                 actual_fee: gen::FeePayment {
                     amount: gen::Felt::try_new("0x1")?,
@@ -876,10 +879,13 @@ impl gen::blocking::Rpc for State {
         let result = gen::EventsChunk {
             continuation_token: Some("token-0".to_string()),
             events: vec![gen::EmittedEvent {
-                event: gen::Event(gen::EventContent {
-                    keys: vec![gen::Felt::try_new("0x4")?],
-                    data: vec![gen::Felt::try_new("0x3")?],
-                }),
+                event: gen::Event {
+                    from_address: gen::Address(gen::Felt::try_new("0xA")?),
+                    event_content: gen::EventContent {
+                        keys: vec![gen::Felt::try_new("0x4")?],
+                        data: vec![gen::Felt::try_new("0x3")?],
+                    },
+                },
                 block_hash: Some(gen::BlockHash(gen::Felt::try_new("0x2")?)),
                 block_number: Some(gen::BlockNumber::try_new(42)?),
                 transaction_hash: gen::TxnHash(gen::Felt::try_new("0x1")?),
@@ -1833,7 +1839,11 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct Event(pub EventContent);
+    pub struct Event {
+        pub from_address: Address,
+        #[serde(flatten)]
+        pub event_content: EventContent,
+    }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct EventAbiEntry {
@@ -2280,7 +2290,7 @@ pub mod gen {
         #[serde(default)]
         pub order: Option<i64>,
         #[serde(flatten)]
-        pub event: Event,
+        pub event_content: EventContent,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]

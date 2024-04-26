@@ -859,7 +859,11 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct Event(pub EventContent);
+    pub struct Event {
+        pub from_address: Address,
+        #[serde(flatten)]
+        pub event_content: EventContent,
+    }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct EventAbiEntry {
@@ -1306,7 +1310,7 @@ pub mod gen {
         #[serde(default)]
         pub order: Option<i64>,
         #[serde(flatten)]
-        pub event: Event,
+        pub event_content: EventContent,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
