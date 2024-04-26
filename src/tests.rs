@@ -582,3 +582,96 @@ fn test_all_of() {
         Some(expected)
     );
 }
+
+#[test]
+fn test_composite_all_of() {
+    let schemas: HashMap<String, SchemaOrRef> = serde_json::from_value(serde_json::json!({
+        "EVENT": {
+            "title": "Event",
+            "description": "A StarkNet event",
+            "allOf": [
+                {
+                    "title": "Event emitter",
+                    "type": "object",
+                    "properties": {
+                        "from_address": {
+                            "title": "From address",
+                            "$ref": "#/components/schemas/ADDRESS"
+                        }
+                    },
+                    "required": [
+                        "from_address"
+                    ]
+                },
+                {
+                    "title": "Event content",
+                    "$ref": "#/components/schemas/EVENT_CONTENT"
+                }
+            ]
+        },
+        "EVENT_CONTENT": {
+            "title": "Event content",
+            "description": "The content of an event",
+            "type": "object",
+            "properties": {
+                "keys": {
+                    "type": "array",
+                    "title": "Keys",
+                    "items": {
+                        "$ref": "#/components/schemas/FELT"
+                    }
+                },
+                "data": {
+                    "type": "array",
+                    "title": "Data",
+                    "items": {
+                        "$ref": "#/components/schemas/FELT"
+                    }
+                }
+            },
+            "required": [
+                "keys",
+                "data"
+            ]
+        },
+        "FELT": {
+            "type": "string",
+            "title": "Field element",
+            "description": "A field element. represented by at most 63 hex digits",
+            "pattern": "^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$"
+        }
+    })).unwrap();
+
+    let expected = Object::Struct(Struct {
+        name: "Event".to_owned(),
+        properties: vec![
+            Property {
+                name: "from_address".to_owned(),
+                rename: Default::default(),
+                r#type: Type::Named("Address".to_owned()),
+                flatten: false,
+            },
+            Property {
+                name: "event_content".to_owned(),
+                rename: Default::default(),
+                r#type: Type::Named("EventContent".to_owned()),
+                flatten: true,
+            },
+        ],
+    });
+
+    let event = bind_object("EVENT", &schemas, &mut vec![]);
+    assert_eq!(event.as_ref(), Some(&expected));
+
+    let code = crate::renders::render_object(&expected).unwrap();
+    assert_eq!(
+        code,
+        r#"#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Event {
+    pub from_address: Address,
+#[serde(flatten)]
+    pub event_content: EventContent,
+}
+"#
+    );
+}
