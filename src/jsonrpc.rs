@@ -70,7 +70,10 @@ impl Response {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(
+    Clone, Debug, Deserialize, Serialize, Eq, PartialEq, thiserror::Error,
+)]
+#[error("JSON-RPC error: code={code} message='{message}'")]
 pub struct Error {
     pub code: i64,
     pub message: String,
@@ -79,23 +82,6 @@ pub struct Error {
 impl Error {
     pub fn new(code: i64, message: String) -> Self {
         Self { code, message }
-    }
-}
-
-#[cfg(feature = "anyhow")]
-impl From<Error> for anyhow::Error {
-    fn from(value: Error) -> Self {
-        anyhow::anyhow!(value)
-    }
-}
-
-#[cfg(feature = "anyhow")]
-impl From<anyhow::Error> for Error {
-    fn from(value: anyhow::Error) -> Self {
-        Self {
-            code: 500,
-            message: value.to_string(),
-        }
     }
 }
 
