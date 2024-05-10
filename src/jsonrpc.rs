@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+const V2: &str = "2.0";
+
 #[derive(Clone, Debug, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Request {
     pub jsonrpc: String,
@@ -14,7 +16,7 @@ pub struct Request {
 impl Request {
     pub fn new(method: String, params: Value) -> Self {
         Self {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: V2.to_string(),
             method,
             params: Some(params),
             id: None,
@@ -43,7 +45,7 @@ pub struct Response {
 impl Response {
     pub fn result(value: Value) -> Self {
         Self {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: V2.to_string(),
             result: Some(value),
             error: None,
             id: None,
@@ -52,7 +54,7 @@ impl Response {
 
     pub fn error(code: i64, message: &str) -> Self {
         Self {
-            jsonrpc: "2.0".to_string(),
+            jsonrpc: V2.to_string(),
             result: None,
             error: Some(Error {
                 code,
