@@ -94,22 +94,9 @@ impl Object {
 }
 
 #[derive(Debug, Clone)]
-pub struct Alias {
-    pub name: String,
-    pub r#type: Type,
-}
-
-#[derive(Debug, Clone)]
 pub struct Method {
     pub doc: Option<String>,
     pub name: String,
     pub args: Vec<(String, Type)>,
     pub ret: Type,
-}
-
-#[derive(Debug, Clone)]
-pub struct Trait {
-    pub name: String,
-    pub visibility: Visibility,
-    pub methods: Vec<Method>,
 }
