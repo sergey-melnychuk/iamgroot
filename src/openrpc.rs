@@ -123,7 +123,7 @@ impl SchemaOrRef {
 }
 
 #[allow(non_snake_case)]
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Default)]
 pub struct Schema {
     #[serde(rename = "type")]
     #[serde(skip_serializing_if = "Option::is_none")]
