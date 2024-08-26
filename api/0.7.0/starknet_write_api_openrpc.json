@@ -259,7 +259,9 @@
             "VALIDATION_FAILURE": {
                 "code": 55,
                 "message": "Account validation failed",
-                "data": "string"
+                "data": {
+                    "type": "string"
+                }
             },
             "COMPILATION_FAILED": {
                 "code": 56,
@@ -292,7 +294,9 @@
             "UNEXPECTED_ERROR": {
                 "code": 63,
                 "message": "An unexpected error occurred",
-                "data": "string"
+                "data": {
+                    "type": "string"
+                }
             }
         }
     }
