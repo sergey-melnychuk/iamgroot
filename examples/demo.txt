@@ -503,10 +503,15 @@ impl gen::blocking::Rpc for State {
                     new_root: gen::Felt::try_new("0x3")?,
                     parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
                     l1_gas_price: gen::ResourcePrice {
-                        price_in_fri: Some(gen::Felt::try_new("0x4")?),
+                        price_in_fri: gen::Felt::try_new("0x4")?,
                         price_in_wei: gen::Felt::try_new("0x4")?,
                     },
                     starknet_version: "starknet-version".to_string(),
+                    l1_da_mode: Some(gen::BlockHeaderL1DaMode::Blob),
+                    l1_data_gas_price: Some(gen::ResourcePrice {
+                        price_in_fri: gen::Felt::try_new("0x5")?,
+                        price_in_wei: gen::Felt::try_new("0x6")?,
+                    }),
                 },
                 block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
                     transactions: vec![
@@ -535,13 +540,18 @@ impl gen::blocking::Rpc for State {
                     new_root: gen::Felt::try_new("0x3")?,
                     parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
                     l1_gas_price: gen::ResourcePrice {
-                        price_in_fri: Some(gen::Felt::try_new("0x1111")?),
+                        price_in_fri: gen::Felt::try_new("0x1111")?,
                         price_in_wei: gen::Felt::try_new("0x2222")?,
                     },
                     starknet_version: "starknet-version".to_owned(),
+                    l1_da_mode: Some(gen::BlockHeaderL1DaMode::Blob),
+                    l1_data_gas_price: Some(gen::ResourcePrice {
+                        price_in_fri: gen::Felt::try_new("0x5")?,
+                        price_in_wei: gen::Felt::try_new("0x6")?,
+                    }),
                 },
                 block_body_with_txs: gen::BlockBodyWithTxs {
-                    transactions: vec![gen::TxnWithHash {
+                    transactions: vec![gen::TransactionsInBlock {
                         txn: gen::Txn::InvokeTxn(gen::InvokeTxn::InvokeTxnV0(
                             gen::InvokeTxnV0 {
                                 r#type: gen::InvokeTxnV0Type::Invoke,
@@ -581,7 +591,7 @@ impl gen::blocking::Rpc for State {
                         "0x2",
                     )?)),
                 }],
-                declared_classes: vec![gen::DeclaredClass {
+                declared_classes: vec![gen::NewClasses {
                     class_hash: Some(gen::Felt::try_new("0x101")?),
                     compiled_class_hash: Some(gen::Felt::try_new("0x102")?),
                 }],
@@ -628,7 +638,7 @@ impl gen::blocking::Rpc for State {
     {
         let result = gen::GetTransactionByHashResult {
             txn: gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
-                version: gen::Felt::try_new("0xcafebabe")?,
+                version: gen::L1HandlerTxnVersion::V0x0,
                 r#type: gen::L1HandlerTxnType::L1Handler,
                 nonce: gen::NumAsHex::try_new("0x1")?,
                 function_call: gen::FunctionCall {
@@ -673,9 +683,8 @@ impl gen::blocking::Rpc for State {
     fn getTransactionReceipt(
         &self,
         transaction_hash: gen::TxnHash,
-    ) -> std::result::Result<gen::GetTransactionReceiptResult, jsonrpc::Error>
-    {
-        let result = gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
+    ) -> std::result::Result<gen::TxnReceiptWithBlockInfo, jsonrpc::Error> {
+        let txn_receipt = gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
             common_receipt_properties: gen::CommonReceiptProperties {
                 messages_sent: vec![gen::MsgToL1 {
                     to_address: gen::Felt::try_new("0x1")?,
@@ -703,28 +712,39 @@ impl gen::blocking::Rpc for State {
                     amount: gen::Felt::try_new("0x1")?,
                     unit: gen::PriceUnit::Wei,
                 },
-                block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
-                block_number: gen::BlockNumber::try_new(42)?,
-                execution_status: gen::TxnExecutionStatus::Succeeded,
                 finality_status: gen::TxnFinalityStatus::AcceptedOnL2,
-                revert_reason: Some("reason".to_string()),
                 execution_resources: gen::ExecutionResources {
-                    steps: 42,
-                    memory_holes: Some(42),
-                    range_check_builtin_applications: Some(1),
-                    pedersen_builtin_applications: Some(1),
-                    poseidon_builtin_applications: Some(1),
-                    ec_op_builtin_applications: Some(1),
-                    ecdsa_builtin_applications: Some(1),
-                    bitwise_builtin_applications: Some(1),
-                    keccak_builtin_applications: Some(1),
-                    segment_arena_builtin: Some(1),
+                    computation_resources: gen::ComputationResources {
+                        steps: 42,
+                        memory_holes: Some(42),
+                        range_check_builtin_applications: Some(1),
+                        pedersen_builtin_applications: Some(1),
+                        poseidon_builtin_applications: Some(1),
+                        ec_op_builtin_applications: Some(1),
+                        ecdsa_builtin_applications: Some(1),
+                        bitwise_builtin_applications: Some(1),
+                        keccak_builtin_applications: Some(1),
+                        segment_arena_builtin: Some(1),
+                    },
+                    data_availability: gen::ExecutionResourcesDataAvailability {
+                        l1_data_gas: 42,
+                        l1_gas: 142,
+                    },
                 },
+                result_common_receipt_properties: gen::ResultCommonReceiptProperties::SuccessfulCommonReceiptProperties(
+                    gen::SuccessfulCommonReceiptProperties {
+                        execution_status: gen::SuccessfulCommonReceiptPropertiesExecutionStatus::Succeeded,
+                    }
+                ),
             },
             contract_address: gen::Felt::try_new("0x1")?,
             r#type: gen::DeployTxnReceiptType::Deploy,
         });
-        let result = gen::GetTransactionReceiptResult::TxnReceipt(result);
+        let result = gen::TxnReceiptWithBlockInfo {
+            txn_receipt,
+            block_hash: None,
+            block_number: None,
+        };
         tracing::debug!(?transaction_hash, ?result);
         Ok(result)
     }
@@ -828,6 +848,8 @@ impl gen::blocking::Rpc for State {
         block_id: gen::BlockId,
     ) -> std::result::Result<Vec<gen::FeeEstimate>, jsonrpc::Error> {
         let result = vec![gen::FeeEstimate {
+            data_gas_consumed: gen::Felt::try_new("0xDD")?,
+            data_gas_price: gen::Felt::try_new("0xEE")?,
             gas_consumed: gen::Felt::try_new("0xAA")?,
             gas_price: gen::Felt::try_new("0xBB")?,
             overall_fee: gen::Felt::try_new("0xCC")?,
@@ -958,7 +980,8 @@ impl gen::blocking::Rpc for State {
     fn traceBlockTransactions(
         &self,
         _block_hash: gen::BlockId,
-    ) -> std::result::Result<Vec<gen::BlockTransaction>, jsonrpc::Error> {
+    ) -> std::result::Result<Vec<gen::BlockTransactionTrace>, jsonrpc::Error>
+    {
         Err(jsonrpc::Error {
             code: 1,
             message: "not implemented".to_owned(),
@@ -1027,6 +1050,17 @@ impl gen::blocking::Rpc for State {
     }
 
     fn version(&self) -> std::result::Result<String, jsonrpc::Error> {
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "not implemented".to_owned(),
+        })
+    }
+
+    fn getBlockWithReceipts(
+        &self,
+        _block_id: gen::BlockId,
+    ) -> std::result::Result<gen::GetBlockWithReceiptsResult, jsonrpc::Error>
+    {
         Err(jsonrpc::Error {
             code: 1,
             message: "not implemented".to_owned(),

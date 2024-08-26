@@ -165,6 +165,14 @@ mod rpc {
             self.client.getBlockTransactionCount(block_id).await
         }
 
+        async fn getBlockWithReceipts(
+            &self,
+            block_id: BlockId,
+        ) -> std::result::Result<GetBlockWithReceiptsResult, jsonrpc::Error>
+        {
+            self.client.getBlockWithReceipts(block_id).await
+        }
+
         async fn getBlockWithTxHashes(
             &self,
             block_id: BlockId,
@@ -262,7 +270,7 @@ mod rpc {
         async fn getTransactionReceipt(
             &self,
             transaction_hash: TxnHash,
-        ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>
+        ) -> std::result::Result<TxnReceiptWithBlockInfo, jsonrpc::Error>
         {
             self.client.getTransactionReceipt(transaction_hash).await
         }
@@ -302,7 +310,7 @@ mod rpc {
         async fn traceBlockTransactions(
             &self,
             block_id: BlockId,
-        ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>
+        ) -> std::result::Result<Vec<BlockTransactionTrace>, jsonrpc::Error>
         {
             self.client.traceBlockTransactions(block_id).await
         }
@@ -322,14 +330,14 @@ mod rpc {
         ) -> std::result::Result<gen::GetProofResult, jsonrpc::Error> {
             self.client.getProof(block_id, contract_address, keys).await
         }
-    
+
         async fn getTxStatus(
             &self,
             transaction_hash: gen::TxnHash,
         ) -> std::result::Result<gen::TxGatewayStatus, jsonrpc::Error> {
             self.client.getTxStatus(transaction_hash).await
         }
-    
+
         async fn version(&self) -> std::result::Result<String, jsonrpc::Error> {
             self.client.version().await
         }

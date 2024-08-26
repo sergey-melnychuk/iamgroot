@@ -503,10 +503,15 @@ impl gen::blocking::Rpc for State {
                     new_root: gen::Felt::try_new("0x3")?,
                     parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
                     l1_gas_price: gen::ResourcePrice {
-                        price_in_fri: Some(gen::Felt::try_new("0x4")?),
+                        price_in_fri: gen::Felt::try_new("0x4")?,
                         price_in_wei: gen::Felt::try_new("0x4")?,
                     },
                     starknet_version: "starknet-version".to_string(),
+                    l1_da_mode: Some(gen::BlockHeaderL1DaMode::Blob),
+                    l1_data_gas_price: Some(gen::ResourcePrice {
+                        price_in_fri: gen::Felt::try_new("0x5")?,
+                        price_in_wei: gen::Felt::try_new("0x6")?,
+                    }),
                 },
                 block_body_with_tx_hashes: gen::BlockBodyWithTxHashes {
                     transactions: vec![
@@ -535,13 +540,18 @@ impl gen::blocking::Rpc for State {
                     new_root: gen::Felt::try_new("0x3")?,
                     parent_hash: gen::BlockHash(gen::Felt::try_new("0x4")?),
                     l1_gas_price: gen::ResourcePrice {
-                        price_in_fri: Some(gen::Felt::try_new("0x1111")?),
+                        price_in_fri: gen::Felt::try_new("0x1111")?,
                         price_in_wei: gen::Felt::try_new("0x2222")?,
                     },
                     starknet_version: "starknet-version".to_owned(),
+                    l1_da_mode: Some(gen::BlockHeaderL1DaMode::Blob),
+                    l1_data_gas_price: Some(gen::ResourcePrice {
+                        price_in_fri: gen::Felt::try_new("0x5")?,
+                        price_in_wei: gen::Felt::try_new("0x6")?,
+                    }),
                 },
                 block_body_with_txs: gen::BlockBodyWithTxs {
-                    transactions: vec![gen::TxnWithHash {
+                    transactions: vec![gen::TransactionsInBlock {
                         txn: gen::Txn::InvokeTxn(gen::InvokeTxn::InvokeTxnV0(
                             gen::InvokeTxnV0 {
                                 r#type: gen::InvokeTxnV0Type::Invoke,
@@ -581,7 +591,7 @@ impl gen::blocking::Rpc for State {
                         "0x2",
                     )?)),
                 }],
-                declared_classes: vec![gen::DeclaredClass {
+                declared_classes: vec![gen::NewClasses {
                     class_hash: Some(gen::Felt::try_new("0x101")?),
                     compiled_class_hash: Some(gen::Felt::try_new("0x102")?),
                 }],
@@ -628,7 +638,7 @@ impl gen::blocking::Rpc for State {
     {
         let result = gen::GetTransactionByHashResult {
             txn: gen::Txn::L1HandlerTxn(gen::L1HandlerTxn {
-                version: gen::Felt::try_new("0xcafebabe")?,
+                version: gen::L1HandlerTxnVersion::V0x0,
                 r#type: gen::L1HandlerTxnType::L1Handler,
                 nonce: gen::NumAsHex::try_new("0x1")?,
                 function_call: gen::FunctionCall {
@@ -673,9 +683,8 @@ impl gen::blocking::Rpc for State {
     fn getTransactionReceipt(
         &self,
         transaction_hash: gen::TxnHash,
-    ) -> std::result::Result<gen::GetTransactionReceiptResult, jsonrpc::Error>
-    {
-        let result = gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
+    ) -> std::result::Result<gen::TxnReceiptWithBlockInfo, jsonrpc::Error> {
+        let txn_receipt = gen::TxnReceipt::DeployTxnReceipt(gen::DeployTxnReceipt {
             common_receipt_properties: gen::CommonReceiptProperties {
                 messages_sent: vec![gen::MsgToL1 {
                     to_address: gen::Felt::try_new("0x1")?,
@@ -703,28 +712,39 @@ impl gen::blocking::Rpc for State {
                     amount: gen::Felt::try_new("0x1")?,
                     unit: gen::PriceUnit::Wei,
                 },
-                block_hash: gen::BlockHash(gen::Felt::try_new("0x1")?),
-                block_number: gen::BlockNumber::try_new(42)?,
-                execution_status: gen::TxnExecutionStatus::Succeeded,
                 finality_status: gen::TxnFinalityStatus::AcceptedOnL2,
-                revert_reason: Some("reason".to_string()),
                 execution_resources: gen::ExecutionResources {
-                    steps: 42,
-                    memory_holes: Some(42),
-                    range_check_builtin_applications: Some(1),
-                    pedersen_builtin_applications: Some(1),
-                    poseidon_builtin_applications: Some(1),
-                    ec_op_builtin_applications: Some(1),
-                    ecdsa_builtin_applications: Some(1),
-                    bitwise_builtin_applications: Some(1),
-                    keccak_builtin_applications: Some(1),
-                    segment_arena_builtin: Some(1),
+                    computation_resources: gen::ComputationResources {
+                        steps: 42,
+                        memory_holes: Some(42),
+                        range_check_builtin_applications: Some(1),
+                        pedersen_builtin_applications: Some(1),
+                        poseidon_builtin_applications: Some(1),
+                        ec_op_builtin_applications: Some(1),
+                        ecdsa_builtin_applications: Some(1),
+                        bitwise_builtin_applications: Some(1),
+                        keccak_builtin_applications: Some(1),
+                        segment_arena_builtin: Some(1),
+                    },
+                    data_availability: gen::ExecutionResourcesDataAvailability {
+                        l1_data_gas: 42,
+                        l1_gas: 142,
+                    },
                 },
+                result_common_receipt_properties: gen::ResultCommonReceiptProperties::SuccessfulCommonReceiptProperties(
+                    gen::SuccessfulCommonReceiptProperties {
+                        execution_status: gen::SuccessfulCommonReceiptPropertiesExecutionStatus::Succeeded,
+                    }
+                ),
             },
             contract_address: gen::Felt::try_new("0x1")?,
             r#type: gen::DeployTxnReceiptType::Deploy,
         });
-        let result = gen::GetTransactionReceiptResult::TxnReceipt(result);
+        let result = gen::TxnReceiptWithBlockInfo {
+            txn_receipt,
+            block_hash: None,
+            block_number: None,
+        };
         tracing::debug!(?transaction_hash, ?result);
         Ok(result)
     }
@@ -828,6 +848,8 @@ impl gen::blocking::Rpc for State {
         block_id: gen::BlockId,
     ) -> std::result::Result<Vec<gen::FeeEstimate>, jsonrpc::Error> {
         let result = vec![gen::FeeEstimate {
+            data_gas_consumed: gen::Felt::try_new("0xDD")?,
+            data_gas_price: gen::Felt::try_new("0xEE")?,
             gas_consumed: gen::Felt::try_new("0xAA")?,
             gas_price: gen::Felt::try_new("0xBB")?,
             overall_fee: gen::Felt::try_new("0xCC")?,
@@ -958,7 +980,8 @@ impl gen::blocking::Rpc for State {
     fn traceBlockTransactions(
         &self,
         _block_hash: gen::BlockId,
-    ) -> std::result::Result<Vec<gen::BlockTransaction>, jsonrpc::Error> {
+    ) -> std::result::Result<Vec<gen::BlockTransactionTrace>, jsonrpc::Error>
+    {
         Err(jsonrpc::Error {
             code: 1,
             message: "not implemented".to_owned(),
@@ -1032,6 +1055,17 @@ impl gen::blocking::Rpc for State {
             message: "not implemented".to_owned(),
         })
     }
+
+    fn getBlockWithReceipts(
+        &self,
+        _block_id: gen::BlockId,
+    ) -> std::result::Result<gen::GetBlockWithReceiptsResult, jsonrpc::Error>
+    {
+        Err(jsonrpc::Error {
+            code: 1,
+            message: "not implemented".to_owned(),
+        })
+    }
 }
 
 // vvv GENERATED CODE BELOW vvv
@@ -1059,13 +1093,18 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockBodyWithReceipts {
+        pub transactions: Vec<TransactionAndReceipt>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct BlockBodyWithTxHashes {
         pub transactions: Vec<TxnHash>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct BlockBodyWithTxs {
-        pub transactions: Vec<TxnWithHash>,
+        pub transactions: Vec<TransactionsInBlock>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1075,12 +1114,26 @@ pub mod gen {
     pub struct BlockHeader {
         pub block_hash: BlockHash,
         pub block_number: BlockNumber,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub l1_da_mode: Option<BlockHeaderL1DaMode>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub l1_data_gas_price: Option<ResourcePrice>,
         pub l1_gas_price: ResourcePrice,
         pub new_root: Felt,
         pub parent_hash: BlockHash,
         pub sequencer_address: Felt,
         pub starknet_version: String,
         pub timestamp: BlockHeaderTimestamp,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum BlockHeaderL1DaMode {
+        #[serde(rename = "BLOB")]
+        Blob,
+        #[serde(rename = "CALLDATA")]
+        Calldata,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1199,6 +1252,15 @@ pub mod gen {
         Latest,
         #[serde(rename = "pending")]
         Pending,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct BlockWithReceipts {
+        pub status: BlockStatus,
+        #[serde(flatten)]
+        pub block_header: BlockHeader,
+        #[serde(flatten)]
+        pub block_body_with_receipts: BlockBodyWithReceipts,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1379,17 +1441,45 @@ pub mod gen {
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct CommonReceiptProperties {
         pub actual_fee: FeePayment,
-        pub block_hash: BlockHash,
-        pub block_number: BlockNumber,
         pub events: Vec<Event>,
         pub execution_resources: ExecutionResources,
-        pub execution_status: TxnExecutionStatus,
         pub finality_status: TxnFinalityStatus,
         pub messages_sent: Vec<MsgToL1>,
+        pub transaction_hash: TxnHash,
+        #[serde(flatten)]
+        pub result_common_receipt_properties: ResultCommonReceiptProperties,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ComputationResources {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
-        pub revert_reason: Option<String>,
-        pub transaction_hash: TxnHash,
+        pub bitwise_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub ec_op_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub ecdsa_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub keccak_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub memory_holes: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub pedersen_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub poseidon_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub range_check_builtin_applications: Option<i64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub segment_arena_builtin: Option<i64>,
+        pub steps: i64,
     }
 
     type ContractAbi = Vec<ContractAbiEntry>;
@@ -1460,6 +1550,7 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct DeclareTxnTrace {
+        pub execution_resources: ExecutionResources,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub fee_transfer_invocation: Option<FunctionInvocation>,
@@ -1585,16 +1676,6 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct DeclaredClass {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub class_hash: Option<Felt>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub compiled_class_hash: Option<Felt>,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum DeployAccountTxn {
         DeployAccountTxnV1(DeployAccountTxnV1),
@@ -1618,6 +1699,7 @@ pub mod gen {
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct DeployAccountTxnTrace {
         pub constructor_invocation: FunctionInvocation,
+        pub execution_resources: ExecutionResources,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub fee_transfer_invocation: Option<FunctionInvocation>,
@@ -1738,8 +1820,67 @@ pub mod gen {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub abi: Option<ContractAbi>,
-        pub entry_points_by_type: EntryPoints,
-        pub program: Program,
+        pub entry_points_by_type: DeprecatedContractClassEntryPointsByType,
+        pub program: DeprecatedContractClassProgram,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct DeprecatedContractClassEntryPointsByType {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        #[serde(rename = "CONSTRUCTOR")]
+        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        #[serde(rename = "EXTERNAL")]
+        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        #[serde(rename = "L1_HANDLER")]
+        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(try_from = "String")]
+    pub struct DeprecatedContractClassProgram(String);
+
+    mod deprecatedcontractclassprogram {
+        use super::jsonrpc;
+        use super::DeprecatedContractClassProgram;
+        use once_cell::sync::Lazy;
+        use regex::Regex;
+
+        static DEPRECATEDCONTRACTCLASSPROGRAM_REGEX: Lazy<Regex> = Lazy::new(
+            || {
+                Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").expect("DeprecatedContractClassProgram: valid regex")
+            },
+        );
+
+        impl DeprecatedContractClassProgram {
+            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
+                if DEPRECATEDCONTRACTCLASSPROGRAM_REGEX.is_match(value) {
+                    Ok(Self(value.to_string()))
+                } else {
+                    Err(jsonrpc::Error {
+                    code: 1001,
+                    message: format!("DeprecatedContractClassProgram value does not match regex: {value}"),
+                })
+                }
+            }
+        }
+
+        impl TryFrom<String> for DeprecatedContractClassProgram {
+            type Error = String;
+            fn try_from(value: String) -> Result<Self, Self::Error> {
+                Self::try_new(&value).map_err(|e| e.message)
+            }
+        }
+
+        impl AsRef<String> for DeprecatedContractClassProgram {
+            fn as_ref(&self) -> &String {
+                &self.0
+            }
+        }
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1780,19 +1921,6 @@ pub mod gen {
         L1Handler,
         #[serde(rename = "CONSTRUCTOR")]
         Constructor,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct EntryPoints {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub constructor: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub external: Option<Vec<DeprecatedCairoEntryPoint>>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub l1_handler: Option<Vec<DeprecatedCairoEntryPoint>>,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -1891,38 +2019,21 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct ExecutionResources {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub bitwise_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub ec_op_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub ecdsa_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub keccak_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub memory_holes: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub pedersen_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub poseidon_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub range_check_builtin_applications: Option<i64>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub segment_arena_builtin: Option<i64>,
-        pub steps: i64,
+        #[serde(flatten)]
+        pub computation_resources: ComputationResources,
+        pub data_availability: ExecutionResourcesDataAvailability,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct ExecutionResourcesDataAvailability {
+        pub l1_data_gas: i64,
+        pub l1_gas: i64,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct FeeEstimate {
+        pub data_gas_consumed: Felt,
+        pub data_gas_price: Felt,
         pub gas_consumed: Felt,
         pub gas_price: Felt,
         pub overall_fee: Felt,
@@ -2018,7 +2129,7 @@ pub mod gen {
         pub class_hash: Felt,
         pub entry_point_type: EntryPointType,
         pub events: Vec<OrderedEvent>,
-        pub execution_resources: ExecutionResources,
+        pub execution_resources: ComputationResources,
         pub messages: Vec<OrderedMessage>,
         pub result: Vec<Felt>,
     }
@@ -2053,6 +2164,7 @@ pub mod gen {
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct InvokeTxnTrace {
         pub execute_invocation: InvokeTxnTraceExecuteInvocation,
+        pub execution_resources: ExecutionResources,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub fee_transfer_invocation: Option<FunctionInvocation>,
@@ -2069,11 +2181,7 @@ pub mod gen {
     #[serde(untagged)]
     pub enum InvokeTxnTraceExecuteInvocation {
         FunctionInvocation(FunctionInvocation),
-        RevertReason {
-            #[serde(skip_serializing_if = "Option::is_none")]
-            #[serde(default)]
-            revert_reason: Option<String>,
-        },
+        RevertReason { revert_reason: String },
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2166,7 +2274,7 @@ pub mod gen {
     pub struct L1HandlerTxn {
         pub nonce: NumAsHex,
         pub r#type: L1HandlerTxnType,
-        pub version: Felt,
+        pub version: L1HandlerTxnVersion,
         #[serde(flatten)]
         pub function_call: FunctionCall,
     }
@@ -2207,6 +2315,12 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum L1HandlerTxnVersion {
+        #[serde(rename = "0x0")]
+        V0x0,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct MsgFromL1 {
         pub entry_point_selector: Felt,
         pub from_address: EthAddress,
@@ -2223,6 +2337,16 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct NestedCall(pub FunctionInvocation);
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct NewClasses {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub class_hash: Option<Felt>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub compiled_class_hash: Option<Felt>,
+    }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
@@ -2290,7 +2414,7 @@ pub mod gen {
         #[serde(default)]
         pub order: Option<i64>,
         #[serde(flatten)]
-        pub event_content: EventContent,
+        pub event: Event,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2304,11 +2428,21 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct PendingBlockHeader {
+        pub l1_da_mode: PendingBlockHeaderL1DaMode,
+        pub l1_data_gas_price: ResourcePrice,
         pub l1_gas_price: ResourcePrice,
         pub parent_hash: BlockHash,
         pub sequencer_address: Felt,
         pub starknet_version: String,
         pub timestamp: PendingBlockHeaderTimestamp,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum PendingBlockHeaderL1DaMode {
+        #[serde(rename = "BLOB")]
+        Blob,
+        #[serde(rename = "CALLDATA")]
+        Calldata,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2355,6 +2489,14 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct PendingBlockWithReceipts {
+        #[serde(flatten)]
+        pub block_body_with_receipts: BlockBodyWithReceipts,
+        #[serde(flatten)]
+        pub pending_block_header: PendingBlockHeader,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct PendingBlockWithTxHashes {
         #[serde(flatten)]
         pub block_body_with_tx_hashes: BlockBodyWithTxHashes,
@@ -2371,92 +2513,9 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingCommonReceiptProperties {
-        pub actual_fee: FeePayment,
-        pub events: Vec<Event>,
-        pub execution_resources: ExecutionResources,
-        pub execution_status: TxnExecutionStatus,
-        pub finality_status: PendingCommonReceiptPropertiesFinalityStatus,
-        pub messages_sent: Vec<MsgToL1>,
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub revert_reason: Option<String>,
-        pub transaction_hash: TxnHash,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingCommonReceiptPropertiesFinalityStatus {
-        #[serde(rename = "ACCEPTED_ON_L2")]
-        AcceptedOnL2,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingDeclareTxnReceipt {
-        pub r#type: PendingDeclareTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingDeclareTxnReceiptType {
-        #[serde(rename = "DECLARE")]
-        Declare,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingDeployAccountTxnReceipt {
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-        pub contract_address: Felt,
-        pub r#type: PendingDeployAccountTxnReceiptType,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingDeployAccountTxnReceiptType {
-        #[serde(rename = "DEPLOY_ACCOUNT")]
-        DeployAccount,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingInvokeTxnReceipt {
-        pub r#type: PendingInvokeTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingInvokeTxnReceiptType {
-        #[serde(rename = "INVOKE")]
-        Invoke,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct PendingL1HandlerTxnReceipt {
-        pub message_hash: NumAsHex,
-        pub r#type: PendingL1HandlerTxnReceiptType,
-        #[serde(flatten)]
-        pub pending_common_receipt_properties: PendingCommonReceiptProperties,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub enum PendingL1HandlerTxnReceiptType {
-        #[serde(rename = "L1_HANDLER")]
-        L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct PendingStateUpdate {
         pub old_root: Felt,
         pub state_diff: StateDiff,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum PendingTxnReceipt {
-        PendingInvokeTxnReceipt(PendingInvokeTxnReceipt),
-        PendingL1HandlerTxnReceipt(PendingL1HandlerTxnReceipt),
-        PendingDeclareTxnReceipt(PendingDeclareTxnReceipt),
-        PendingDeployAccountTxnReceipt(PendingDeployAccountTxnReceipt),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2465,49 +2524,6 @@ pub mod gen {
         Wei,
         #[serde(rename = "FRI")]
         Fri,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(try_from = "String")]
-    pub struct Program(String);
-
-    mod program {
-        use super::jsonrpc;
-        use super::Program;
-        use once_cell::sync::Lazy;
-        use regex::Regex;
-
-        static PROGRAM_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$").expect("Program: valid regex")
-        });
-
-        impl Program {
-            pub fn try_new(value: &str) -> Result<Self, jsonrpc::Error> {
-                if PROGRAM_REGEX.is_match(value) {
-                    Ok(Self(value.to_string()))
-                } else {
-                    Err(jsonrpc::Error {
-                        code: 1001,
-                        message: format!(
-                            "Program value does not match regex: {value}"
-                        ),
-                    })
-                }
-            }
-        }
-
-        impl TryFrom<String> for Program {
-            type Error = String;
-            fn try_from(value: String) -> Result<Self, Self::Error> {
-                Self::try_new(&value).map_err(|e| e.message)
-            }
-        }
-
-        impl AsRef<String> for Program {
-            fn as_ref(&self) -> &String {
-                &self.0
-            }
-        }
     }
 
     type Proof = Vec<Node>;
@@ -2536,10 +2552,15 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct ResourcePrice {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        pub price_in_fri: Option<Felt>,
+        pub price_in_fri: Felt,
         pub price_in_wei: Felt,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
+    pub enum ResultCommonReceiptProperties {
+        SuccessfulCommonReceiptProperties(SuccessfulCommonReceiptProperties),
+        RevertedCommonReceiptProperties(RevertedCommonReceiptProperties),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2594,6 +2615,18 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct RevertedCommonReceiptProperties {
+        pub execution_status: RevertedCommonReceiptPropertiesExecutionStatus,
+        pub revert_reason: String,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum RevertedCommonReceiptPropertiesExecutionStatus {
+        #[serde(rename = "REVERTED")]
+        Reverted,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct SierraEntryPoint {
         pub function_idx: i64,
         pub selector: Felt,
@@ -2617,7 +2650,7 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct StateDiff {
-        pub declared_classes: Vec<DeclaredClass>,
+        pub declared_classes: Vec<NewClasses>,
         pub deployed_contracts: Vec<DeployedContractItem>,
         pub deprecated_declared_classes: Vec<Felt>,
         pub nonces: Vec<NonceUpdate>,
@@ -2654,7 +2687,7 @@ pub mod gen {
         use regex::Regex;
 
         static STORAGEKEY_REGEX: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^0x0[0-7]{1}[a-fA-F0-9]{0,62}$")
+            Regex::new("^0x(0|[0-7]{1}[a-fA-F0-9]{0,62}$)")
                 .expect("StorageKey: valid regex")
         });
 
@@ -2758,6 +2791,17 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct SuccessfulCommonReceiptProperties {
+        pub execution_status: SuccessfulCommonReceiptPropertiesExecutionStatus,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub enum SuccessfulCommonReceiptPropertiesExecutionStatus {
+        #[serde(rename = "SUCCEEDED")]
+        Succeeded,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct SyncStatus {
         pub current_block_hash: BlockHash,
         pub current_block_num: BlockNumber,
@@ -2768,12 +2812,25 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TransactionAndReceipt {
+        pub receipt: TxnReceipt,
+        pub transaction: Txn,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
     pub enum TransactionTrace {
         InvokeTxnTrace(InvokeTxnTrace),
         DeclareTxnTrace(DeclareTxnTrace),
         DeployAccountTxnTrace(DeployAccountTxnTrace),
         L1HandlerTxnTrace(L1HandlerTxnTrace),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TransactionsInBlock {
+        #[serde(flatten)]
+        pub txn: Txn,
+        pub transaction_hash: TxnHash,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2836,6 +2893,18 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
+    pub struct TxnReceiptWithBlockInfo {
+        #[serde(flatten)]
+        pub txn_receipt: TxnReceipt,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub block_hash: Option<BlockHash>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        pub block_number: Option<BlockNumber>,
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
     pub enum TxnStatus {
         #[serde(rename = "RECEIVED")]
         Received,
@@ -2859,13 +2928,6 @@ pub mod gen {
         Invoke,
         #[serde(rename = "L1_HANDLER")]
         L1Handler,
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct TxnWithHash {
-        #[serde(flatten)]
-        pub txn: Txn,
-        pub transaction_hash: TxnHash,
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -2978,6 +3040,13 @@ pub mod gen {
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     #[serde(untagged)]
+    pub enum GetBlockWithReceiptsResult {
+        BlockWithReceipts(BlockWithReceipts),
+        PendingBlockWithReceipts(PendingBlockWithReceipts),
+    }
+
+    #[derive(Clone, Debug, Deserialize, Serialize)]
+    #[serde(untagged)]
     pub enum GetStateUpdateResult {
         StateUpdate(StateUpdate),
         PendingStateUpdate(PendingStateUpdate),
@@ -3046,13 +3115,6 @@ pub mod gen {
                 &self.0
             }
         }
-    }
-
-    #[derive(Clone, Debug, Deserialize, Serialize)]
-    #[serde(untagged)]
-    pub enum GetTransactionReceiptResult {
-        TxnReceipt(TxnReceipt),
-        PendingTxnReceipt(PendingTxnReceipt),
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -3161,7 +3223,7 @@ pub mod gen {
     }
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
-    pub struct BlockTransaction {
+    pub struct BlockTransactionTrace {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[serde(default)]
         pub trace_root: Option<TransactionTrace>,
@@ -3345,6 +3407,12 @@ pub mod gen {
                 jsonrpc::Error,
             >;
 
+            /// Get block information with full transactions and receipts given the block id
+            fn getBlockWithReceipts(
+                &self,
+                block_id: BlockId,
+            ) -> std::result::Result<GetBlockWithReceiptsResult, jsonrpc::Error>;
+
             /// Get block information with transaction hashes given the block id
             fn getBlockWithTxHashes(
                 &self,
@@ -3425,7 +3493,7 @@ pub mod gen {
             fn getTransactionReceipt(
                 &self,
                 transaction_hash: TxnHash,
-            ) -> std::result::Result<GetTransactionReceiptResult, jsonrpc::Error>;
+            ) -> std::result::Result<TxnReceiptWithBlockInfo, jsonrpc::Error>;
 
             /// Gets the transaction status (possibly reflecting that the tx is still in the mempool, or dropped from it)
             fn getTransactionStatus(
@@ -3455,7 +3523,7 @@ pub mod gen {
             fn traceBlockTransactions(
                 &self,
                 block_id: BlockId,
-            ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>;
+            ) -> std::result::Result<Vec<BlockTransactionTrace>, jsonrpc::Error>;
 
             /// For a given executed transaction, return the trace of its execution, including internal calls
             fn traceTransaction(
@@ -3962,6 +4030,53 @@ pub mod gen {
             let ArgByName { block_id } = args;
 
             match rpc.getBlockTransactionCount(block_id) {
+                Ok(ret) => match serde_json::to_value(ret) {
+                    Ok(ret) => jsonrpc::Response::result(ret),
+                    Err(error) => {
+                        tracing::debug!(
+                            ?error,
+                            "failed to parse response object"
+                        );
+                        jsonrpc::Response::error(-32603, "Internal error")
+                    }
+                },
+                Err(e) => jsonrpc::Response::error(e.code, &e.message),
+            }
+        }
+
+        fn handle_getBlockWithReceipts<RPC: Rpc>(
+            rpc: &RPC,
+            params: &Value,
+        ) -> jsonrpc::Response {
+            #[derive(Deserialize, Serialize)]
+            struct ArgByPos(BlockId);
+
+            #[derive(Deserialize, Serialize)]
+            struct ArgByName {
+                block_id: BlockId,
+            }
+
+            let args = serde_json::from_value::<ArgByName>(params.clone())
+                .or_else(|_| {
+                    serde_json::from_value::<ArgByPos>(params.clone()).map(
+                        |args_by_pos| {
+                            let ArgByPos(block_id) = args_by_pos;
+                            ArgByName { block_id }
+                        },
+                    )
+                });
+
+            let args: ArgByName = match args {
+                Ok(args) => args,
+                Err(error) => {
+                    tracing::debug!(?error, "failed to parse request params");
+                    return jsonrpc::Response::error(-32602, "Invalid params");
+                }
+            };
+
+            let ArgByName { block_id } = args;
+
+            match rpc.getBlockWithReceipts(block_id) {
                 Ok(ret) => match serde_json::to_value(ret) {
                     Ok(ret) => jsonrpc::Response::result(ret),
                     Err(error) => {
@@ -4846,6 +4961,9 @@ pub mod gen {
                 }
                 "starknet_getBlockTransactionCount" => {
                     handle_getBlockTransactionCount(rpc, params)
+                }
+                "starknet_getBlockWithReceipts" => {
+                    handle_getBlockWithReceipts(rpc, params)
                 }
                 "starknet_getBlockWithTxHashes" => {
                     handle_getBlockWithTxHashes(rpc, params)
@@ -5744,6 +5862,74 @@ pub mod gen {
                     }
                 }
 
+                fn getBlockWithReceipts(
+                    &self,
+                    block_id: BlockId,
+                ) -> std::result::Result<
+                    GetBlockWithReceiptsResult,
+                    jsonrpc::Error,
+                > {
+                    let args = (block_id,);
+
+                    let params: serde_json::Value = serde_json::to_value(args)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4001,
+                                format!("Invalid params: {e}."),
+                            )
+                        })?;
+                    let req = jsonrpc::Request::new(
+                        "starknet_getBlockWithReceipts".to_string(),
+                        params,
+                    )
+                    .with_id(jsonrpc::Id::Number(1));
+
+                    tracing::debug!(request=?req, "processing");
+
+                    let mut res: jsonrpc::Response = ureq::post(&self.url)
+                        .send_json(&req)
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                4002,
+                                format!("Request failed: {e}."),
+                            )
+                        })?
+                        .into_json()
+                        .map_err(|e| {
+                            jsonrpc::Error::new(
+                                5001,
+                                format!("Invalid response JSON: {e}."),
+                            )
+                        })?;
+
+                    tracing::debug!(response=?res, "processing");
+
+                    if let Some(err) = res.error.take() {
+                        tracing::error!(error=?err, "failed");
+                        return Err(err);
+                    }
+
+                    if let Some(value) = res.result.take() {
+                        let ret: GetBlockWithReceiptsResult =
+                            serde_json::from_value(value).map_err(|e| {
+                                jsonrpc::Error::new(
+                                    5002,
+                                    format!("Invalid response object: {e}."),
+                                )
+                            })?;
+
+                        tracing::debug!(result=?ret, "ready");
+
+                        Ok(ret)
+                    } else {
+                        tracing::error!("both error and result are missing");
+                        Err(jsonrpc::Error::new(
+                            5003,
+                            "Response missing".to_string(),
+                        ))
+                    }
+                }
+
                 fn getBlockWithTxHashes(
                     &self,
                     block_id: BlockId,
@@ -6483,10 +6669,8 @@ pub mod gen {
                 fn getTransactionReceipt(
                     &self,
                     transaction_hash: TxnHash,
-                ) -> std::result::Result<
-                    GetTransactionReceiptResult,
-                    jsonrpc::Error,
-                > {
+                ) -> std::result::Result<TxnReceiptWithBlockInfo, jsonrpc::Error>
+                {
                     let args = (transaction_hash,);
 
                     let params: serde_json::Value = serde_json::to_value(args)
@@ -6528,7 +6712,7 @@ pub mod gen {
                     }
 
                     if let Some(value) = res.result.take() {
-                        let ret: GetTransactionReceiptResult =
+                        let ret: TxnReceiptWithBlockInfo =
                             serde_json::from_value(value).map_err(|e| {
                                 jsonrpc::Error::new(
                                     5002,
@@ -6801,8 +6985,10 @@ pub mod gen {
                 fn traceBlockTransactions(
                     &self,
                     block_id: BlockId,
-                ) -> std::result::Result<Vec<BlockTransaction>, jsonrpc::Error>
-                {
+                ) -> std::result::Result<
+                    Vec<BlockTransactionTrace>,
+                    jsonrpc::Error,
+                > {
                     let args = (block_id,);
 
                     let params: serde_json::Value = serde_json::to_value(args)
@@ -6844,7 +7030,7 @@ pub mod gen {
                     }
 
                     if let Some(value) = res.result.take() {
-                        let ret: Vec<BlockTransaction> =
+                        let ret: Vec<BlockTransactionTrace> =
                             serde_json::from_value(value).map_err(|e| {
                                 jsonrpc::Error::new(
                                     5002,
