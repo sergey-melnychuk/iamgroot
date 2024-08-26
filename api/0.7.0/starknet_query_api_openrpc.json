@@ -1500,8 +1500,6 @@
                     "timestamp",
                     "sequencer_address",
                     "l1_gas_price",
-                    "l1_data_gas_price",
-                    "l1_da_mode",
                     "starknet_version"
                 ]
             },
@@ -2894,52 +2892,61 @@
                         ]
                     },
                     {
-                        "oneOf": [
-                            {
-                                "title": "Successful Common receipt properties",
-                                "description": "Common properties for a transaction receipt that was executed successfully",
-                                "type": "object",
-                                "properties": {
-                                    "execution_status": {
-                                        "title": "Execution status",
-                                        "type": "string",
-                                        "enum": [
-                                            "SUCCEEDED"
-                                        ],
-                                        "description": "The execution status of the transaction"
-                                    }
-                                },
-                                "required": [
-                                    "execution_status"
-                                ]
-                            },
-                            {
-                                "title": "Reverted Common receipt properties",
-                                "description": "Common properties for a transaction receipt that was reverted",
-                                "type": "object",
-                                "properties": {
-                                    "execution_status": {
-                                        "title": "Execution status",
-                                        "type": "string",
-                                        "enum": [
-                                            "REVERTED"
-                                        ],
-                                        "description": "The execution status of the transaction"
-                                    },
-                                    "revert_reason": {
-                                        "title": "Revert reason",
-                                        "name": "revert reason",
-                                        "description": "the revert reason for the failed execution",
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "execution_status",
-                                    "revert_reason"
-                                ]
-                            }
-                        ]
+                        "$ref": "#/components/schemas/RESULT_COMMON_RECEIPT_PROPERTIES"
                     }
+                ]
+            },
+            "RESULT_COMMON_RECEIPT_PROPERTIES": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/SUCCESSFUL_COMMON_RECEIPT_PROPERTIES"
+                    },
+                    {
+                        "$ref": "#/components/schemas/REVERTED_COMMON_RECEIPT_PROPERTIES"
+                    }
+                ]
+            },
+            "SUCCESSFUL_COMMON_RECEIPT_PROPERTIES": {
+                "title": "Successful Common receipt properties",
+                "description": "Common properties for a transaction receipt that was executed successfully",
+                "type": "object",
+                "properties": {
+                    "execution_status": {
+                        "title": "Execution status",
+                        "type": "string",
+                        "enum": [
+                            "SUCCEEDED"
+                        ],
+                        "description": "The execution status of the transaction"
+                    }
+                },
+                "required": [
+                    "execution_status"
+                ]
+            },
+            "REVERTED_COMMON_RECEIPT_PROPERTIES": {
+                "title": "Reverted Common receipt properties",
+                "description": "Common properties for a transaction receipt that was reverted",
+                "type": "object",
+                "properties": {
+                    "execution_status": {
+                        "title": "Execution status",
+                        "type": "string",
+                        "enum": [
+                            "REVERTED"
+                        ],
+                        "description": "The execution status of the transaction"
+                    },
+                    "revert_reason": {
+                        "title": "Revert reason",
+                        "name": "revert reason",
+                        "description": "the revert reason for the failed execution",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "execution_status",
+                    "revert_reason"
                 ]
             },
             "INVOKE_TXN_RECEIPT": {
@@ -3958,7 +3965,9 @@
                             "type": "string"
                         }
                     },
-                    "required": "revert_error"
+                    "required": [
+                        "revert_error"
+                    ]
                 }
             },
             "TRANSACTION_EXECUTION_ERROR": {
