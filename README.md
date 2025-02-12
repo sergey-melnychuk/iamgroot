@@ -1,4 +1,4 @@
-I am groot
+I AM GROOT
 ==========
 
 [Proof of Concept] Rust code generator from OpenRPC spec
@@ -36,9 +36,26 @@ $URL
 
 1. [X] `async` version of the `Rpc` trait and the client
    - using [`async_trait`](https://docs.rs/async-trait/latest/async_trait/)
-1. [ ] Seamless inclusion into a build process
+   - add an option to generate blocking client (use case: Beerus WebAssembly)
+1. [X] Seamless inclusion into a build process
    - extract `-build` sub-crate for `[build-dependencies]`
+   - see [iamgroot-demo](https://github.com/sergey-melnychuk/iamgroot-demo/tree/main/gen-build-proxy)
+1. [X] Extract generic HTTP client trait and uncouple specific HTTP client dependencies
 
 #### Misc
 
 Total lines of code: `find ./src -type f -name "*.rs" | xargs grep . | wc -l`
+
+---
+
+**Why "I am groot"?**
+
+Most people keep crafting hand-made RPC clients from formalized and machine-readable specs.
+
+Such people don't want to make specs codegen-friendly and usable for reasons unknown.
+
+Such people don't want to turn spec & client upgrades work from `O(N)` into `O(1)`.
+
+Such people can't explain why do they do it ¯\\\_(ツ)_/¯.
+
+Such people's excuses all sound like "I am groot" to me. That's why.
