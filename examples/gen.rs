@@ -4,12 +4,54 @@ async fn main() {
     client::run().await;
 }
 
+pub struct Http(reqwest::Client);
+
+impl Http {
+    pub fn new() -> Self {
+        Self(reqwest::Client::new())
+    }
+}
+
+#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+impl gen::client::HttpClient for Http {
+    async fn post(
+        &self,
+        url: &str,
+        request: &iamgroot::jsonrpc::Request,
+    ) -> std::result::Result<
+        iamgroot::jsonrpc::Response,
+        iamgroot::jsonrpc::Error,
+    > {
+        Ok(self
+            .0
+            .post(url)
+            .json(request)
+            .send()
+            .await
+            .map_err(|e| {
+                iamgroot::jsonrpc::Error::new(
+                    -32001,
+                    format!("post request failed: {e}"),
+                )
+            })?
+            .json()
+            .await
+            .map_err(|e| {
+                iamgroot::jsonrpc::Error::new(
+                    -32002,
+                    format!("post response failed: {e}"),
+                )
+            })?)
+    }
+}
+
 mod client {
     use super::*;
     pub async fn run() {
         use crate::gen::Rpc;
         let url = std::env::var("URL").expect("URL");
-        let client = gen::client::Client::new(&url);
+        let client = gen::client::Client::new(&url, Http::new());
 
         let block_id = gen::BlockId::BlockTag(gen::BlockTag::Latest);
         let block = match client.getBlockWithTxs(block_id).await.unwrap() {
@@ -2308,7 +2350,8 @@ pub mod gen {
         }
     }
 
-    #[async_trait::async_trait]
+    #[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+    #[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
     pub trait Rpc {
         /// Returns merkle proofs of a contract's storage state
         async fn getProof(
@@ -3918,29 +3961,34 @@ pub mod gen {
     pub mod client {
         use super::*;
 
+        #[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+        #[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+        pub trait HttpClient: Sync + Send {
+            async fn post(
+                &self,
+                url: &str,
+                request: &jsonrpc::Request,
+            ) -> std::result::Result<jsonrpc::Response, jsonrpc::Error>;
+        }
+
         #[derive(Clone)]
-        pub struct Client {
-            client: reqwest::Client,
+        pub struct Client<HTTP: HttpClient> {
+            http: HTTP,
             url: String,
         }
 
-        impl Client {
-            pub fn new(url: &str) -> Self {
+        impl<HTTP: HttpClient> Client<HTTP> {
+            pub fn new(url: &str, http: HTTP) -> Self {
                 Self {
                     url: url.to_string(),
-                    client: reqwest::Client::new(),
-                }
-            }
-            pub fn with_client(url: &str, client: reqwest::Client) -> Self {
-                Self {
-                    url: url.to_string(),
-                    client,
+                    http,
                 }
             }
         }
 
-        #[async_trait::async_trait]
-        impl super::Rpc for Client {
+        #[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+        #[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+        impl<HTTP: HttpClient> super::Rpc for Client<HTTP> {
             async fn getProof(
                 &self,
                 block_id: BlockId,
@@ -3964,28 +4012,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4035,28 +4063,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4095,28 +4103,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4166,28 +4154,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4239,28 +4207,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4310,28 +4258,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4371,28 +4299,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4431,28 +4339,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4500,28 +4388,8 @@ pub mod gen {
                         .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4560,28 +4428,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4633,28 +4481,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4704,28 +4532,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4777,28 +4585,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4848,28 +4636,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4919,28 +4687,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -4990,28 +4738,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5062,28 +4790,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5134,28 +4842,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5205,28 +4893,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5275,28 +4943,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5346,28 +4994,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5417,28 +5045,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5489,28 +5097,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5563,28 +5151,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5634,28 +5202,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5705,28 +5253,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5776,28 +5304,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5849,28 +5357,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5909,28 +5397,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -5970,28 +5438,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -6041,28 +5489,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {
@@ -6112,28 +5540,8 @@ pub mod gen {
                 .with_id(jsonrpc::Id::Number(1));
 
                 tracing::debug!(request=?req, "processing");
-
-                let mut res: jsonrpc::Response = self
-                    .client
-                    .post(&self.url)
-                    .json(&req)
-                    .send()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            4002,
-                            format!("Request failed: {e}."),
-                        )
-                    })?
-                    .json()
-                    .await
-                    .map_err(|e| {
-                        jsonrpc::Error::new(
-                            5001,
-                            format!("Invalid response JSON: {e}."),
-                        )
-                    })?;
-
+                let mut res: jsonrpc::Response =
+                    self.http.post(&self.url, &req).await?;
                 tracing::debug!(response=?res, "processing");
 
                 if let Some(err) = res.error.take() {

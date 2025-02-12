@@ -4,12 +4,43 @@ async fn main() {
     client::run().await;
 }
 
+pub struct Http(reqwest::Client);
+
+impl Http {
+    pub fn new() -> Self {
+        Self(reqwest::Client::new())
+    }
+}
+
+#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+impl gen::client::HttpClient for Http {
+    async fn post(
+        &self,
+        url: &str,
+        request: &iamgroot::jsonrpc::Request,
+    ) -> std::result::Result<iamgroot::jsonrpc::Response, iamgroot::jsonrpc::Error> {
+        Ok(self.0.post(url)
+            .json(request)
+            .send()
+            .await
+            .map_err(|e| {
+                iamgroot::jsonrpc::Error::new(-32001, format!("post request failed: {e}"))     
+            })?
+            .json()
+            .await
+            .map_err(|e| {
+                iamgroot::jsonrpc::Error::new(-32002, format!("post response failed: {e}"))
+            })?)
+    }
+}
+
 mod client {
     use super::*;
     pub async fn run() {
         use crate::gen::Rpc;
         let url = std::env::var("URL").expect("URL");
-        let client = gen::client::Client::new(&url);
+        let client = gen::client::Client::new(&url, Http::new());
 
         let block_id = gen::BlockId::BlockTag(gen::BlockTag::Latest);
         let block = match client.getBlockWithTxs(block_id).await.unwrap() {
@@ -29,10 +60,8 @@ mod client {
             .getEvents(gen::GetEventsFilter {
                 event_filter: gen::EventFilter {
                     from_block: Some(gen::BlockId::BlockNumber {
-                        block_number: gen::BlockNumber::try_new(
-                            *number - 10,
-                        )
-                        .unwrap(),
+                        block_number: gen::BlockNumber::try_new(*number - 10)
+                            .unwrap(),
                     }),
                     to_block: Some(gen::BlockId::BlockNumber {
                         block_number: gen::BlockNumber::try_new(*number)
@@ -43,10 +72,8 @@ mod client {
                 },
                 result_page_request: gen::ResultPageRequest {
                     continuation_token: None,
-                    chunk_size: gen::ResultPageRequestChunkSize::try_new(
-                        1000,
-                    )
-                    .unwrap(),
+                    chunk_size: gen::ResultPageRequestChunkSize::try_new(1000)
+                        .unwrap(),
                 },
             })
             .await

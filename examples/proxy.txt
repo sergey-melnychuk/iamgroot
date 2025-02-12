@@ -8,11 +8,42 @@ use tokio::net::TcpListener;
 
 use iamgroot::jsonrpc;
 
+pub struct Http(reqwest::Client);
+
+impl Http {
+    pub fn new() -> Self {
+        Self(reqwest::Client::new())
+    }
+}
+
+#[cfg_attr(target_arch = "wasm32", async_trait::async_trait(?Send))]
+#[cfg_attr(not(target_arch = "wasm32"), async_trait::async_trait)]
+impl gen::client::HttpClient for Http {
+    async fn post(
+        &self,
+        url: &str,
+        request: &iamgroot::jsonrpc::Request,
+    ) -> std::result::Result<iamgroot::jsonrpc::Response, iamgroot::jsonrpc::Error> {
+        Ok(self.0.post(url)
+            .json(request)
+            .send()
+            .await
+            .map_err(|e| {
+                iamgroot::jsonrpc::Error::new(-32001, format!("post request failed: {e}"))     
+            })?
+            .json()
+            .await
+            .map_err(|e| {
+                iamgroot::jsonrpc::Error::new(-32002, format!("post response failed: {e}"))
+            })?)
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let url = std::env::var("URL").unwrap();
     let ctx = Context {
-        client: Arc::new(gen::client::Client::new(&url)),
+        client: Arc::new(gen::client::Client::new(&url, Http::new())),
     };
 
     let app = Router::new()
@@ -51,7 +82,7 @@ impl IntoResponse for RpcError {
 
 #[derive(Clone)]
 struct Context {
-    client: Arc<gen::client::Client>,
+    client: Arc<gen::client::Client<Http>>,
 }
 
 async fn handle_request(
