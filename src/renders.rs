@@ -514,24 +514,25 @@ pub fn render_handle_function(
 }
 
 const CLIENT_MOD_REQWEST_BLOCKING: &str = r###"
+    `async_trait`
+    pub trait HttpClient: Sync + Send {
+        `async_gap`fn post(&self, url: &str, request: &jsonrpc::Request) -> std::result::Result<jsonrpc::Response, jsonrpc::Error>;
+    }
+
     #[derive(Clone)]
-    pub struct Client {
-        `client_prop`
+    pub struct Client<HTTP: HttpClient> {
+        http: HTTP,
         url: String,
     }
 
-    impl Client {
-        pub fn new(url: &str) -> Self {
-            Self {
-                url: url.to_string(),
-                `client_init`
-            }
+    impl<HTTP: HttpClient> Client<HTTP> {
+        pub fn new(url: &str, http: HTTP) -> Self {
+            Self { url: url.to_string(), http }
         }
-        `with_client`
     }
 
     `async_trait`
-    impl `super::`super::`blocking::`Rpc for Client {
+    impl<HTTP: HttpClient> `super::`super::`blocking::`Rpc for Client<HTTP> {
 `client_methods`
     }
 "###;
@@ -558,9 +559,7 @@ const CLIENT_METHOD_REQWEST_BLOCKING: &str = r###"
         .with_id(jsonrpc::Id::Number(1));
 
     tracing::debug!(request=?req, "processing");
-
-    `TRANSPORT`
-
+    let mut res: jsonrpc::Response = self.http.post(&self.url, &req)`dot_await`?;
     tracing::debug!(response=?res, "processing");
 
     if let Some(err) = res.error.take() {
@@ -596,9 +595,7 @@ const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
     .with_id(jsonrpc::Id::Number(1));
 
     tracing::debug!(request=?req, "processing");
-
-    `TRANSPORT`
-
+    let mut res: jsonrpc::Response = self.http.post(&self.url, &req)`dot_await`?;
     tracing::debug!(response=?res, "processing");
 
     if let Some(err) = res.error.take() {
@@ -625,24 +622,7 @@ const CLIENT_METHOD_NO_ARGS_BLOCKING: &str = r###"
 }
 "###;
 
-const TRANSPORT_UREQ: &str = r###"
-let mut res: jsonrpc::Response = ureq::post(&self.url)
-    .send_json(&req)
-    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
-    .into_json()
-    .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
-"###;
-
-const TRANSPORT_REQWEST: &str = r###"
-let mut res: jsonrpc::Response = self
-    .client
-    .post(&self.url)
-    .json(&req)
-    .send()`dot_await`
-    .map_err(|e| jsonrpc::Error::new(4002, format!("Request failed: {e}.")))?
-    .json()`dot_await`
-    .map_err(|e| jsonrpc::Error::new(5001, format!("Invalid response JSON: {e}.")))?;
-"###;
+pub const ASYNC_TRAIT: &str = "#[cfg_attr(target_arch = \"wasm32\", async_trait::async_trait(?Send))]\n#[cfg_attr(not(target_arch = \"wasm32\"), async_trait::async_trait)]";
 
 pub fn render_client(methods: &[codegen::Method], is_async: bool) -> String {
     let methods = methods
@@ -665,18 +645,15 @@ pub fn render_client(methods: &[codegen::Method], is_async: bool) -> String {
             .replace("`with_client`", "")
     };
 
+    let async_gap = if is_async { "async " } else { "" };
+    let dot_await = if is_async { ".await" } else { "" };
     client
+        .replace("`async_gap`", async_gap)
+        .replace("`dot_await`", dot_await)
         .replace("`super::`", if is_async { "" } else { "super::" })
         .replace("`client_methods`", &methods)
         .replace("`blocking::`", if is_async { "" } else { "blocking::" })
-        .replace(
-            "`async_trait`",
-            if is_async {
-                "#[async_trait::async_trait]"
-            } else {
-                ""
-            },
-        )
+        .replace("`async_trait`", if is_async { ASYNC_TRAIT } else { "" })
 }
 
 pub fn render_client_method(
@@ -686,17 +663,10 @@ pub fn render_client_method(
     let async_gap = if is_async { "async " } else { "" };
     let dot_await = if is_async { ".await" } else { "" };
 
-    let transport = if is_async {
-        TRANSPORT_REQWEST
-    } else {
-        TRANSPORT_UREQ
-    };
-
     let return_type = render_type(&method.ret);
 
     if method.args.is_empty() {
         return CLIENT_METHOD_NO_ARGS_BLOCKING
-            .replace("`TRANSPORT`", transport)
             .replace("`full_method_name`", &method.name)
             .replace("`method_name`", &unprefix(&method.name))
             .replace("`result_type`", &return_type)
@@ -719,7 +689,6 @@ pub fn render_client_method(
         .join("\n");
 
     CLIENT_METHOD_REQWEST_BLOCKING
-        .replace("`TRANSPORT`", transport)
         .replace("`arg_names`", &params_names_only)
         .replace("`arg_names_and_types`", &params_names_with_types)
         .replace("`full_method_name`", &method.name)

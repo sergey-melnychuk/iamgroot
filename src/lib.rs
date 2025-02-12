@@ -3,6 +3,7 @@ use std::{fmt::Display, path::Path};
 
 use binding::{bind_method, bind_object, get_error};
 use openrpc::{ErrorOrRef, SchemaOrRef};
+use renders::ASYNC_TRAIT;
 
 pub(crate) mod binding;
 pub(crate) mod codegen;
@@ -160,7 +161,7 @@ pub fn gen_code<P: AsPath>(
     writeln!(target, "{}", renders::render_errors(&errors))?;
 
     if gen_async {
-        writeln!(target, "#[async_trait::async_trait]")?;
+        writeln!(target, "{}", ASYNC_TRAIT)?;
         writeln!(target, "pub trait Rpc {{")?;
         for method in &methods {
             let code = renders::render_method(method, true);
